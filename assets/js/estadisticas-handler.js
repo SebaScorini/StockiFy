@@ -1,49 +1,20 @@
+import * as api from './api.js';
+import * as setup from './setupMiCuentaDropdown.js';
+import {getTableData} from "./api.js";
 
-document.addEventListener('DOMContentLoaded', () => {
-    const todayDateNoFormat = new Date();
-    const todayDate = formatDate(todayDateNoFormat);
+let desdeDate, hastaDate, todayDate, creationDate, chart, tablaID, user, fechaDesde, fechaHasta;
 
-    var creationDate;
-    var creationDateNoFormat;
+const greyBg = document.getElementById('grey-background');
 
-    const graficoContainer = document.getElementById('grafico-estadistica');
+const fechaDesdeInput = document.getElementById('fecha-desde-elegida');
+const fechaHastaInput = document.getElementById('fecha-hasta-elegida');
 
-    const options = {
-        chart:{
-            type: 'area',
-            height: 350
-        },
-        series: [{
-            name: 'empty',
-            data: [0]
-        }],
-        xaxis: {
-            categories: 'empty'
-        }
-    };
+const graficoContainer = document.getElementById('grafico-estadistica');
 
-    const chart = new ApexCharts(graficoContainer,options);
-    chart.render();
+function getEstadisticas(){
+    const estadisticasFechaContainer = document.getElementById('estadisticas-fecha');
 
-    fetch('./assets/php/get-account-date.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-    }).then(response => response.json())
-        .then(data => {
-            if (!data.success){
-                creationDateNoFormat = new Date();
-                creationDate = formatDate(creationDateNoFormat);
-            }
-            else{
-                creationDateNoFormat = new Date(data.creationDate.replace(/-/g, '\/'));
-                creationDate = formatDate(creationDateNoFormat);
-            }
-
-            const estadisticasFechaContainer = document.getElementById('estadisticas-fecha');
-
-            estadisticasFechaContainer.innerHTML = `<div class="flex-column" id="estadisticas-fecha-desde">
+    estadisticasFechaContainer.innerHTML = `<div class="flex-column" id="estadisticas-fecha-desde">
                                                 <h4>${creationDate.day} ${creationDate.date} de ${creationDate.month} de ${creationDate.year}</h4>
                                                     <p>Desde</p>          
                                             </div>
@@ -52,93 +23,30 @@ document.addEventListener('DOMContentLoaded', () => {
                                                 <p>Hasta</p>
                                             </div>`
 
-            actualizarEstadisticas(creationDateNoFormat,todayDateNoFormat,chart);
+    actualizarEstadisticas();
+}
 
-            const fechaDesdeBtn = document.getElementById('estadisticas-fecha-desde');
-            const fechaHastaBtn = document.getElementById('estadisticas-fecha-hasta');
+function populateTableSelect(){
 
-            const fechaDesdeInput = document.getElementById('fecha-desde-elegida');
-            const fechaHastaInput = document.getElementById('fecha-hasta-elegida');
+    try{
+        const tableData = user['databases'];
+        const selectContainer = document.getElementById('select-tabla-container');
+        tableData.forEach(table => {
+            const tablaItem = document.createElement('p');
+            tablaItem.textContent = table.name;
+            tablaItem.classList.add('tabla-item', 'btn', 'btn-primary');
 
-            fechaHastaInput.min = creationDateNoFormat.toISOString().slice(0,10);
-            fechaDesdeInput.min = creationDateNoFormat.toISOString().slice(0,10);
-            fechaDesdeInput.max = formatYMD(todayDateNoFormat);
-            fechaHastaInput.max = formatYMD(todayDateNoFormat);
-
-            var fechaDesde = creationDate;
-            var fechaHasta = todayDate;
-            var fechaDesdeNoFormat = creationDateNoFormat;
-            var fechaHastaNoFormat = todayDateNoFormat;
-
-            const greyBg = document.getElementById('grey-background');
-
-            function hidePicker(){
-                fechaDesdeInput.classList.add('hidden');
-                fechaHastaInput.classList.add('hidden');
-                greyBg.classList.add('hidden');
-            }
-
-            function showPicker(fechaInput){
-                fechaInput.classList.remove('hidden');
-                greyBg.classList.remove('hidden');
-
-                setTimeout(() => {
-                    fechaInput.showPicker();
-                }, 0)
-            }
-
-            fechaDesdeBtn.addEventListener('click',function() {
-                showPicker(fechaDesdeInput);
-            })
-            fechaHastaBtn.addEventListener('click',function() {
-                showPicker(fechaHastaInput);
+            tablaItem.addEventListener('click', () => {
+                tablaID = table.id;
+                actualizarEstadisticas(desdeDate,hastaDate,chart,tablaID);
             })
 
-            fechaDesdeInput.addEventListener('blur', hidePicker);
-
-            fechaHastaInput.addEventListener('blur', hidePicker);
-
-            greyBg.addEventListener('click', () =>{
-                hidePicker();
-            })
-
-            fechaDesdeInput.addEventListener('input', function() {
-                const fechaPrevia = fechaDesdeNoFormat;
-
-                fechaDesdeNoFormat = (this.value === '') ? fechaPrevia : new Date(this.value.replace(/-/g, '\/'));
-
-                const phpDate = {'desde' : fechaDesdeNoFormat, 'hasta' : fechaHastaNoFormat}
-
-                fechaHastaInput.min = this.value;
-
-                fechaDesde = formatDate(fechaDesdeNoFormat);
-                fechaDesdeBtn.querySelector('h4').textContent = `${fechaDesde.day} ${fechaDesde.date} de ${fechaDesde.month} de ${fechaDesde.year}`
-
-                actualizarEstadisticas(phpDate.desde,phpDate.hasta,chart);
-                hidePicker();
-            })
-
-
-
-            fechaHastaInput.addEventListener('input', function() {
-                const fechaPrevia = fechaHastaNoFormat;
-
-                fechaHastaNoFormat = (this.value === '') ? fechaPrevia : new Date(this.value.replace(/-/g, '\/'));
-
-                const phpDate = {'desde' : fechaDesdeNoFormat, 'hasta' : fechaHastaNoFormat}
-
-                fechaDesdeInput.max = this.value;
-
-                fechaHasta = formatDate(fechaHastaNoFormat);
-
-                fechaHastaBtn.querySelector('h4').textContent = `${fechaHasta.day} ${fechaHasta.date} de ${fechaHasta.month} de ${fechaHasta.year}`
-
-                actualizarEstadisticas(phpDate.desde,phpDate.hasta,chart);
-                hidePicker();
-            })
+            selectContainer.appendChild(tablaItem);
         })
-
-})
+    } catch (error) {
+        console.error('Error al obtener los datos de la tabla:', error);
+    }
+}
 
 function formatDate(ogDate){
     const todayDate = ogDate.toLocaleString('es-AR', {day : 'numeric'});
@@ -149,34 +57,29 @@ function formatDate(ogDate){
     return {'date' : todayDate,'day' : todayDay,'month' : todayMonth,'year' : todayYear};
 }
 
-function actualizarEstadisticas(fechaDesde, fechaHasta,chart)
+async function actualizarEstadisticas()
 {
-    let fechaActual = new Date(fechaDesde);
+    let fechaActual = new Date(desdeDate);
     const listaFechas = [];
-
-    while (fechaActual <= fechaHasta){
+    while (fechaActual <= hastaDate){
         listaFechas.push(formatYMD(fechaActual));
         fechaActual.setDate(fechaActual.getDate()+1);
     }
+    if (!tablaID){
+        tablaID = user['databases'][0]['id'];
+    }
 
-    fetch('./assets/php/update-statistics.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({fechas : listaFechas})
+    const dailyData = await api.updateStatistics(tablaID,listaFechas);
 
-    }).then(response => response.json())
-        .then(dailyData => {
-            const groupedData = formatStatData(dailyData);
+    if (dailyData){
+        const groupedData = formatStatData(dailyData);
+        addContainerData(dailyData,groupedData,listaFechas);
+    }
 
-            addContainerData(dailyData,groupedData,listaFechas,chart);
-        })
 }
 
 function formatYMD(date) {
     const year = date.getFullYear();
-    // getMonth() es base 0 (Enero=0), por eso se le suma 1
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
 
@@ -205,7 +108,7 @@ function formatStatData(data) {
     return groupedData;
 }
 
-function addContainerData(dailyData, groupData, listaFechas,chart){
+function addContainerData(dailyData, groupData, listaFechas){
 
     const containerConfig = [
         { id: 'ventas-general',         groupedKey: 'generalData.stockVendido',   dailyKey: 'stockVendidoGeneral',   unit: 'unit' },
@@ -239,9 +142,9 @@ function addContainerData(dailyData, groupData, listaFechas,chart){
     })
 }
 
-function showGraph(statName,dailyData,dateList,chart){
+function showGraph(statName,dailyData,dateList) {
     const options = {
-        chart:{
+        chart: {
             type: 'area',
             height: 350
         },
@@ -263,13 +166,161 @@ function showGraph(statName,dailyData,dateList,chart){
     greyBg.classList.remove('hidden');
     graphContainer.classList.remove('hidden');
 
-    backBtn.addEventListener('click', () =>{
+    backBtn.addEventListener('click', () => {
         greyBg.classList.add('hidden');
         graphContainer.classList.add('hidden');
     })
 
-    greyBg.addEventListener('click', () =>{
+    greyBg.addEventListener('click', () => {
         greyBg.classList.add('hidden');
         graphContainer.classList.add('hidden');
     })
 }
+
+    function getInitialDates(value){
+        desdeDate = new Date(value.replace(/-/g, '\/'));
+        creationDate = formatDate(desdeDate);
+        hastaDate = new Date();
+        todayDate = formatDate(hastaDate);
+    }
+
+function createGraph(){
+    const options = {
+        chart:{
+            type: 'area',
+            height: 350
+        },
+        series: [{
+            name: 'empty',
+            data: [0]
+        }],
+        xaxis: {
+            categories: 'empty'
+        }
+    };
+
+    chart = new ApexCharts(graficoContainer,options);
+    chart.render();
+}
+
+
+function setupDatePickers(fechaDesdeBtn, fechaHastaBtn){
+    fechaHastaInput.min = desdeDate.toISOString().slice(0,10);
+    fechaDesdeInput.min = desdeDate.toISOString().slice(0,10);
+    fechaDesdeInput.max = formatYMD(hastaDate);
+    fechaHastaInput.max = formatYMD(hastaDate);
+
+    console.log(fechaDesdeBtn);
+
+    fechaDesde = creationDate;
+    fechaHasta = todayDate;
+
+    fechaDesdeBtn.addEventListener('click',function() {
+        showPicker(fechaDesdeInput);
+    })
+    fechaHastaBtn.addEventListener('click',function() {
+        showPicker(fechaHastaInput);
+    })
+
+
+
+    fechaDesdeInput.addEventListener('blur', hidePicker);
+
+    fechaHastaInput.addEventListener('blur', hidePicker);
+
+    greyBg.addEventListener('click', () =>{
+        hidePicker();
+    })
+
+    fechaDesdeInput.addEventListener('input', function() {
+        const fechaPrevia = desdeDate;
+
+        desdeDate = (this.value === '') ? fechaPrevia : new Date(this.value.replace(/-/g, '\/'));
+
+        fechaHastaInput.min = this.value;
+
+        fechaDesde = formatDate(desdeDate);
+        fechaDesdeBtn.querySelector('h4').textContent = `${fechaDesde.day} ${fechaDesde.date} de ${fechaDesde.month} de ${fechaDesde.year}`
+
+        actualizarEstadisticas();
+        hidePicker();
+    })
+
+    fechaHastaInput.addEventListener('input', function() {
+        const fechaPrevia = hastaDate;
+
+        hastaDate = (this.value === '') ? fechaPrevia : new Date(this.value.replace(/-/g, '\/'));
+
+        fechaDesdeInput.max = this.value;
+        fechaHasta = formatDate(hastaDate);
+
+        fechaHastaBtn.querySelector('h4').textContent = `${fechaHasta.day} ${fechaHasta.date} de ${fechaHasta.month} de ${fechaHasta.year}`
+
+        actualizarEstadisticas();
+        hidePicker();
+    })
+}
+
+function hidePicker(){
+    fechaDesdeInput.classList.add('hidden');
+    fechaHastaInput.classList.add('hidden');
+    greyBg.classList.add('hidden');
+}
+
+function showPicker(fechaInput){
+    fechaInput.classList.remove('hidden');
+    greyBg.classList.remove('hidden');
+
+    setTimeout(() => {
+        fechaInput.showPicker();
+    }, 0)
+}
+
+function setupHeader(){
+    const nav = document.getElementById('header-nav');
+
+    nav.innerHTML = `
+            <a href="/StockiFy/dashboard.php" class="btn btn-primary">Ir al Panel</a> 
+            <a href="/StockiFy/estadisticas.php" class="btn btn-secondary">Estadisticas</a>
+            <div id="dropdown-container">
+                <div class="btn btn-secondary" id="mi-cuenta-btn">Mi Cuenta</div>
+                <div class="flex-column hidden" id="mi-cuenta-dropdown">
+                    <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Configuración</a>
+                    <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Modificaciones de Stock</a>
+                    <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Soporte</a>
+                    <a href="/StockiFy/logout.php" class="btn btn-secondary">Cerrar Sesión</a>
+                </div>
+            </div>            
+        `;
+    setup.setupMiCuenta();
+}
+
+//INIT
+async function init(){
+
+    const isLoggedIn = await api.checkSessionStatus();
+    if (isLoggedIn) {
+        user = await api.getUserProfile();
+        if (user){
+
+            setupHeader();
+            const value = user['user']['created_at'];
+            tablaID = user['activeInventoryId'];
+
+            createGraph();
+            getInitialDates(value);
+            getEstadisticas();
+
+            const fechaDesdeBtn = document.getElementById('estadisticas-fecha-desde');
+            const fechaHastaBtn = document.getElementById('estadisticas-fecha-hasta');
+
+            populateTableSelect();
+            setupDatePickers(fechaDesdeBtn,fechaHastaBtn);
+        }
+    }
+    else{
+        window.location.href = '/StockiFy/logout.php';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', init);

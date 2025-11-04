@@ -1,0 +1,363 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - StockiFy</title>
+    <base href="/StockiFy/">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    <script src="assets/js/theme.js"></script>
+</head>
+<body>
+<header>
+    <a href="index.php" id="header-logo">
+        <img src="assets/img/LogoE.png" alt="StockiFy Logo">
+    </a>
+    <nav id="header-nav"></nav> </header>
+
+
+<div id="grey-background" class="hidden">
+    <div id="new-transaction-container">
+        <div id="return-btn" class="return-btn" style="top: 0;">X</div>
+        <div id="transaction-form-container">
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-container">
+    <aside class="dashboard-sidebar">
+        <nav class="main-menu">
+            <h3>Base de Datos</h3>
+            <ul>
+                <li><button class="menu-btn active" data-target-view="view-db"><i class="ph ph-table"></i> Ver Datos</button></li>
+                <li><button class="menu-btn" data-target-view="config-db"><i class="ph ph-gear"></i> Configurar Tabla</button></li>
+                <li><a href="select-db.php" class="menu-link"><i class="ph ph-database"></i> Cambiar Base de Datos</a></li>
+                <li><a href="create-db.php" class="menu-link"><i class="ph ph-plus-circle"></i> Crear Nueva Base de Datos</a></li>
+                <hr>
+            </ul>
+            <h3>Transacciones</h3>
+            <ul>
+                <li><button class="menu-btn" data-target-view="sales"><i class="ph ph-money"></i> Ventas</button></li>
+                <li><button class="menu-btn" data-target-view="receipts"><i class="ph ph-stack"></i> Compras</button></li>
+                <li><button class="menu-btn" data-target-view="clients"><i class="ph ph-user-focus"></i> Clientes</button></li>
+                <li><button class="menu-btn" data-target-view="providers"><i class="ph ph-van"></i> Proveedores</button></li>
+                <hr>
+            </ul>
+            <h3>Usuario</h3>
+            <ul>
+                <li><button class="menu-btn" data-target-view="analysis"><i class="ph ph-chart-line"></i> Estadísticas Diarias 🔴</button></li>
+                <li><button class="menu-btn" data-target-view="notifications"><i class="ph ph-bell"></i> Notificaciones</button></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="dashboard-main">
+        <div id="view-db" class="dashboard-view">
+            <div class="menu-container">
+                <div class="table-header">
+                    <h2 id="table-title">Cargando...</h2>
+                    <div class="table-controls">
+                        <input type="text" id="search-input" placeholder="Buscar en la tabla...">
+                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="sale">+ Agregar Venta</button>
+                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="receipt">+ Agregar Compra</button>
+                        <button id="add-row-btn" class="btn btn-primary" style="width: auto; margin-top: 0; margin-left: 1rem;">+ Añadir Fila</button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table id="data-table">
+                        <thead></thead>
+                        <tbody>
+                        <tr><td colspan="100%">Cargando datos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="config-db" class="dashboard-view hidden">
+            <h2>⚙️ Configurar Tabla</h2>
+            <p>Acá vas a poder agregar/eliminar columnas, gestionar stock bajo, códigos de barras, importar/exportar, etc.</p>
+            <div class="danger-zone" style="margin-top: 2rem; padding: 1rem; border: 2px solid var(--accent-red); border-radius: var(--border-radius);">
+                <h3 style="color: var(--accent-red);">Zona de Peligro</h3>
+                <p style="color: var(--color-gray);">Estas acciones son permanentes.</p>
+                <button id="delete-db-btn" class="btn btn-secondary" style="border-color: var(--accent-red); color: var(--accent-red);">Eliminar esta Base de Datos</button>
+            </div>
+        </div>
+
+        <div id="analysis" class="dashboard-view hidden">
+            <div class="menu-container">
+                <div class="table-header">
+                    <h2>Estadísticas Diarias 🔴</h2>
+                        <div class="flex-row" style="margin-right: 20px; align-items: center; justify-content: flex-end;">
+                            <h3>Mostrando Estadisticas para Inventario = </h3>
+                            <div class="inventory-select-container">
+                                <h4 class="select-inventory-btn" id="inventory-picker">Todos</h4>
+                                <div class="inventories-dropdown flex-column hidden" id="inventories-dropdown">
+                                    <div class="inventory-btn" data-value="all" style="border: none"><h4>Todos</h4></div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+                <div class="flex-row">
+                    <div class="daily-stats-wrapper flex-row" id="general-stats">
+                        <div class="flex-column" style="gap: 2rem;">
+                            <div class="stat-group-container">
+                                <h3>Stock</h3>
+                                <div class="flex-column">
+                                    <div class="daily-stat-item">
+                                        <h4>Stock Ingresado</h4>
+                                        <div class="daily-stat" id="daily-stock-ingresado">0</div>
+                                    </div>
+                                    <div class="daily-stat-item">
+                                        <h4>Stock Vendido</h4>
+                                        <div class="daily-stat" id="daily-stock-vendido">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="stat-group-container">
+                                <h3>Monetarias</h3>
+                                <div class="flex-column">
+                                    <div class="daily-stat-item">
+                                        <h4>Gastos</h4>
+                                        <div class="flex-column">
+                                            <div class="daily-stat" id="daily-gastos">0</div>
+                                        </div>
+                                    </div>
+                                    <div class="daily-stat-item">
+                                        <h4>Ingresos</h4>
+                                        <div class="daily-stat" id="daily-ganancias">0</div>
+                                    </div>
+                                    <div class="daily-stat-item">
+                                        <h4>Ganancias</h4>
+                                        <div class="daily-stat" id="daily-ganancias">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex-column" style="gap: 2rem">
+                            <div class="stat-group-container">
+                                <h3>Transacciones</h3>
+                                <div class="flex-column">
+                                    <div class="daily-stat-item">
+                                        <h4>Ventas Realizadas</h4>
+                                        <div class="daily-stat" id="daily-ventas">0</div>
+                                    </div>
+                                    <div class="daily-stat-item">
+                                        <h4>Compras Realizadas</h4>
+                                        <div class="daily-stat" id="daily-compras">0</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="stat-group-container">
+                                <h3>Conexiones</h3>
+                                <div class="flex-column">
+                                    <div class="daily-stat-item">
+                                        <h4>Nuevos Clientes</h4>
+                                        <div class="daily-stat" id="daily-clientes">0</div>
+                                    </div>
+                                    <div class="daily-stat-item">
+                                        <h4>Nuevos Proveedores</h4>
+                                        <div class="daily-stat" id="daily-proveedores">0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="estadisticas-graph-wrapper">
+                        <div id="all-stats"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="notifications" class="dashboard-view hidden">
+            <h2>🔔 Notificaciones</h2>
+            <p>Acá vas a poder ver avisos importantes.</p>
+        </div>
+
+        <div id="sales" class="dashboard-view hidden">
+            <div id="ventas-container" class="menu-container" style="overflow: visible;">
+                <div class="table-header">
+                    <h2>Ventas</h2>
+                    <div class="table-controls">
+                        <div id="sales-direction-btn" data-direction="descending">
+                            <i class="ph ph-arrow-up hidden" style="margin-right: 5px"></i>
+                            <i class="ph ph-arrow-down" style="margin-right: 5px"></i>
+                        </div>
+                        <div id="sale-order-by-container" class="order-by-container">
+                            <div class="flex-row" style="margin-right: 20px; align-items: center; justify-content: flex-end;" id="sale-order-by-btn">
+                                <i class="ph ph-list-bullets" style="margin-right: 5px"></i>
+                                <h4 class="order-by-btn">Ordenar Por</h4>
+                            </div>
+                            <div id="sale-order-by-dropdown" class="order-by-dropdown flex-column hidden">
+                                <p data-order="sales-table-date" class="order-btn">Fecha</p>
+                                <p data-order="sales-table-id" class="order-btn">Número</p>
+                                <p data-order="sales-table-client" class="order-btn">Cliente</p>
+                                <p data-order="sales-table-price" class="order-btn">Precio</p>
+                            </div>
+                        </div>
+                        <input type="text" id="sale-input" placeholder="Buscar una venta...">
+                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem;" data-transaction="sale">+ Agregar Venta</button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <div id="sales-table-container">
+                        <div id="sales-table-id-descending" class="sales-view hidden">
+                            <p>Ventas Ordenadas por ID descendiente</p>
+                        </div>
+                        <div id="sales-table-id-ascending" class="sales-view hidden">
+                            <p>Ventas Ordenadas por ID cresciente</p>
+                        </div>
+                        <div id="sales-table-client-descending" class="sales-view hidden">
+                            <p>Ventas Ordenadas por Cliente descendiente (Alfabeticamente)</p>
+                        </div>
+                        <div id="sales-table-client-ascending" class="sales-view hidden">
+                            <p>Ventas Ordenadas por Cliente cresciente (Alfabeticamente)</p>
+                        </div>
+                        <div id="sales-table-price-ascending" class="sales-view hidden">
+                            <p>Ventas Ordenadas por Precio cresciente</p>
+                        </div>
+                        <div id="sales-table-price-descending" class="sales-view hidden">
+                            <p>Ventas Ordenadas por Precio descendente</p>
+                        </div>
+                        <div id="sales-table-date-ascending" class="sales-view hidden">
+                            <p>Ventas Ordenadas por Fecha cresciente</p>
+                        </div>
+                        <div id="sales-table-date-descending" class="sales-view">
+                            <p>Ventas Ordenadas por Fecha descendente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="receipts" class="dashboard-view hidden">
+            <div id="receipts-container" class="menu-container" style="overflow: visible;">
+                <div class="table-header">
+                    <h2>Compras</h2>
+                    <div class="table-controls">
+                        <div id="receipts-direction-btn" data-direction="descending">
+                            <i class="ph ph-arrow-up hidden" style="margin-right: 5px"></i>
+                            <i class="ph ph-arrow-down" style="margin-right: 5px"></i>
+                        </div>
+                        <div id="receipts-order-by-container" class="order-by-container">
+                            <div class="flex-row" style="margin-right: 20px; align-items: center; justify-content: flex-end;" id="receipts-order-by-btn">
+                                <i class="ph ph-list-bullets" style="margin-right: 5px"></i>
+                                <h4 class="order-by-btn">Ordenar Por</h4>
+                            </div>
+                            <div id="receipts-order-by-dropdown" class="order-by-dropdown flex-column hidden">
+                                <p data-order="receipts-table-date" class="order-btn">Fecha</p>
+                                <p data-order="receipts-table-id" class="order-btn">Número</p>
+                                <p data-order="receipts-table-proveedor" class="order-btn">Proveedor</p>
+                                <p data-order="receipts-table-price" class="order-btn">Precio</p>
+                            </div>
+                        </div>
+                        <input type="text" id="receipt-input" placeholder="Buscar una compra...">
+                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="receipt">+ Agregar Compra</button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <div id="receipts-table-container">
+                        <div id="receipts-table-id-descending" class="receipts-view hidden">
+                            <p>Compras Ordenadas por ID descendiente</p>
+                        </div>
+                        <div id="receipts-table-id-ascending" class="receipts-view hidden">
+                            <p>Compras Ordenadas por ID cresciente</p>
+                        </div>
+                        <div id="receipts-table-client-descending" class="receipts-view hidden">
+                            <p>Compras Ordenadas por Proveedor descendiente (Alfabeticamente)</p>
+                        </div>
+                        <div id="receipts-table-client-ascending" class="receipts-view hidden">
+                            <p>Compras Ordenadas por Proveedor cresciente (Alfabeticamente)</p>
+                        </div>
+                        <div id="receipts-table-price-ascending" class="receipts-view hidden">
+                            <p>Compras Ordenadas por Precio cresciente</p>
+                        </div>
+                        <div id="receipts-table-price-descending" class="receipts-view hidden">
+                            <p>Compras Ordenadas por Precio descendente</p>
+                        </div>
+                        <div id="receipts-table-date-descending" class="receipts-view">
+                            <p>Compras Ordenadas por Fecha descendente</p>
+                        </div>
+                        <div id="receipts-table-date-ascending" class="receipts-view hidden">
+                            <p>Compras Ordenadas por Fecha ascendente</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="clients" class="dashboard-view hidden">
+            <div class="menu-container">
+                <div class="table-header"></div>
+                <h2>⚙️ Clientes</h2>
+            </div>
+        </div>
+
+        <div id="providers" class="dashboard-view hidden">
+            <h2>⚙️ Proveedores</h2>
+        </div>
+    </main>
+</div>
+
+<div id="import-modal" class="modal-overlay hidden">
+    <div class="modal-content view-container"> <button id="close-modal-btn" class="modal-close-btn">&times;</button>
+
+        <div class="modal-header">
+            <h2>Importar Datos desde CSV</h2>
+            <p>Selecciona o arrastra tu archivo CSV.</p>
+        </div>
+
+        <div class="modal-body">
+            <div id="import-step-1">
+                <div id="drop-zone" class="drop-zone">
+                    <p>Arrastra tu archivo CSV acá o hacé clic para seleccionar</p>
+                    <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+                </div>
+                <div id="import-status" style="margin-top: 1rem;"></div>
+            </div>
+
+            <div id="import-step-2" class="hidden">
+                <h3>Mapeá las Columnas</h3>
+                <p>Asigná las columnas de tu archivo a las de StockiFy.</p>
+                <form id="mapping-form" style="max-height: 40vh; overflow-y: auto; padding-right: 10px;"></form>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button id="import-cancel-btn" class="btn btn-secondary">Cancelar</button>
+            <button id="validate-prepare-btn" class="btn btn-primary hidden">Validar y Preparar Datos</button>
+        </div>
+    </div>
+</div>
+
+<div id="delete-confirm-modal" class="modal-overlay hidden">
+    <div class="modal-content view-container" style="max-width: 450px;">
+        <button id="close-delete-modal-btn" class="modal-close-btn">&times;</button>
+
+        <div class="modal-header">
+            <h2 style="color: var(--accent-red);">Confirmar Eliminación</h2>
+            <p>Esta acción <strong>no se puede deshacer</strong>. Se borrará permanentemente la base de datos "<strong id="delete-db-name-confirm"></strong>" y todos sus datos.</p>
+        </div>
+
+        <div class="modal-body">
+            <p style="text-align: left; color: var(--color-gray);">Para confirmar, escribí el nombre exacto de la base de datos:</p>
+            <input type="text" id="delete-confirm-input" placeholder="Nombre de la Base de Datos" style="margin-bottom: 1rem;">
+            <div id="delete-error-message" style="color: var(--accent-red); font-weight: 500;"></div>
+        </div>
+
+        <div class="modal-footer">
+            <button id="cancel-delete-btn" class="btn btn-secondary">Cancelar</button>
+            <button id="confirm-delete-btn" class="btn btn-primary" disabled style="background-color: var(--accent-red); border-color: var(--accent-red);">Eliminar Permanentemente</button>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="assets/js/import.js"></script>
+<script type="module" src="assets/js/dashboard.js"></script>
+</body>
+</html>

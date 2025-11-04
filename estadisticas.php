@@ -4,15 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StockiFy</title>
+    <base href="/StockiFy/">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="assets/css/main.css">
+    <script src="assets/js/theme.js"></script>
+    <script src="assets/js/estadisticas-handler.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 <body id="page-index" data-user-id="">
 <div id="grey-background" class="hidden">
     <p id="msj-bubble" class="view-container"></p>
 </div>
 <header>
-    <a href="/" id="header-logo">
+    <a href="/StockiFy/index.php" id="header-logo">
         <img src="assets/img/LogoE.png" alt="Stocky Logo">
     </a>
     <nav id="header-nav">
@@ -64,11 +69,10 @@
                 </div>
             </div>
         </div>
-        <div class="estadisticas-container">
-            <div class="flex-row justify-between" style="width: 100%;">
+        <div class="estadisticas-container" style="margin-top: 5rem">
+            <div class="flex-row justify-between">
                 <h1>Estadisticas Por Inventario</h1>
-                <div id="select-tabla-container">
-                    <p class="btn btn-primary">Tabla 1</p>
+                <div id="select-tabla-container" class="flex-column">
                 </div>
             </div>
             <h4>(Todas las ventas realizadas sobre el inventario seleccionado)</h4>
@@ -101,9 +105,6 @@
         </div>
     </div>
 </main>
-<script src="assets/js/theme.js"></script>
-<script src="assets/js/estadisticas-handler.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script type="module" src="assets/js/estadisticas-handler.js"></script>
 </body>
 </html>

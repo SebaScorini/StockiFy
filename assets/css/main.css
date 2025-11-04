@@ -23,8 +23,11 @@
     --color-black: #1A1A1A;
     --color-gray: #8A8A8A;
     --accent-color: #5E81AC; /* Azul por defecto */
-    --accent-color-medium-opacity: rgba(94, 129, 172, 0.75);
+    --accent-color-rgb: 94, 129, 172;
+    --accent-color-medium-opacity: rgba(var(--accent-color-rgb), 0.75);
     --accent-color-hover: #5E81AC;
+    --accent-red: #d11616;
+    --accent-green: #1bd61b;
     --font-title: 'Satoshi', sans-serif;
     --font-body: 'Satoshi', sans-serif;
     --border-strong: 2px solid var(--color-black);
@@ -216,8 +219,9 @@ main {
 
 .estadisticas-container {
     transition: all var(--transition-speed) ease;
-    width: 80%;
+    width: 100%;
     border: var(--border-strong);
+    padding: 5rem;
 }
 
 .estadisticas-container h4 {
@@ -337,6 +341,92 @@ main {
     left: 46%;
     transform: translate(-50%, -50%);
     opacity: 0;
+}
+
+#cycling-text-container {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top; /* Ajuste si tu texto no se alinea bien */
+}
+
+#cycling-text {
+    display: block;
+    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#cycling-text.cycle {
+    opacity: 0;
+    transform: translateY(-100%);
+}
+
+#welcome-container{
+    width: 90%;
+    margin: 5rem 0;
+    flex-wrap: wrap;
+    gap: 5rem;
+    overflow: hidden;
+}
+
+#welcome-container > div{
+    width: 800px;
+    justify-content: center;
+}
+
+#mi-cuenta-dropdown{
+    z-index: 20;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+}
+
+#mi-cuenta-dropdown .btn{
+    margin: 0;
+    border-top: none;
+    border-radius: 0;
+}
+
+#dropdown-container{
+    position: relative;
+}
+
+#dropdown-container.clicked{
+    width: 200px;
+}
+
+#dropdown-container .btn{
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#mi-cuenta-btn.clicked{
+    background-color: var(--accent-color);
+    color: var(--color-white);
+    border-radius: var(--border-radius) var(--border-radius) 0 0 ;
+}
+
+#index-sections-container{
+    margin-top: 9rem;
+    width: 100%;
+    justify-content: space-around;
+    overflow: hidden;
+    background-color: var(--color-white );
+    border-radius: var(--border-radius);
+    border: var(--border-strong);
+}
+
+#index-sections-container h3{
+    padding: 2rem 4rem;
+    transition: all var(--transition-speed) ease;
+}
+
+#index-sections-container h3:hover{
+    cursor: pointer;
+    background-color: var(--accent-color);
+    color: var(--color-white);
+    border-radius: var(--border-radius);
 }
 
 /* ---- Estilos para Botones (Versión "Pop-Up") ---- */
@@ -578,6 +668,17 @@ input[type="text"]:focus, textarea:focus { outline: none; box-shadow: 0 0 0 3px 
     opacity: 1;
 }
 
+#welcome-container > div > h1{
+    font-size:6rem;
+}
+
+#welcome-container > div > h2{
+    font-size: 2rem;
+    margin-top: 2rem;
+    width: fit-content;
+}
+
+
 /* ---- Configuraciones Varias ---- */
 
 #pass-img{
@@ -588,7 +689,7 @@ input[type="text"]:focus, textarea:focus { outline: none; box-shadow: 0 0 0 3px 
 #grey-background{
     width: 100%;
     height: 100%;
-    position: fixed;
+    position: absolute;
     z-index: 15;
     background-color: rgba(0, 0, 0, 0.25);
     transition: all var(--transition-speed) ease;
@@ -628,5 +729,70 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
 @media (max-width: 1400px) {
     #estadisticas-generales-container{
         grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 1510px) {
+    #welcome-container{
+        margin: 2rem;
+        flex-direction: column;
+    }
+
+    #welcome-container > div > h1{
+        font-size: 4rem;
+        width: 650px;
+    }
+
+    #welcome-container > div{
+        width: fit-content;
+    }
+    #index-sections-container h3{
+        padding: 2rem 2rem;
+    }
+}
+
+@media (max-width: 790px){
+
+    #welcome-container{
+        gap: 2rem;
+    }
+    #index-sections-container{
+        margin-top: 2rem;
+    }
+    #index-sections-container h3{
+        padding: 1rem 0.25rem;
+        font-size: 0.75rem;
+    }
+    #welcome-container > div > h1{
+        font-size: 2.75rem;
+        width: 300px;
+    }
+
+    #welcome-container > div > h2{
+        margin-top: 1rem;
+        font-size: 1rem;
+    }
+
+    .view-container > h2{
+        font-size: 1rem;
+    }
+
+    .view-container > h3{
+        font-size: 0.8rem;
+    }
+
+    .view-container > p{
+        font-size: 0.75rem;
+        width:  90%;
+        justify-self: center;
+    }
+
+    .btn{
+        font-size: 0.75rem;
+        padding: 8px 16px;
+    }
+
+    .view-container > div > a{
+        font-size: 0.75rem;
     }
 }
