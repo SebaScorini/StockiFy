@@ -220,3 +220,12 @@ export async function createProvider(provider){
     });
     return handleResponse(response);
 }
+
+export async function sendSaleEmail(emailInfo){
+    const response = await fetch('/StockiFy/api/sales/send-email.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({emailInfo}),
+    });
+    return handleResponse(response);
+}

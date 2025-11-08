@@ -1952,14 +1952,8 @@ function setupSendEmailBtn(emailInfo){
     })
 }
 
-function sendSaleEmail(emailInfo){
-    console.log('Enviando email...');
-    console.log('Factura :');
-    console.log(emailInfo.saleList);
-    console.log('Cliente :');
-    console.log(emailInfo.clientInfo.name);
-    console.log('Email :');
-    console.log(emailInfo.clientInfo.email);
+async function sendSaleEmail(emailInfo){
+    const response = api.sendSaleEmail(emailInfo);
 }
 
 function showTransactionSuccess(body){
