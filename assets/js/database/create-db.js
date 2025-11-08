@@ -42,8 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
     createDbForm.addEventListener('submit', async (event) => {
         event.preventDefault(); // Detenemos el envío normal
 
+        let columns = 'name,stock,min_stock,sale_price,receipt_price,';
+
         const dbName = document.getElementById('dbNameInput').value.trim();
-        const columns = document.getElementById('columnsInput').value.trim();
+        columns += document.getElementById('columnsInput').value.trim();
+        console.log(columns);
         const submitButton = createDbForm.querySelector('button[type="submit"]');
 
         console.log(dbName);
