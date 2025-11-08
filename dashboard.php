@@ -10,8 +10,39 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
     <script src="assets/js/theme.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 <body>
+<!--                     CODIGO DE NANO                        -->
+
+<!--          FONDO GRIS Y MODALES DE TRANSACCIONES            -->
+
+<div id="grey-background" class="hidden">
+    <div id="new-transaction-container">
+        <div id="return-btn" class="return-btn" style="top: 0; left: 0">Volver</div>
+        <div id="transaction-form-container">
+        </div>
+    </div>
+    <div id="transaction-picker-modal" class="hidden">
+        <div id="modal-return-btn" class="return-btn" style="top: 0; left: 0">Volver</div>
+        <div id="item-picker-modal" class="picker-modal flex-column">
+            <div id="item-picker-header" class="flex-row">
+            </div>
+            <div id="item-list" class="flex-column">
+            </div>
+        </div>
+        <div id="client-picker-modal" class="picker-modal">
+        </div>
+        <div id="provider-picker-modal" class="picker-modal">
+        </div>
+    </div>
+    <div id="transaction-success-modal" class="flex-column hidden">
+        <h2 style="color: var(--accent-green)" class="flex-row all-center">¡Exito!</h2>
+        <div id="success-modal-body">
+        </div>
+    </div>
+</div>
+<!--                      FIN DE CODIGO                        -->
 <header>
     <a href="index.php" id="header-logo">
         <img src="assets/img/LogoE.png" alt="StockiFy Logo">
@@ -19,19 +50,15 @@
     <nav id="header-nav"></nav> </header>
 
 
-<div id="grey-background" class="hidden">
-    <div id="new-transaction-container">
-        <div id="return-btn" class="return-btn" style="top: 0;">X</div>
-        <div id="transaction-form-container">
-        </div>
-    </div>
-</div>
 
 <div class="dashboard-container">
     <aside class="dashboard-sidebar">
         <nav class="main-menu">
             <h3>Base de Datos</h3>
             <ul>
+                <!--                     CODIGO DE NANO                        -->
+
+                <!--        MODIFICACION DE ORDEN DE MENUS, MENUS NUEVOS       -->
                 <li><button class="menu-btn active" data-target-view="view-db"><i class="ph ph-table"></i> Ver Datos</button></li>
                 <li><button class="menu-btn" data-target-view="config-db"><i class="ph ph-gear"></i> Configurar Tabla</button></li>
                 <li><a href="select-db.php" class="menu-link"><i class="ph ph-database"></i> Cambiar Base de Datos</a></li>
@@ -42,7 +69,7 @@
             <ul>
                 <li><button class="menu-btn" data-target-view="sales"><i class="ph ph-money"></i> Ventas</button></li>
                 <li><button class="menu-btn" data-target-view="receipts"><i class="ph ph-stack"></i> Compras</button></li>
-                <li><button class="menu-btn" data-target-view="clients"><i class="ph ph-user-focus"></i> Clientes</button></li>
+                <li><button class="menu-btn" data-target-view="customers"><i class="ph ph-user-focus"></i> Clientes</button></li>
                 <li><button class="menu-btn" data-target-view="providers"><i class="ph ph-van"></i> Proveedores</button></li>
                 <hr>
             </ul>
@@ -51,6 +78,8 @@
                 <li><button class="menu-btn" data-target-view="analysis"><i class="ph ph-chart-line"></i> Estadísticas Diarias 🔴</button></li>
                 <li><button class="menu-btn" data-target-view="notifications"><i class="ph ph-bell"></i> Notificaciones</button></li>
             </ul>
+            <!--                          FIN DE CODIGO                        -->
+
         </nav>
     </aside>
 
@@ -87,6 +116,9 @@
             </div>
         </div>
 
+        <!--                       CODIGO DE NANO                        -->
+
+        <!-- SECCION DE ESTADISTICAS DIARIAS. CODIGO COMPLETAMENTE NUEVO -->
         <div id="analysis" class="dashboard-view hidden">
             <div class="menu-container">
                 <div class="table-header">
@@ -107,11 +139,11 @@
                             <div class="stat-group-container">
                                 <h3>Stock</h3>
                                 <div class="flex-column">
-                                    <div class="daily-stat-item">
+                                    <div class="daily-stat-item" data-graph="stock-ingresado">
                                         <h4>Stock Ingresado</h4>
                                         <div class="daily-stat" id="daily-stock-ingresado">0</div>
                                     </div>
-                                    <div class="daily-stat-item">
+                                    <div class="daily-stat-item" data-graph="stock-vendido">
                                         <h4>Stock Vendido</h4>
                                         <div class="daily-stat" id="daily-stock-vendido">0</div>
                                     </div>
@@ -120,17 +152,17 @@
                             <div class="stat-group-container">
                                 <h3>Monetarias</h3>
                                 <div class="flex-column">
-                                    <div class="daily-stat-item">
+                                    <div class="daily-stat-item" data-graph="gastos">
                                         <h4>Gastos</h4>
                                         <div class="flex-column">
                                             <div class="daily-stat" id="daily-gastos">0</div>
                                         </div>
                                     </div>
-                                    <div class="daily-stat-item">
+                                    <div class="daily-stat-item" data-graph="ingresos">
                                         <h4>Ingresos</h4>
-                                        <div class="daily-stat" id="daily-ganancias">0</div>
+                                        <div class="daily-stat" id="daily-ingresos">0</div>
                                     </div>
-                                    <div class="daily-stat-item">
+                                    <div class="daily-stat-item" data-graph="ganancias">
                                         <h4>Ganancias</h4>
                                         <div class="daily-stat" id="daily-ganancias">0</div>
                                     </div>
@@ -141,11 +173,11 @@
                             <div class="stat-group-container">
                                 <h3>Transacciones</h3>
                                 <div class="flex-column">
-                                    <div class="daily-stat-item">
+                                    <div class="daily-stat-item" data-graph="ventas">
                                         <h4>Ventas Realizadas</h4>
                                         <div class="daily-stat" id="daily-ventas">0</div>
                                     </div>
-                                    <div class="daily-stat-item">
+                                    <div class="daily-stat-item" data-graph="compras">
                                         <h4>Compras Realizadas</h4>
                                         <div class="daily-stat" id="daily-compras">0</div>
                                     </div>
@@ -155,11 +187,11 @@
                             <div class="stat-group-container">
                                 <h3>Conexiones</h3>
                                 <div class="flex-column">
-                                    <div class="daily-stat-item">
+                                    <div class="daily-stat-item" data-graph="clientes">
                                         <h4>Nuevos Clientes</h4>
                                         <div class="daily-stat" id="daily-clientes">0</div>
                                     </div>
-                                    <div class="daily-stat-item">
+                                    <div class="daily-stat-item" data-graph="proveedores">
                                         <h4>Nuevos Proveedores</h4>
                                         <div class="daily-stat" id="daily-proveedores">0</div>
                                     </div>
@@ -167,33 +199,75 @@
                             </div>
                         </div>
                     </div>
-                    <div class="estadisticas-graph-wrapper">
-                        <div id="all-stats"></div>
+                    <div class="estadisticas-graph-wrapper all-center">
+                        <div class="flex-column stat-graph all-center" id="stock-ingresado-container">
+                            <h2>Stock Ingresado por Hora</h2>
+                            <div id="stock-ingresado-graph"></div>
+                        </div>
+                        <div class="flex-column all-center stat-graph hidden" id="stock-vendido-container">
+                            <h2>Stock Vendido por Hora</h2>
+                            <div id="stock-vendido-graph"></div>
+                        </div>
+                        <div class="flex-column stat-graph all-center hidden" id="ventas-container">
+                            <h2>Ventas Realizadas por Hora</h2>
+                            <div id="ventas-graph"></div>
+                        </div>
+                        <div class="flex-column all-center stat-graph hidden" id="compras-container">
+                            <h2>Compras Realizadas por Hora</h2>
+                            <div id="compras-graph"></div>
+                        </div>
+                        <div class="flex-column stat-graph all-center hidden" id="gastos-container">
+                            <h2>Gastos por Hora</h2>
+                            <div id="gastos-graph"></div>
+                        </div>
+                        <div class="flex-column all-center stat-graph hidden" id="ingresos-container">
+                            <h2>Ingresos por Hora</h2>
+                            <div id="ingresos-graph"></div>
+                        </div>
+                        <div class="flex-column all-center stat-graph hidden" id="ganancias-container">
+                            <h2>Ganancias por Hora</h2>
+                            <div id="ganancias-graph"></div>
+                        </div>
+                        <div class="flex-column stat-graph all-center hidden" id="clientes-container">
+                            <h2>Nuevos Clientes por Hora</h2>
+                            <div id="clientes-graph"></div>
+                        </div>
+                        <div class="flex-column all-center stat-graph hidden" id="proveedores-container">
+                            <h2>Nuevos Proveedores por Hora</h2>
+                            <div id="proveedores-graph"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!--                        FIN DE CODIGO                        -->
 
         <div id="notifications" class="dashboard-view hidden">
             <h2>🔔 Notificaciones</h2>
             <p>Acá vas a poder ver avisos importantes.</p>
         </div>
 
+
+        <!--                       CODIGO DE NANO                        -->
+
+        <!--       SECCION DE VENTAS. CODIGO COMPLETAMENTE NUEVO         -->
+
         <div id="sales" class="dashboard-view hidden">
             <div id="ventas-container" class="menu-container" style="overflow: visible;">
                 <div class="table-header">
                     <h2>Ventas</h2>
                     <div class="table-controls">
-                        <div id="sales-direction-btn" data-direction="descending">
+                        <div data-direction="descending" data-order= "none" class="direction-btn">
                             <i class="ph ph-arrow-up hidden" style="margin-right: 5px"></i>
                             <i class="ph ph-arrow-down" style="margin-right: 5px"></i>
                         </div>
-                        <div id="sale-order-by-container" class="order-by-container">
-                            <div class="flex-row" style="margin-right: 20px; align-items: center; justify-content: flex-end;" id="sale-order-by-btn">
+                        <div class="order-by-container">
+                            <div class="flex-row" style="margin-right: 20px; align-items: center; justify-content: flex-end;">
                                 <i class="ph ph-list-bullets" style="margin-right: 5px"></i>
                                 <h4 class="order-by-btn">Ordenar Por</h4>
                             </div>
-                            <div id="sale-order-by-dropdown" class="order-by-dropdown flex-column hidden">
+                            <div class="order-by-dropdown flex-column hidden">
                                 <p data-order="sales-table-date" class="order-btn">Fecha</p>
                                 <p data-order="sales-table-id" class="order-btn">Número</p>
                                 <p data-order="sales-table-client" class="order-btn">Cliente</p>
@@ -201,33 +275,33 @@
                             </div>
                         </div>
                         <input type="text" id="sale-input" placeholder="Buscar una venta...">
-                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem;" data-transaction="sale">+ Agregar Venta</button>
+                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem;" data-transaction="sale">+ Crear una Venta</button>
                     </div>
                 </div>
                 <div class="table-wrapper">
                     <div id="sales-table-container">
-                        <div id="sales-table-id-descending" class="sales-view hidden">
+                        <div id="sales-table-id-descending" class="transaction-view hidden">
                             <p>Ventas Ordenadas por ID descendiente</p>
                         </div>
-                        <div id="sales-table-id-ascending" class="sales-view hidden">
+                        <div id="sales-table-id-ascending" class="transaction-view hidden">
                             <p>Ventas Ordenadas por ID cresciente</p>
                         </div>
-                        <div id="sales-table-client-descending" class="sales-view hidden">
+                        <div id="sales-table-client-descending" class="transaction-view hidden">
                             <p>Ventas Ordenadas por Cliente descendiente (Alfabeticamente)</p>
                         </div>
-                        <div id="sales-table-client-ascending" class="sales-view hidden">
+                        <div id="sales-table-client-ascending" class="transaction-view hidden">
                             <p>Ventas Ordenadas por Cliente cresciente (Alfabeticamente)</p>
                         </div>
-                        <div id="sales-table-price-ascending" class="sales-view hidden">
+                        <div id="sales-table-price-ascending" class="transaction-view hidden">
                             <p>Ventas Ordenadas por Precio cresciente</p>
                         </div>
-                        <div id="sales-table-price-descending" class="sales-view hidden">
+                        <div id="sales-table-price-descending" class="transaction-view hidden">
                             <p>Ventas Ordenadas por Precio descendente</p>
                         </div>
-                        <div id="sales-table-date-ascending" class="sales-view hidden">
+                        <div id="sales-table-date-ascending" class="transaction-view hidden">
                             <p>Ventas Ordenadas por Fecha cresciente</p>
                         </div>
-                        <div id="sales-table-date-descending" class="sales-view">
+                        <div id="sales-table-date-descending" class="transaction-view">
                             <p>Ventas Ordenadas por Fecha descendente</p>
                         </div>
                     </div>
@@ -235,55 +309,57 @@
             </div>
         </div>
 
+        <!--        SECCION DE COMPRAS. CODIGO COMPLETAMENTE NUEVO         -->
+
         <div id="receipts" class="dashboard-view hidden">
             <div id="receipts-container" class="menu-container" style="overflow: visible;">
                 <div class="table-header">
                     <h2>Compras</h2>
                     <div class="table-controls">
-                        <div id="receipts-direction-btn" data-direction="descending">
+                        <div data-direction="descending" data-order= "none" class="direction-btn">
                             <i class="ph ph-arrow-up hidden" style="margin-right: 5px"></i>
                             <i class="ph ph-arrow-down" style="margin-right: 5px"></i>
                         </div>
-                        <div id="receipts-order-by-container" class="order-by-container">
-                            <div class="flex-row" style="margin-right: 20px; align-items: center; justify-content: flex-end;" id="receipts-order-by-btn">
+                        <div class="order-by-container">
+                            <div class="flex-row" style="margin-right: 20px; align-items: center; justify-content: flex-end;">
                                 <i class="ph ph-list-bullets" style="margin-right: 5px"></i>
                                 <h4 class="order-by-btn">Ordenar Por</h4>
                             </div>
-                            <div id="receipts-order-by-dropdown" class="order-by-dropdown flex-column hidden">
+                            <div class="order-by-dropdown flex-column hidden">
                                 <p data-order="receipts-table-date" class="order-btn">Fecha</p>
                                 <p data-order="receipts-table-id" class="order-btn">Número</p>
-                                <p data-order="receipts-table-proveedor" class="order-btn">Proveedor</p>
+                                <p data-order="receipts-table-provider" class="order-btn">Proveedor</p>
                                 <p data-order="receipts-table-price" class="order-btn">Precio</p>
                             </div>
                         </div>
                         <input type="text" id="receipt-input" placeholder="Buscar una compra...">
-                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="receipt">+ Agregar Compra</button>
+                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="receipt">+ Crear una Compra</button>
                     </div>
                 </div>
                 <div class="table-wrapper">
                     <div id="receipts-table-container">
-                        <div id="receipts-table-id-descending" class="receipts-view hidden">
+                        <div id="receipts-table-id-descending" class="transaction-view hidden">
                             <p>Compras Ordenadas por ID descendiente</p>
                         </div>
-                        <div id="receipts-table-id-ascending" class="receipts-view hidden">
+                        <div id="receipts-table-id-ascending" class="transaction-view hidden">
                             <p>Compras Ordenadas por ID cresciente</p>
                         </div>
-                        <div id="receipts-table-client-descending" class="receipts-view hidden">
+                        <div id="receipts-table-provider-descending" class="transaction-view hidden">
                             <p>Compras Ordenadas por Proveedor descendiente (Alfabeticamente)</p>
                         </div>
-                        <div id="receipts-table-client-ascending" class="receipts-view hidden">
+                        <div id="receipts-table-provider-ascending" class="transaction-view hidden">
                             <p>Compras Ordenadas por Proveedor cresciente (Alfabeticamente)</p>
                         </div>
-                        <div id="receipts-table-price-ascending" class="receipts-view hidden">
+                        <div id="receipts-table-price-ascending" class="transaction-view hidden">
                             <p>Compras Ordenadas por Precio cresciente</p>
                         </div>
-                        <div id="receipts-table-price-descending" class="receipts-view hidden">
+                        <div id="receipts-table-price-descending" class="transaction-view hidden">
                             <p>Compras Ordenadas por Precio descendente</p>
                         </div>
-                        <div id="receipts-table-date-descending" class="receipts-view">
+                        <div id="receipts-table-date-descending" class="transaction-view">
                             <p>Compras Ordenadas por Fecha descendente</p>
                         </div>
-                        <div id="receipts-table-date-ascending" class="receipts-view hidden">
+                        <div id="receipts-table-date-ascending" class="transaction-view hidden">
                             <p>Compras Ordenadas por Fecha ascendente</p>
                         </div>
                     </div>
@@ -291,15 +367,127 @@
             </div>
         </div>
 
-        <div id="clients" class="dashboard-view hidden">
-            <div class="menu-container">
-                <div class="table-header"></div>
-                <h2>⚙️ Clientes</h2>
+        <!--         FIN DE CODIGO DE NANO         -->
+
+        <div id="customers" class="dashboard-view hidden">
+            <div class="menu-container" style="overflow: visible;">
+                <div class="table-header">
+                    <h2>Clientes</h2>
+                    <div class="table-controls">
+                        <div data-direction="descending" data-order= "none" class="direction-btn">
+                            <i class="ph ph-arrow-up hidden" style="margin-right: 5px"></i>
+                            <i class="ph ph-arrow-down" style="margin-right: 5px"></i>
+                        </div>
+                        <div class="order-by-container">
+                            <div class="flex-row" style="margin-right: 20px; align-items: center; justify-content: flex-end;">
+                                <i class="ph ph-list-bullets" style="margin-right: 5px"></i>
+                                <h4 class="order-by-btn">Ordenar Por</h4>
+                            </div>
+                            <div class="order-by-dropdown flex-column hidden">
+                                <p data-order="customers-table-date" class="order-btn">Fecha</p>
+                                <p data-order="customers-table-name" class="order-btn">Nombre</p>
+                                <p data-order="customers-table-email" class="order-btn">Email</p>
+                                <p data-order="customers-table-phone" class="order-btn">Teléfono</p>
+                                <p data-order="customers-table-address" class="order-btn">Dirección</p>
+                                <p data-order="customers-table-dni" class="order-btn">DNI</p>
+                            </div>
+                        </div>
+                        <input type="text" id="customers-input" placeholder="Buscar un cliente...">
+                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="customer">+ Crear Cliente</button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <div id="customers-table-container">
+                        <div id="customers-table-email-descending" class="transaction-view hidden customer-view">
+                        </div>
+                        <div id="customers-table-email-ascending" class="transaction-view hidden customer-view">
+                        </div>
+                        <div id="customers-table-name-descending" class="transaction-view hidden customer-view">
+                        </div>
+                        <div id="customers-table-name-ascending" class="transaction-view hidden customer-view">
+                        </div>
+                        <div id="customers-table-date-descending" class="transaction-view customer-view">
+                        </div>
+                        <div id="customers-table-date-ascending" class="transaction-view hidden customer-view">
+                        </div>
+                        <div id="customers-table-phone-ascending" class="transaction-view hidden customer-view">
+                        </div>
+                        <div id="customers-table-phone-descending" class="transaction-view hidden customer-view">
+                        </div>
+                        <div id="customers-table-address-descending" class="transaction-view hidden customer-view">
+                        </div>
+                        <div id="customers-table-address-ascending" class="transaction-view hidden customer-view">
+                        </div>
+                        <div id="customers-table-dni-descending" class="transaction-view hidden customer-view">
+                        </div>
+                        <div id="customers-table-dni-ascending" class="transaction-view hidden customer-view">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div id="providers" class="dashboard-view hidden">
-            <h2>⚙️ Proveedores</h2>
+            <div class="menu-container" style="overflow: visible;">
+                <div class="table-header">
+                    <h2>Proveedores</h2>
+                    <div class="table-controls">
+                        <div data-direction="descending" data-order= "none" class="direction-btn">
+                            <i class="ph ph-arrow-up hidden" style="margin-right: 5px"></i>
+                            <i class="ph ph-arrow-down" style="margin-right: 5px"></i>
+                        </div>
+                        <div class="order-by-container">
+                            <div class="flex-row" style="margin-right: 20px; align-items: center; justify-content: flex-end;">
+                                <i class="ph ph-list-bullets" style="margin-right: 5px"></i>
+                                <h4 class="order-by-btn">Ordenar Por</h4>
+                            </div>
+                            <div class="order-by-dropdown flex-column hidden">
+                                <p data-order="providers-table-date" class="order-btn">Fecha</p>
+                                <p data-order="providers-table-name" class="order-btn">Nombre</p>
+                                <p data-order="providers-table-email" class="order-btn">Email</p>
+                                <p data-order="providers-table-address" class="order-btn">Dirección</p>
+                                <p data-order="providers-table-phone" class="order-btn">Teléfono</p>
+                            </div>
+                        </div>
+                        <input type="text" id="providers-input" placeholder="Buscar un proveedor...">
+                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="provider">+ Crear Proveedor</button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <div id="customers-table-container">
+                        <div id="providers-table-email-descending" class="transaction-view hidden provider-view">
+                            <p>Proveedores Ordenados por Email descendiente</p>
+                        </div>
+                        <div id="providers-table-email-ascending" class="transaction-view hidden provider-view">
+                            <p>Proveedores Ordenadas por Email cresciente</p>
+                        </div>
+                        <div id="providers-table-name-descending" class="transaction-view hidden provider-view">
+                            <p>Proveedores Ordenadas por Nombre descendiente (Alfabeticamente)</p>
+                        </div>
+                        <div id="providers-table-name-ascending" class="transaction-view hidden provider-view">
+                            <p>Proveedores Ordenadas por Nombre cresciente (Alfabeticamente)</p>
+                        </div>
+                        <div id="providers-table-date-descending" class="transaction-view provider-view">
+                            <p>Proveedores Ordenadas por Fecha descendente</p>
+                        </div>
+                        <div id="providers-table-date-ascending" class="transaction-view hidden provider-view">
+                            <p>Proveedores Ordenadas por Fecha ascendente</p>
+                        </div>
+                        <div id="providers-table-phone-descending" class="transaction-view hidden provider-view">
+                            <p>Proveedores Ordenados por Telefono descendiente</p>
+                        </div>
+                        <div id="providers-table-phone-ascending" class="transaction-view hidden provider-view">
+                            <p>Proveedores Ordenadas por Telefono cresciente</p>
+                        </div>
+                        <div id="providers-table-address-descending" class="transaction-view hidden provider-view">
+                            <p>Proveedores Ordenadas por Dirección descendiente (Alfabeticamente)</p>
+                        </div>
+                        <div id="providers-table-address-ascending" class="transaction-view hidden provider-view">
+                            <p>Proveedores Ordenadas por Dirección cresciente (Alfabeticamente)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 </div>

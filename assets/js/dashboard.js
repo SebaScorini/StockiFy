@@ -74,6 +74,337 @@ async function handleStockUpdate(event) {
 }
 // -- Estadisticas --
 
+async function updateDailyStatistics(inventoryId) {
+    const hourlyStatistics = await api.getDailyStatistics(inventoryId);
+    if (hourlyStatistics){
+        const groupedStatistics = groupHourlyData(hourlyStatistics);
+        populateGroupedStatistics(groupedStatistics);
+        populateHourlyGraphs(hourlyStatistics);
+    }
+}
+
+function createCharts(){
+    const stockIngresado = document.getElementById('stock-ingresado-graph');
+    const stockVendido = document.getElementById('stock-vendido-graph');
+    const ventas = document.getElementById('ventas-graph');
+    const compras = document.getElementById('compras-graph');
+    const gastos = document.getElementById('gastos-graph');
+    const ingresos = document.getElementById('ingresos-graph');
+    const ganancias = document.getElementById('ganancias-graph');
+    const clientes = document.getElementById('clientes-graph');
+    const proveedores = document.getElementById('proveedores-graph');
+
+    var options = {
+        name:{
+        },
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [],
+        xaxis: {
+            categories: []
+        },
+        noData: {
+            text: "Cargando datos..." // Mensaje mientras no hay datos
+        }
+    };
+
+    const stockIngresadoChart = new ApexCharts(stockIngresado,options);
+    stockIngresadoChart.render();
+    stockIngresado.myChartInstance = stockIngresadoChart;
+
+    const stockVendidoChart = new ApexCharts(stockVendido,options);
+    stockVendidoChart.render();
+    stockVendido.myChartInstance = stockVendidoChart;
+
+    const gastosChart = new ApexCharts(gastos,options);
+    gastosChart.render();
+    gastos.myChartInstance = gastosChart;
+
+    const ingresosChart = new ApexCharts(ingresos,options);
+    ingresosChart.render();
+    ingresos.myChartInstance = ingresosChart;
+
+    const gananciasChart = new ApexCharts(ganancias,options);
+    gananciasChart.render();
+    ganancias.myChartInstance = gananciasChart;
+
+    const clientesChart = new ApexCharts(clientes,options);
+    clientesChart.render();
+    clientes.myChartInstance = clientesChart;
+
+    const proveedoresChart = new ApexCharts(proveedores,options);
+    proveedoresChart.render();
+    proveedores.myChartInstance = proveedoresChart;
+
+    const ventasChart = new ApexCharts(ventas,options);
+    ventasChart.render();
+    ventas.myChartInstance = ventasChart;
+
+    const comprasChart = new ApexCharts(compras,options);
+    comprasChart.render();
+    compras.myChartInstance = comprasChart;
+
+}
+
+function setupStatPickers(){
+    const statPickers = document.querySelectorAll('.daily-stat-item');
+    statPickers.forEach(picker => {
+        picker.addEventListener('click', () => {
+            document.querySelectorAll('.stat-graph').forEach(graph => graph.classList.add('hidden'));
+
+            const graphContainerID = picker.dataset.graph + '-container';
+            console.log(graphContainerID);
+
+            const containerToShow = document.getElementById(graphContainerID);
+            containerToShow.classList.remove('hidden');
+
+        })
+    })
+}
+
+function populateHourlyGraphs(hourlyStatistics){
+
+    const hours = [];
+    const currentHour = new Date().getHours();
+    var i;
+
+    for (i = 0; i <= currentHour ; i++){
+        hours.push(i + " hs");
+    }
+
+    const stockIngresado = document.getElementById('stock-ingresado-graph');
+    const stockVendido = document.getElementById('stock-vendido-graph');
+    const ventas = document.getElementById('ventas-graph');
+    const compras = document.getElementById('compras-graph');
+    const gastos = document.getElementById('gastos-graph');
+    const ingresos = document.getElementById('ingresos-graph');
+    const ganancias = document.getElementById('ganancias-graph');
+    const clientes = document.getElementById('clientes-graph');
+    const proveedores = document.getElementById('proveedores-graph');
+
+    var options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.stock.stockIngresado
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+
+    const stockIngresadoChart = stockIngresado.myChartInstance;
+    stockIngresadoChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.stock.stockVendido
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const stockVendidoChart = stockVendido.myChartInstance;
+    stockVendidoChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.monetarias.gastos
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const gastosChart = gastos.myChartInstance;
+    gastosChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.monetarias.ingresos
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const ingresosChart = ingresos.myChartInstance;
+    ingresosChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.monetarias.ganancias
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const gananciasChart = ganancias.myChartInstance;
+    gananciasChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.transacciones.ventasRealizadas
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const ventasChart = ventas.myChartInstance;
+    ventasChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.transacciones.comprasRealizadas
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const comprasChart = compras.myChartInstance;
+    comprasChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.conexiones.nuevosClientes
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const clientesChart = clientes.myChartInstance;
+    clientesChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.conexiones.nuevosProveedores
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const proveedoresChart = proveedores.myChartInstance;
+    proveedoresChart.updateOptions(options);
+}
+
+function populateGroupedStatistics(stats){
+    const stockIngresado = document.getElementById('daily-stock-ingresado');
+    const stockVendido = document.getElementById('daily-stock-vendido');
+    const gastos = document.getElementById('daily-gastos');
+    const ingresos = document.getElementById('daily-ingresos');
+    const ganancias = document.getElementById('daily-ganancias');
+    const clientes = document.getElementById('daily-clientes');
+    const proveedores = document.getElementById('daily-proveedores');
+    const ventas = document.getElementById('daily-ventas');
+    const compras = document.getElementById('daily-compras');
+
+    stockIngresado.innerHTML = stats.stock.stockIngresado;
+    stockVendido.innerHTML = stats.stock.stockVendido;
+    gastos.innerHTML = stats.monetarias.gastos;
+    ingresos.innerHTML = stats.monetarias.ingresos;
+    ganancias.innerHTML = stats.monetarias.ganancias;
+    clientes.innerHTML = stats.conexiones.nuevosClientes;
+    proveedores.innerHTML = stats.conexiones.nuevosProveedores;
+    ventas.innerHTML = stats.transacciones.ventasRealizadas;
+    compras.innerHTML = stats.transacciones.comprasRealizadas;
+}
+
+function groupHourlyData(hourlyData) {
+    var groupedData = {
+        conexiones: {
+            nuevosClientes: 0,
+            nuevosProveedores: 0
+        },
+        transacciones: {
+            ventasRealizadas: 0,
+            comprasRealizadas: 0
+        },
+        stock: {
+            stockIngresado: 0,
+            stockVendido: 0
+        },
+        monetarias: {
+            gastos: 0,
+            ingresos: 0,
+            ganancias: 0
+        }
+    };
+
+    groupedData.conexiones.nuevosClientes = hourlyData.conexiones.nuevosClientes.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.conexiones.nuevosProveedores = hourlyData.conexiones.nuevosProveedores.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.transacciones.ventasRealizadas = hourlyData.transacciones.ventasRealizadas.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.transacciones.comprasRealizadas = hourlyData.transacciones.comprasRealizadas.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.stock.stockIngresado = hourlyData.stock.stockIngresado.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.stock.stockVendido = hourlyData.stock.stockVendido.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.monetarias.gastos = hourlyData.monetarias.gastos.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.monetarias.ingresos = hourlyData.monetarias.ingresos.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.monetarias.ganancias = hourlyData.monetarias.ganancias.reduce((acum,valor) => {
+        return acum + valor;
+    })
+
+    return groupedData;
+}
+
 async function setupInventoryPicker() {
     const user = await api.getUserProfile();
     if (user){
@@ -97,10 +428,11 @@ async function setupInventoryPicker() {
         const allBtns = inventoriesDropdown.querySelectorAll('.inventory-btn');
         allBtns.forEach(btn =>{
             btn.addEventListener('click', () => {
-                console.log("Inventory selected:", btn.dataset.value);
+                updateDailyStatistics(btn.dataset.value);
                 inventoryPicker.innerHTML = `<h4>${btn.innerHTML}</h4>`;
             })
         })
+
 
 
         inventoryPicker.addEventListener('click', () => {
@@ -221,7 +553,10 @@ function filterTable() {
 function showDashboardView(viewId) {
     document.querySelectorAll('.dashboard-view').forEach(view => view.classList.add('hidden'));
     const viewToShow = document.getElementById(viewId);
+    const transactionViews = ['sales','receipts', 'customers','providers'];
+
     if (viewToShow) { viewToShow.classList.remove('hidden'); }
+
     document.querySelectorAll('.menu-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.targetView === viewId);
     });
@@ -239,454 +574,16 @@ function setupMenuNavigation() {
     console.log("Navegación del menú lateral configurada.");
 }
 
-function setupOrderBy(){
-
-    //SECCION DE "SALES"
-
-    //DECLARACION DE VARIABLES IMPORTANTES
-    const orderBySalesBtn = document.getElementById('sale-order-by-btn');
-    const orderBySalesContainer = document.getElementById('sale-order-by-container');
-    const orderBySalesDropdown = document.getElementById('sale-order-by-dropdown');
-    const salesDirectionBtn = document.getElementById('sales-direction-btn');
-    let viewOrderSales = 'sales-table-date';
-    let viewDirectionSales = 'descending';
-    const orderButtonsSales = document.querySelectorAll('#sale-order-by-dropdown .order-btn');
-
-    //COMPORTAMIENTOS DEL DROPDOWN
-
-    orderBySalesBtn.addEventListener('click', (e) =>{
-        e.stopPropagation();
-        if(orderBySalesContainer.classList.contains('clicked')) {
-            orderBySalesContainer.classList.remove('clicked');
-            orderBySalesDropdown.classList.add('hidden');
-        }
-        else{
-            orderBySalesContainer.classList.add('clicked');
-            orderBySalesDropdown.classList.remove('hidden');
-        }
-        orderBySalesDropdown.addEventListener('click', (e) => {
-            e.stopPropagation();
-        })
-        window.addEventListener('click', () => {
-            if (orderBySalesContainer.classList.contains('clicked')) {
-                orderBySalesContainer.classList.remove('clicked');
-                orderBySalesDropdown.classList.add('hidden');
-            }
-        })
-    })
-
-    //SELECCION DE ORDEN
-
-    orderButtonsSales.forEach(button =>{
-        button.addEventListener('click', () =>{
-            viewOrderSales = button.dataset.order;
-            showSalesView(viewOrderSales,viewDirectionSales);
-        })
-    })
-
-    //SELECCION DE DIRECCION
-
-    salesDirectionBtn.addEventListener('click', () =>{
-        if (salesDirectionBtn.dataset.direction === 'descending') {
-            salesDirectionBtn.innerHTML = `<i class="ph ph-arrow-up" style="margin-right: 5px"></i>
-                                        <i class="ph ph-arrow-down hidden" style="margin-right: 5px"></i>`;
-            viewDirectionSales = 'ascending';
-            salesDirectionBtn.dataset.direction = 'ascending';
-        }
-        else {
-            salesDirectionBtn.innerHTML = `<i class="ph ph-arrow-up hidden" style="margin-right: 5px"></i>
-                                        <i class="ph ph-arrow-down" style="margin-right: 5px"></i>`;
-            viewDirectionSales = 'descending';
-            salesDirectionBtn.dataset.direction = 'descending';
-        }
-        showSalesView(viewOrderSales,viewDirectionSales);
-    })
-
-
-    //SECCION DE "COMPRAS"
-
-    const orderByReceiptsBtn = document.getElementById('receipts-order-by-btn');
-    const orderByReceiptsContainer = document.getElementById('receipts-order-by-container');
-    const orderByReceiptsDropdown = document.getElementById('receipts-order-by-dropdown');
-    const receiptsDirectionBtn = document.getElementById('receipts-direction-btn');
-    let viewOrderReceipts = 'receipts-table-date';
-    let viewDirectionReceipts = 'descending';
-    const orderButtonsReceipts = document.querySelectorAll('#receipts-order-by-dropdown .order-btn');
-
-    //COMPORTAMIENTOS DEL DROPDOWN
-
-    orderByReceiptsBtn.addEventListener('click', (e) =>{
-        e.stopPropagation();
-        if(orderByReceiptsContainer.classList.contains('clicked')) {
-            orderByReceiptsContainer.classList.remove('clicked');
-            orderByReceiptsDropdown.classList.add('hidden');
-        }
-        else{
-            orderByReceiptsContainer.classList.add('clicked');
-            orderByReceiptsDropdown.classList.remove('hidden');
-        }
-        orderByReceiptsDropdown.addEventListener('click', (e) => {
-            e.stopPropagation();
-        })
-        window.addEventListener('click', () => {
-            if (orderByReceiptsContainer.classList.contains('clicked')) {
-                orderByReceiptsContainer.classList.remove('clicked');
-                orderByReceiptsDropdown.classList.add('hidden');
-            }
-        })
-    })
-
-    //SELECCION DE ORDEN
-
-    orderButtonsReceipts.forEach(button =>{
-        button.addEventListener('click', () =>{
-            viewOrderReceipts = button.dataset.order;
-            showReceiptsView(viewOrderReceipts,viewDirectionReceipts);
-        })
-    })
-
-    //SELECCION DE DIRECCION
-
-    receiptsDirectionBtn.addEventListener('click', () =>{
-        if (receiptsDirectionBtn.dataset.direction === 'descending') {
-            receiptsDirectionBtn.innerHTML = `<i class="ph ph-arrow-up" style="margin-right: 5px"></i>
-                                        <i class="ph ph-arrow-down hidden" style="margin-right: 5px"></i>`;
-            viewDirectionReceipts = 'ascending';
-            receiptsDirectionBtn.dataset.direction = 'ascending';
-        }
-        else {
-            receiptsDirectionBtn.innerHTML = `<i class="ph ph-arrow-up hidden" style="margin-right: 5px"></i>
-                                        <i class="ph ph-arrow-down" style="margin-right: 5px"></i>`;
-            viewDirectionReceipts = 'descending';
-            receiptsDirectionBtn.dataset.direction = 'descending';
-        }
-        showReceiptsView(viewOrderReceipts,viewDirectionReceipts);
-    })
-
-}
-
-//CAMBIO DE VIEW SEGUN VISTA SELECCIONADA
-function showReceiptsView(viewOrder, viewDirection) {
-    document.querySelectorAll('.receipts-view').forEach(view => view.classList.add('hidden'));
-    const viewToShow =  document.getElementById(viewOrder + '-' + viewDirection);
-    if (viewToShow) { viewToShow.classList.remove('hidden'); }
-}
-
-function showSalesView(viewOrder, viewDirection) {
-    document.querySelectorAll('.sales-view').forEach(view => view.classList.add('hidden'));
-    const viewToShow =  document.getElementById(viewOrder + '-' + viewDirection);
-    if (viewToShow) { viewToShow.classList.remove('hidden'); }
-}
-
-function setupGreyBg(){
-    const greyBg = document.getElementById('grey-background');
-    greyBg.addEventListener('click', (event) =>{
-        if (event.target === greyBg) {
-            greyBg.classList.add('hidden');
-        }
-    })
-}
-
-function setupReturnBtn(){
-    const returnBtn = document.getElementById('return-btn');
-    const greyBg = document.getElementById('grey-background');
-
-    returnBtn.addEventListener('click', () => {
-        greyBg.classList.add('hidden');
-    })
-}
-
-function setupTransactions(){
-    const newTransacionButtons = document.querySelectorAll('.new-transaction-btn');
-    const greyBg = document.getElementById('grey-background');
-
-    setupReturnBtn();
-    setupGreyBg();
-
-    newTransacionButtons.forEach(button =>{
-        button.addEventListener('click', () =>{
-            greyBg.classList.remove('hidden');
-            populateTransactionContainer(button.dataset.transaction);
-        })
-    })
-}
-
-function configAddProductBtn(){
-    const addProductBtnList = document.querySelectorAll('.add-product-btn');
-    const productPicker = document.getElementById('product-picker');
-
-    addProductBtnList.forEach(btn =>{
-        btn.addEventListener('click', (event) =>{
-            event.stopPropagation();
-
-            productPicker.classList.toggle('hidden');
-        })
-    })
-
-    window.addEventListener('click', (event) => {
-        // Si el picker está visible Y el clic fue FUERA del picker
-        if (!productPicker.classList.contains('hidden') &&
-            !productPicker.contains(event.target)) {
-            productPicker.classList.add('hidden');
-        }
-    });
-}
-
-function createNewSaleRow (selectedProduct) {
-    const newSaleRow = document.createElement('div');
-
-    newSaleRow.className = 'flex-row';
-
-    newSaleRow.innerHTML = `<div class="flex-column">
-        <h3>Nombre</h3>
-        <h4>${selectedProduct.name}</h4>
-    </div>
-    <div class="flex-column">
-        <h3>Cantidad</h3>
-        <h4>Cantidad</h4>
-    </div>
-    <div class="flex-column">
-        <h3>Precio</h3>
-        <h4>Precio</h4>
-    </div>
-    <div class="flex-column">
-        <h3>Precio Total</h3>
-        <h4>Precio Total</h4>
-    </div>
-    <button type="button" class="btn delete-product-btn" data-pID=${selectedProduct.pID} data-tID=${selectedProduct.tID}>
-        Eliminar
-    </button>`
-
-    return newSaleRow;
-}
-
-function renderSalesProductList(saleItemList){
-    const saleProductContainer = document.getElementById('sale-product-container');
-    saleProductContainer.innerHTML = '';
-
-    if (saleItemList.length === 0) {
-        saleProductContainer.innerHTML = `<h3>No hay productos en la lista</h3>`;
-        return;
-    }
-
-    saleItemList.forEach(item =>{
-        const newSaleProductRow = createNewSaleRow(item);
-        saleProductContainer.appendChild(newSaleProductRow);
-    })
-}
-
-function addProduct(selectedProduct,saleItemList,receiptItemList) {
-    const productPicker = document.getElementById('product-picker');
-    productPicker.classList.add('hidden');
-
-    saleItemList.push(selectedProduct);
-    receiptItemList.push(selectedProduct);
-
-    renderSalesProductList(saleItemList);
-    //renderReceiptProductList(receiptItemList);
-}
-
-async function populateProductPicker(saleItemsList,receiptItemsList){
-    const user = await api.getUserProfile();
-    if (user){
-        const tables = user['databases'];
-
-        const productPicker = document.getElementById('product-picker');
-        const inventoryPicker = document.createElement('div');
-
-        productPicker.innerHTML = '';
-
-        inventoryPicker.className = 'flex-column';
-        const tableItem = document.createElement('div');
-        tableItem.dataset.tID = 'all';
-        tableItem.innerHTML = 'Todas';
-        tableItem.className = 'product-table-picker';
-
-        inventoryPicker.appendChild(tableItem);
-
-        tables.forEach(table => {
-            const tableItem = document.createElement('div');
-            tableItem.dataset.tID = table.id;
-            tableItem.innerHTML = table.name;
-            tableItem.className = 'product-table-picker';
-
-            inventoryPicker.appendChild(tableItem);
-        })
-
-        productPicker.appendChild(inventoryPicker);
-
-        configureTablePickers();
-
-        //LA VARIABLE PRODUCTOS DEBE HACER UN FETCH A LA API PARA OBTENER TODOS LOS PRODUCTOS DEL USUARIO
-
-        const products = [{name :'Producto 1', pID : 1, tID : 2},{name :'Producto 2', pID : 2, tID : 11},
-            {name :'Producto 3', pID : 3, tID : 9}];
-
-        const allProductsDiv = document.createElement('div');
-        allProductsDiv.className = 'hidden flex-column product-list';
-        allProductsDiv.id = 'all';
-
-        products.forEach(product => {
-            const item = document.createElement('div');
-            item.dataset.tID = product.tID;
-            item.dataset.pID = product.pID;
-            item.innerHTML = product.name;
-            item.className = 'product-item';
-            allProductsDiv.appendChild(item);
-        })
-
-        const productListWrapper = document.createElement('div');
-        productListWrapper.className = 'hidden';
-        productListWrapper.id = 'product-list-wrapper';
-
-        productListWrapper.appendChild(allProductsDiv);
-
-        tables.forEach(table => {
-            const tableProductsDiv = document.createElement('div');
-            tableProductsDiv.className = 'hidden flex-column product-list';
-            tableProductsDiv.id = table.id;
-
-            products.forEach(product => {
-                if (product.tID !== table.id) return;
-                const item = document.createElement('div');
-                item.dataset.tID = product.tID;
-                item.dataset.pID = product.pID;
-                item.innerHTML = product.name;
-                item.className = 'product-item';
-                tableProductsDiv.appendChild(item);
-            })
-            productListWrapper.appendChild(tableProductsDiv);
-        })
-        productPicker.appendChild(productListWrapper);
-
-        configureProductSelection(products,saleItemsList,receiptItemsList);
-    }
-}
-
-function configureProductSelection(products,saleItemsList,receiptItemsList){
-    const productItem = document.querySelectorAll('.product-item');
-    productItem.forEach(item => {
-        item.addEventListener('click', () => {
-            const selectedProduct = products.find(product => product.pID === parseInt(item.dataset.pID,10) &&
-                product.tID === parseInt(item.dataset.tID,10));
-
-            addProduct(selectedProduct,saleItemsList,receiptItemsList);
-        })
-    })
-}
-
-function configureTablePickers(){
-    const tablePickers = document.querySelectorAll('.product-table-picker');
-    tablePickers.forEach(table => {
-        table.addEventListener('click', () => {
-            const tableID = table.dataset.tID;
-            showProductList(tableID);
-        })
-    })
-}
-
-function showProductList(tableID){
-    document.querySelectorAll('.product-list').forEach(wrapper => wrapper.classList.add('hidden'));
-    const productListWrapper = document.getElementById('product-list-wrapper');
-    const productListToShow = document.getElementById(tableID);
-
-    productListWrapper.classList.remove('hidden');
-    productListToShow.classList.remove('hidden');
-}
-
-function getSaleForm() {
-    return `<form class="flex-column" method="get" action="/StockiFy/dashboard.php">
-                                <div class="flex-row all-center">
-                                    <h2>Productos</h2>
-                                    <div class="product-picker-container">
-                                    <btn class="btn add-product-btn">Agregar Producto</btn>
-                                    <div id="product-picker"></div>    
-                                    </div>
-                                </div>
-                                <div>
-                                
-                                </div>           
-                                <div class="flex-column" id="sale-product-container"></div>
-                                <input name="product-list" id="sale-product-list" hidden>
-                                <input name="client-id" id="client-id-input">
-                                <input name="price" id="price-input" value="0" readonly>
-                                <btn type="submit" class="btn btn-primary">Agregar Venta</btn>
-                                </form>`;
-}
-
-function configRemoveProduct(saleItemList, receiptItemList){
-    const saleProductContainer = document.getElementById('sale-product-container');
-
-    if (saleProductContainer){
-        saleProductContainer.addEventListener('click', (event) =>{
-            const deleteButton = event.target.closest('.delete-product-btn');
-            if (!deleteButton) return;
-
-            const itemID = parseInt(deleteButton.dataset.pid,10);
-            const tableID = parseInt(deleteButton.dataset.tid,10);
-
-            const saleItemIndex = saleItemList.findIndex(item => item.pID === itemID && item.tID === tableID);
-            //const receiptItemIndex = receiptItemList.findIndex(item => item.pID === itemID && item.tID === tableID);
-
-            if (saleItemIndex > -1) {
-                saleItemList.splice(saleItemIndex, 1);
-                renderSalesProductList(saleItemList);
-            }
-            /*
-            if (receiptItemIndex > -1) {
-                receiptItemList.splice(receiptItemIndex, 1);
-                renderReceiptsProductList(saleItemList);
-            }*/
-        })
-    }
-}
-
-function populateTransactionContainer(transactionType){
-    const transactionFormContainer = document.getElementById('transaction-form-container');
-    let transactionFromHTML, saleItemList = [], receiptItemList = [];
-    switch (transactionType) {
-        case 'sale':
-            transactionFromHTML = getSaleForm();
-            break;
-        case 'receipt':
-            transactionFromHTML = ``;
-            break;
-        case 'client':
-            transactionFromHTML = ``;
-            break;
-        case 'provider':
-            transactionFromHTML = ``;
-            break;
-    }
-
-
-    transactionFormContainer.innerHTML = transactionFromHTML;
-    populateProductPicker(saleItemList,receiptItemList);
-    configRemoveProduct(saleItemList,receiptItemList);
-
-    switch (transactionType) {
-        case 'sale':
-            configAddProductBtn(saleItemList);
-
-            break;
-        case 'receipt':
-            transactionFromHTML = ``;
-            break;
-        case 'client':
-            transactionFromHTML = ``;
-            break;
-        case 'provider':
-            transactionFromHTML = ``;
-            break;
-    }
-
-    renderSalesProductList(saleItemList);
-
-}
-
 // ---- 4. INICIALIZACIÓN ----
 async function init() {
     console.log("[INIT] Iniciando dashboard...");
+
+    /* ---------------------- CODIGO DE NANO  ---------------------- */
+
+
+    //PREPARA EL HEADER CORRECTAMENTE
+
+
     const nav = document.getElementById('header-nav');
     if (nav) nav.innerHTML = `
                                 <a href="/StockiFy/estadisticas.php" class="btn btn-secondary">Estadisticas</a>
@@ -701,10 +598,28 @@ async function init() {
             </div>   
                            `;
 
+    //PREPARA EL DROPDOWN DE "MI CUENTA"
     setup.setupMiCuenta();
-    setupOrderBy();
+    await setupClients();
+    await setupProviders();
+    createCharts();
+    setupStatPickers();
+    await updateDailyStatistics('all');
+
+    //PREPARA EL SELECTOR DE INVENTARIO PARA LAS ESTADISTICAS DIARIAS
     setupInventoryPicker();
+
+    setupOrderBy();
+
+    //PREPARA LOS FONDOS GRISES DE LOS MODALES
+    setupReturnBtn();
+    setupGreyBg();
+
+    //PREPARA LOS 4 SECTORES DE TRANSACCIONES (VENTAS, COMPRAS, CLIENTES, PROVEEDORES)
     setupTransactions();
+
+
+    /* ---------------------- FIN CODIGO DE NANO  ---------------------- */
 
     const tableTitleElement = document.getElementById('table-title');
 
@@ -772,6 +687,8 @@ async function init() {
             window.location.href = '/select-db.php';
         }
     }
+
+    getReloadVariables();
 }
 
 function createEditableRow(columns) {
@@ -929,5 +846,1309 @@ async function handleConfirmDelete() {
         confirmDeleteBtn.textContent = 'Eliminar Permanentemente';
     }
 }
+
+/* ---------------------- FUNCIONES DE NANO  ---------------------- */
+
+function getReloadVariables(){
+    const urlParams = new URLSearchParams(window.location.search);
+    const menuToOpen = urlParams.get('location');
+    if (!menuToOpen) return;
+
+    const menuToClick = document.querySelector(`.menu-btn[data-target-view="${menuToOpen}"]`);
+    console.log(menuToClick);
+
+    menuToClick.click();
+}
+
+function setupOrderBy(){
+
+    //DECLARACION DE VARIABLES IMPORTANTES
+
+    const orderByBtns = document.querySelectorAll('.order-by-btn');
+    const directionBtns = document.querySelectorAll('.direction-btn');
+    const orderButtons = document.querySelectorAll('.order-btn');
+
+    let viewOrder = '';
+    let viewDirection = 'descending';
+
+    //COMPORTAMIENTOS DEL DROPDOWN
+
+    orderByBtns.forEach(button =>{
+        button.addEventListener('click', (e) =>{
+            e.stopPropagation();
+            const currentContainer = button.closest('.order-by-container');
+            const currentDropdown = currentContainer.querySelector('.order-by-dropdown');
+
+            if(currentContainer.classList.contains('clicked')) {
+                currentContainer.classList.remove('clicked');
+                currentDropdown.classList.add('hidden');
+            }
+            else{
+                currentContainer.classList.add('clicked');
+                currentDropdown.classList.remove('hidden');
+            }
+            currentDropdown.addEventListener('click', (e) => {
+                e.stopPropagation();
+            })
+            window.addEventListener('click', () => {
+                if (currentContainer.classList.contains('clicked')) {
+                    currentContainer.classList.remove('clicked');
+                    currentDropdown.classList.add('hidden');
+                }
+            })
+        })
+    })
+
+
+    //SELECCION DE ORDEN
+    orderButtons.forEach(button =>{
+        button.addEventListener('click', () =>{
+            const menuContainer = button.closest('.menu-container');
+            const directionButton = menuContainer.querySelector('.direction-btn');
+
+            viewOrder = button.dataset.order;
+            directionButton.dataset.order = viewOrder;
+
+            showTransactionView(viewOrder,viewDirection,menuContainer);
+        })
+    })
+
+    //SELECCION DE DIRECCION
+
+    directionBtns.forEach(button =>{
+        button.addEventListener('click', () =>{
+            const menuContainer = button.closest('.menu-container');
+
+            if (button.dataset.order === 'none'){
+                const orderButton = menuContainer.querySelector('.order-btn');
+                button.dataset.order = orderButton.dataset.order;
+            }
+
+            viewOrder = button.dataset.order;
+
+            if (button.dataset.direction === 'descending') {
+                button.innerHTML = `<i class="ph ph-arrow-up" style="margin-right: 5px"></i>
+                                        <i class="ph ph-arrow-down hidden" style="margin-right: 5px"></i>`;
+                viewDirection = 'ascending';
+                button.dataset.direction = 'ascending';
+            }
+            else {
+                button.innerHTML = `<i class="ph ph-arrow-up hidden" style="margin-right: 5px"></i>
+                                        <i class="ph ph-arrow-down" style="margin-right: 5px"></i>`;
+                viewDirection = 'descending';
+                button.dataset.direction = 'descending';
+            }
+
+            showTransactionView(viewOrder,viewDirection,menuContainer);
+        })
+    })
+}
+
+//CAMBIO DE VIEW SEGUN EL ORDEN SELECCIONADO
+
+function showTransactionView(viewOrder, viewDirection,menuContainer) {
+    menuContainer.querySelectorAll('.transaction-view').forEach(view => view.classList.add('hidden'));
+    const viewToShow =  document.getElementById(viewOrder + '-' + viewDirection);
+    console.log(viewOrder + '-' + viewDirection);
+    if (viewToShow) { viewToShow.classList.remove('hidden'); }
+}
+
+
+/* -------------------- FUNCIONES GENERALES PARA MODALES -------------------- */
+
+//PREPARO EL FONDO GRIS PARA LOS MODALES
+function setupGreyBg(){
+    const greyBg = document.getElementById('grey-background');
+    const transactionPickerModals = document.getElementById('transaction-picker-modal');
+    greyBg.addEventListener('click', (event) =>{
+        if (event.target === greyBg) {
+            if (!transactionPickerModals.classList.contains('hidden')) {transactionPickerModals.classList.add('hidden');}
+            else{greyBg.classList.add('hidden'); hideTransactionSuccess();}
+        }
+    })
+}
+
+//PREPARO EL BOTON DE "VOLVER" DE LOS MODALES
+function setupReturnBtn(){
+    const returnBtn = document.getElementById('return-btn');
+    const greyBg = document.getElementById('grey-background');
+    const transactionSuccessModal = document.getElementById('transaction-success-modal');
+
+    returnBtn.addEventListener('click', () => {
+        greyBg.classList.add('hidden');
+        hideTransactionSuccess();
+    })
+}
+
+/* -------------------- FUNCIONES DE TRANSACCIONES -------------------- */
+
+//Detecta la transaccion que se quiere agregar
+function setupTransactions(){
+    const newTransacionButtons = document.querySelectorAll('.new-transaction-btn');
+    const greyBg = document.getElementById('grey-background');
+
+    newTransacionButtons.forEach(button =>{
+        button.addEventListener('click', () =>{
+            const transactionModal = document.getElementById('new-transaction-container');
+            transactionModal.classList.remove('hidden');
+            greyBg.classList.remove('hidden');
+            populateTransactionContainer(button.dataset.transaction);
+        })
+    })
+}
+
+//Llena el modal de transacción segun la transacción elegida
+function populateTransactionContainer(transactionType){
+    const transactionFormContainer = document.getElementById('transaction-form-container');
+    let itemList= [];
+
+    transactionFormContainer.innerHTML = getForm(transactionType);
+
+    if (transactionType === 'sale' || transactionType ===  'receipt'){
+            //Prepara el selector de productos
+            populateProductPicker(itemList,transactionType);
+            //Prepara el selector de clientes
+            populateTransactionClientList();
+            //Prepara el selector de provedores
+            populateTransactionProviderList();
+            //Prepara los botones para subir/bajar la cantidad de productos
+            setupQuantityBtns(transactionType,itemList);
+            //Prepara los botones para eliminar items de la lista
+            configRemoveProduct(itemList);
+            //Prepara los botones que abren los modales de productos/clientes/proveedores
+            configurePickerBtns();
+            //Renderiza la lista de productos
+            renderProductList(itemList,transactionType);
+    }
+
+    else if (transactionType === 'customer') {configCreateClientBtn(); }
+    else {configCreateProviderBtn(); }
+
+    configTransactionModalsReturn();
+
+    //Prepara los botones que completan las transacciones de compra/venta
+    setupCompleteTransactionBtn(itemList);
+
+}
+
+function configTransactionModalsReturn(){
+    const returnBtn = document.getElementById('modal-return-btn');
+    const transactionPickerModals = document.getElementById('transaction-picker-modal');
+
+    returnBtn.addEventListener('click', () => {
+        transactionPickerModals.classList.add('hidden');
+    })
+}
+
+function configRemoveProduct(itemList){
+    const productListContainer = document.getElementById('product-list-container');
+
+    if (productListContainer){
+        productListContainer.addEventListener('click', (event) =>{
+            const deleteButton = event.target.closest('.delete-product-btn');
+            if (!deleteButton) return;
+
+            const transactionType = deleteButton.dataset.type;
+
+            const itemID = parseInt(deleteButton.dataset.pid,10);
+            const tableID = parseInt(deleteButton.dataset.tid,10);
+
+            const itemIndex = itemList.findIndex(item => item.pID === itemID && item.tID === tableID);
+
+            if (itemIndex > -1) {
+                itemList.splice(itemIndex, 1);
+                renderProductList(itemList,transactionType);
+            }
+        })
+    }
+}
+
+function configurePickerBtns(){
+    const pickerBtns = document.querySelectorAll('.picker-btn');
+    const pickerModalContainer = document.getElementById('transaction-picker-modal');
+
+    pickerBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modalID = btn.dataset.modalTarget;
+            pickerModalContainer.classList.remove('hidden');
+            showPickerModal(modalID);
+        })
+    })
+
+    window.addEventListener('click', (event) => {
+
+        const isPickerBtn = event.target.closest('.picker-btn');
+        // Si el picker está visible Y el clic fue FUERA del picker
+        if (!pickerModalContainer.classList.contains('hidden') &&
+            !pickerModalContainer.contains(event.target) &&
+            !isPickerBtn === null) {
+            hideTransactionModal();
+        }
+    });
+}
+
+function setupQuantityBtns(transactionType, itemList){
+    const productListContainer = document.getElementById('product-list-container');
+
+    productListContainer.addEventListener('click', (event) => {
+        const button = event.target.closest('.modify-quantity-btn');
+        if (!button) return;
+
+        const productID = parseInt(button.dataset.pid,10);
+        const tableID = parseInt(button.dataset.tid,10);
+        const type = button.dataset.type;
+
+        hideTransactionError();
+        let item = itemList.find(item => item.pID === productID && item.tID === tableID);
+        if (!item) return;
+
+        if (type === 'add') {
+            if (item.amount === (item.stock) && transactionType === 'sale') {
+                const errorMessage = 'La cantidad de un producto no puede ser mayor a su stock actual';
+                showTransactionError(errorMessage);
+            }
+            else{item.amount++;}
+        }
+        else {if (item.amount > 1) {item.amount--;}
+        else{
+            const errorMessage = 'La cantidad de un producto no puede ser menor a 1';
+            showTransactionError(errorMessage);
+        }
+        }
+        renderProductList(itemList,transactionType);
+    })
+}
+
+function createNewSaleRow (selectedProduct) {
+    const newSaleRow = document.createElement('div');
+
+    newSaleRow.className = 'flex-row';
+
+    newSaleRow.innerHTML = `<div class="flex-column">
+        <h3>Nombre</h3>
+        <h4>${selectedProduct.name}</h4>
+    </div>
+    <div class="flex-column">
+        <h3>Stock Disponible</h3>
+        <h4>${selectedProduct.stock}</h4>
+    </div>
+    <div class="flex-column">
+        <h3>Cantidad</h3>
+        <h4 class="flex-row">
+            <div class="modify-quantity-btn ph ph-minus-square" data-pID=${selectedProduct.pID} data-tID=${selectedProduct.tID} data-type="subtract"></div>
+            ${selectedProduct.amount}
+            <div class="modify-quantity-btn ph ph-plus-square" data-pID=${selectedProduct.pID} data-tID=${selectedProduct.tID} data-type="add"></div>
+        </h4>
+    </div>
+    <div class="flex-column">
+        <h3>Precio de Venta</h3>
+        <h4>${selectedProduct.salePrice}</h4>
+    </div>
+    <div class="flex-column">
+        <h3>Precio Total</h3>
+        <h4>${selectedProduct.totalPrice}</h4>
+    </div>
+    <button type="button" class="btn delete-product-btn" data-type="sale" data-pID=${selectedProduct.pID} data-tID=${selectedProduct.tID}>
+        Eliminar
+    </button>`
+
+    return newSaleRow;
+}
+
+function createNewReceiptRow (selectedProduct) {
+    const newReceiptRow = document.createElement('div');
+
+    newReceiptRow.className = 'flex-row';
+
+    newReceiptRow.innerHTML = `<div class="flex-column">
+        <h3>Nombre</h3>
+        <h4>${selectedProduct.name}</h4>
+    </div>
+    <div class="flex-column">
+        <h3>Stock Disponible</h3>
+        <h4>${selectedProduct.stock}</h4>
+    </div>
+    <div class="flex-column">
+        <h3>Cantidad</h3>
+        <h4 class="flex-row">
+            <div class="modify-quantity-btn ph ph-minus-square" data-pID=${selectedProduct.pID} data-tID=${selectedProduct.tID} data-type="subtract"></div>
+            ${selectedProduct.amount}
+            <div class="modify-quantity-btn ph ph-plus-square" data-pID=${selectedProduct.pID} data-tID=${selectedProduct.tID} data-type="add"></div>
+        </h4>
+    </div>
+    <div class="flex-column">
+        <h3>Precio de Compra</h3>
+        <h4>${selectedProduct.receiptPrice}</h4>
+    </div>
+    <div class="flex-column">
+        <h3>Precio Total</h3>
+        <h4>${selectedProduct.totalPrice}</h4>
+    </div>
+    <button type="button" class="btn delete-product-btn" data-type="receipt" data-pID=${selectedProduct.pID} data-tID=${selectedProduct.tID}>
+        Eliminar
+    </button>`
+
+    return newReceiptRow;
+}
+
+
+function renderProductList(itemList,transactionType){
+    const productListContainer = document.getElementById('product-list-container');
+    const totalPriceInput = document.getElementById('price-input');
+    const totalPriceText = document.getElementById('price-text');
+    let priceAcum = 0;
+
+    productListContainer.innerHTML = '';
+
+    if (itemList.length === 0) {
+        productListContainer.innerHTML = `<h3>No hay productos en la lista</h3>`;
+        totalPriceInput.value = priceAcum;
+        totalPriceText.textContent = priceAcum;
+        return;
+    }
+
+    itemList.forEach(item =>{
+        priceAcum += item.totalPrice;
+        let newProductRow;
+        if (transactionType === 'sale') {
+            newProductRow = createNewSaleRow(item);
+        }
+        else{
+            newProductRow = createNewReceiptRow(item);
+        }
+
+        productListContainer.appendChild(newProductRow);
+    })
+
+    totalPriceText.textContent = priceAcum;
+    totalPriceInput.value = priceAcum;
+}
+
+async function populateTransactionClientList(){
+    // const clients = await api.getAllClients(); OBTENCION DE LISTA DE CLIENTES
+
+    const clientes = [{id:1,name:'Cliente 1',email:'cliente1@gmail.com'},
+        {id:2,name:'Cliente 2',email:null},
+        {id:3,name:'Cliente 3',email:'cliente3@gmail.com'}];
+
+    const clientModal = document.getElementById('client-picker-modal');
+
+    clientModal.innerHTML = '';
+
+    const noneSelected = document.createElement('div');
+    noneSelected.dataset.clientID = null;
+    noneSelected.innerHTML = 'Ninguno';
+    noneSelected.className = 'client-picker-item';
+    clientModal.appendChild(noneSelected);
+
+    clientes.forEach(client => {
+        const newClientItem = document.createElement('div');
+        newClientItem.dataset.clientID = client.id;
+        newClientItem.dataset.clientName = client.name;
+        newClientItem.innerHTML = client.name;
+        newClientItem.className = 'client-picker-item';
+        clientModal.appendChild(newClientItem);
+    })
+
+    configureClientSelection();
+}
+
+function configureClientSelection(){
+    const clientPickers = document.querySelectorAll('.client-picker-item');
+    clientPickers.forEach(client => {
+        client.addEventListener('click', () => {
+            const clientID = parseInt(client.dataset.clientID);
+            const clientName = client.dataset.clientName;
+            selectClient(clientID,clientName);
+        })
+    })
+}
+
+function selectClient(clientID, clientName){
+    const clientFormInput = document.getElementById('client-id-input');
+    const formText = document.getElementById('sale-client-name');
+
+    formText.innerHTML = (isNaN(clientID)) ? 'Ninguno' : clientName;
+    clientFormInput.value = clientID;
+
+    hideTransactionModal();
+}
+
+async function populateTransactionProviderList(){
+    // const clients = await api.getAllProviders(); OBTENCION DE LISTA DE PROVEEDORES
+
+    const providers = [{id:1,name:'Proveedor 1',email:'proveedor1@gmail.com'},
+        {id:2,name:'Proveedor 2',email:'proveedor2@gmail.com'},
+        {id:3,name:'Proveedor 3',email:'proveedor3@gmail.com'}];
+
+    const providerModal = document.getElementById('provider-picker-modal');
+
+    providerModal.innerHTML = '';
+
+    const noneSelected = document.createElement('div');
+    noneSelected.dataset.providerID = null;
+    noneSelected.innerHTML = 'Ninguno';
+    noneSelected.className = 'provider-picker-item';
+    providerModal.appendChild(noneSelected);
+
+    providers.forEach(provider => {
+        const newProviderItem = document.createElement('div');
+        newProviderItem.dataset.providerID = provider.id;
+        newProviderItem.dataset.providerName = provider.name;
+        newProviderItem.innerHTML = provider.name;
+        newProviderItem.className = 'provider-picker-item';
+        providerModal.appendChild(newProviderItem);
+    })
+
+    configureProviderSelection();
+}
+
+function configureProviderSelection(){
+    const providerPickers = document.querySelectorAll('.provider-picker-item');
+    providerPickers.forEach(provider => {
+        provider.addEventListener('click', () => {
+            const providerID = parseInt(provider.dataset.providerID);
+            const providerName = provider.dataset.providerName;
+            selectProvider(providerID,providerName);
+        })
+    })
+}
+
+function selectProvider(providerID,providerName){
+    const providerFormInput = document.getElementById('provider-id-input');
+    const formText = document.getElementById('receipt-provider-name');
+
+    formText.innerHTML = (isNaN(providerID)) ? 'Ninguno' : providerName;
+    providerFormInput.value = providerID;
+
+    hideTransactionModal();
+}
+
+function addProduct(selectedProduct,itemList,transactionType) {
+    if (itemList.find(item => item.pID === selectedProduct.pID && item.tID === selectedProduct.tID)){
+        showTransactionError('El producto ya se encuentra en la lista');
+        hideTransactionModal();
+        return;
+    }
+    hideTransactionError();
+
+    itemList.push(selectedProduct);
+
+    renderProductList(itemList,transactionType);
+    hideTransactionModal();
+}
+
+async function populateProductPicker(itemList,transactionType){
+    const user = await api.getUserProfile();
+    if (user){
+        const tables = user['databases'];
+
+        populateTablePicker(tables);
+        configureTablePickers();
+
+        //LA VARIABLE PRODUCTOS DEBE HACER UN FETCH A LA API PARA OBTENER TODOS LOS PRODUCTOS DEL USUARIO
+        const products = [
+            {name :'Producto 1', pID : 1, tID : 2, stock: 4, salePrice : 5000, receiptPrice : 3000},
+            {name :'Producto 2', pID : 2, tID : 11, stock: 20, salePrice : 10000, receiptPrice: 12000},
+            {name :'Producto 3', pID : 3, tID : 9, stock: 2, salePrice : 15000, receiptPrice: 20000}
+        ];
+
+        populateProductModal(products,tables);
+        configureProductSelection(products,itemList,transactionType);
+    }
+}
+
+function populateTablePicker(tables){
+    const itemPickerHeader = document.getElementById('item-picker-header');
+    const inventoryPicker = document.createElement('div');
+
+    itemPickerHeader.innerHTML = '';
+    inventoryPicker.className = 'flex-column';
+
+    const tableItem = document.createElement('div');
+
+    tableItem.dataset.tID = 'all';
+    tableItem.innerHTML = 'Todas';
+    tableItem.className = 'product-table-picker';
+
+    inventoryPicker.appendChild(tableItem);
+
+    tables.forEach(table => {
+        const tableItem = document.createElement('div');
+        tableItem.dataset.tID = table.id;
+        tableItem.innerHTML = table.name;
+        tableItem.className = 'product-table-picker';
+
+        inventoryPicker.appendChild(tableItem);
+    })
+
+    itemPickerHeader.appendChild(inventoryPicker);
+}
+
+function populateProductModal(products, tables){
+    const itemPickerBody = document.getElementById('item-list');
+
+    const allProductsDiv = document.createElement('div');
+    allProductsDiv.className = 'hidden flex-column product-list';
+    allProductsDiv.id = 'all';
+
+    products.forEach(product => {
+        const item = document.createElement('div');
+        item.dataset.tID = product.tID;
+        item.dataset.pID = product.pID;
+        item.innerHTML = product.name;
+        item.className = 'product-item';
+        allProductsDiv.appendChild(item);
+    })
+
+    const productListWrapper = document.createElement('div');
+    productListWrapper.className = 'hidden';
+    productListWrapper.id = 'product-list-wrapper';
+
+    itemPickerBody.appendChild(allProductsDiv);
+
+    tables.forEach(table => {
+        const tableProductsDiv = document.createElement('div');
+        tableProductsDiv.className = 'hidden flex-column product-list';
+        tableProductsDiv.id = table.id;
+
+        products.forEach(product => {
+            if (product.tID !== table.id) return;
+            const item = document.createElement('div');
+            item.dataset.tID = product.tID;
+            item.dataset.pID = product.pID;
+            item.innerHTML = product.name;
+            item.className = 'product-item';
+            tableProductsDiv.appendChild(item);
+        })
+        productListWrapper.appendChild(tableProductsDiv);
+    })
+    itemPickerBody.appendChild(productListWrapper);
+}
+
+function configureProductSelection(products,itemList,transactionType){
+    const productItem = document.querySelectorAll('.product-item');
+    productItem.forEach(item => {
+        item.addEventListener('click', () => {
+            const findProduct = products.find(product => product.pID === parseInt(item.dataset.pID,10) &&
+                product.tID === parseInt(item.dataset.tID,10));
+            if (!findProduct){
+                showTransactionError('El producto no existe');
+                return;
+            }
+
+            const selectedProduct = { ... findProduct };
+
+            selectedProduct.amount = 1;
+            Object.defineProperty(selectedProduct, 'totalPrice', {get(){
+                    if (transactionType === "sale"){return this.salePrice * this.amount}
+                    else{return this.receiptPrice * this.amount}
+                }});
+
+            addProduct(selectedProduct,itemList,transactionType);
+        })
+    })
+}
+
+function configureTablePickers(){
+    const tablePickers = document.querySelectorAll('.product-table-picker');
+    tablePickers.forEach(table => {
+        table.addEventListener('click', () => {
+            const tableID = table.dataset.tID;
+            showProductList(tableID);
+        })
+    })
+}
+
+function setupCompleteTransactionBtn(itemList){
+
+    const buttons = document.querySelectorAll('.complete-transaction-btn');
+
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            const transactionType = button.dataset.type;
+
+            if (transactionType ==='sale'){
+                const emailInfo = completeSale(itemList);
+                if (emailInfo) {setupSendEmailBtn(emailInfo);}
+
+            }
+            else if (transactionType ==='receipt'){ completeReceipt(itemList);}
+        })
+    })
+}
+
+function completeSale(itemList){
+    if (itemList.length === 0) {showTransactionError('Agregar al menos un producto.'); return;}
+
+    let clientID = document.getElementById('client-id-input').value;
+    const totalPrice = document.getElementById('price-input').value;
+
+    if (clientID === '' || isNaN(clientID)) {clientID = null;}
+
+    var clientName, hasEmail, emailInfo = null;
+
+    // client = api.getProviderByID(providerID);
+    // if (!client) {clientName = 'No asignado'; hasEmail = false}
+    // else {clientName = client.name; hasEmail = (client.email!==null);
+
+    const clientes = [{id:1,name:'Cliente 1',email:'cliente1@gmail.com'},
+        {id:2,name:'Cliente 2',email:null},
+        {id:3,name:'Cliente 3',email:'cliente3@gmail.com'}];
+
+    const clienteAsignado = clientes.find(cliente => cliente.id === parseInt(clientID,10));
+
+    console.log(clienteAsignado);
+
+    if (clienteAsignado) {
+        clientName = clienteAsignado.name;
+        hasEmail = (clienteAsignado.email!==null);
+    }
+    else{
+        clientName = 'No asignado';
+        hasEmail = false;
+    }
+
+    const saleList = itemList.map(item => {
+        const name = item.name;
+        const amount = item.amount;
+        const price = item.salePrice;
+        const totalPrice = item.totalPrice;
+
+        return `<div class="flex-row" style="overflow-x: hidden; gap: 15px;">
+                    <p style="width: 100px; text-align: right">${name}</p>
+                    <p style="width: 70px; text-align: right">${amount}</p>
+                    <p style="width: 65px; text-align: right">${price}$</p>
+                    <p style="width: 80px; text-align: right"">${totalPrice}$</p>
+                 </div>`;
+    }).join('');
+
+    const saleTicket = `<div style="margin-top: 20px; padding: 5px; border: var(--border-strong); border-radius: var(--border-radius)">
+        <hr> <h2 style="text-align: right">Lista de Productos</h2>
+    <div class="flex-column" style="flex-wrap: wrap; gap: 15px; overflow: hidden; margin-top: 15px;"> 
+         <div class="flex-row" style="text-align: right; gap: 15px;"><h4 style="width: 100px">Nombre</h4>
+         <h4 style="width: 70px">Cantidad</h4><h4 style="width: 65px">Precio de Venta</h4><h4 style="width: 80px">Precio Total</h4></div>
+         <div class="flex-column">${saleList}</div>
+         <hr>
+         <div class="flex-column" style="text-align: right"><h4>Cliente</h4><p>${clientName}</p></div>
+         <div class="flex-row" style="justify-content: right; gap:10px;"><h2>Precio Final =</h2><h1>${totalPrice}$</h1></div>
+    </div></div>`;
+
+    const transactionSuccessBody = `
+    <h3 class="flex-row all-center" style="margin-top: 10px">Se ha registrado la venta con exito.</h3>
+    <div>${saleTicket}</div>
+    ${(hasEmail) ? `<div class="flex-row" style="justify-content: end">
+<div class="btn btn-primary"  id="send-sale-email-btn" style="width: 50%; background-color: var(--accent-color-medium-opacity); font-size: 0.85rem">Enviar Factura a Cliente</div></div>` 
+        : ''}
+    <p style="margin-top: 15px; font-size: 0.75rem">Actualiza la pagina para ver tus cambios.</p>
+    <div class="flex-column all-center">
+        <div class="btn btn-primary reload-btn" data-location="sales">Actualizar Pagina</div>
+        <div class="btn btn-secondary" id="success-return-btn">Cerrar</div>
+    </div>`;
+
+    if (hasEmail) {
+        emailInfo = {saleList : saleTicket, clientInfo : clienteAsignado};
+    }
+
+    showTransactionSuccess(transactionSuccessBody);
+    return emailInfo;
+}
+
+function completeReceipt(itemList){
+
+    if (itemList.length === 0) {showTransactionError('Agregar al menos un producto.'); return;}
+    let providerID = document.getElementById('provider-id-input').value;
+    const totalPrice = document.getElementById('price-input').value;
+
+    if (providerID === '' || isNaN(providerID)) {providerID = null;}
+    console.log(providerID, totalPrice);
+    console.log(itemList);
+
+    // providerName = api.getProviderByID(providerID);
+
+    const providerName = (providerID!==null) ? ('Proveedor ' + providerID) : 'No Asignado';
+
+    const receiptList = itemList.map(item => {
+        const name = item.name;
+        const amount = item.amount;
+        const price = item.receiptPrice;
+        const totalPrice = item.totalPrice;
+
+        return `<div class="flex-row" style="overflow-x: hidden; gap: 15px;">
+                    <p style="width: 100px; text-align: right">${name}</p>
+                    <p style="width: 70px; text-align: right">${amount}</p>
+                    <p style="width: 65px; text-align: right">${price}$</p>
+                    <p style="width: 80px; text-align: right"">${totalPrice}$</p>
+                 </div>`;
+    }).join('');
+
+    const receiptTicket = `<div style="margin-top: 20px; padding: 5px; border: var(--border-strong); border-radius: var(--border-radius)">
+        <hr> <h2 style="text-align: right">Lista de Productos</h2>
+    <div class="flex-column" style="flex-wrap: wrap; gap: 15px; overflow: hidden; margin-top: 15px;"> 
+         <div class="flex-row" style="text-align: right; gap: 15px;"><h4 style="width: 100px">Nombre</h4>
+         <h4 style="width: 70px">Cantidad</h4><h4 style="width: 65px">Precio de Compra</h4><h4 style="width: 80px">Precio Total</h4></div>
+         <div class="flex-column">${receiptList}</div>
+         <hr>
+         <div class="flex-column" style="text-align: right"><h4>Proveedor</h4><p>${providerName}</p></div>
+         <div class="flex-row" style="justify-content: right; gap:10px;"><h2>Precio Final =</h2><h1>${totalPrice}$</h1></div>
+    </div></div>`;
+
+    const transactionSuccessBody = `
+    <h3 class="flex-row all-center" style="margin-top: 10px">Se ha registrado la venta con exito.</h3>
+    <div>${receiptTicket}</div>
+    <p style="margin-top: 15px; font-size: 0.75rem">Actualiza la pagina para ver tus cambios.</p>
+    <div class="flex-column all-center">
+        <div class="btn btn-primary reload-btn" data-location="receipts">Actualizar Pagina</div>
+        <div class="btn btn-secondary" id="success-return-btn">Cerrar</div>
+    </div>`;
+
+    showTransactionSuccess(transactionSuccessBody);
+}
+
+function configCreateClientBtn(){
+    const customerForm = document.getElementById('customer-form');
+
+    customerForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (!customerForm.checkValidity()) {
+            showTransactionError('Verifique que los campos ingresados tengan el formato indicado'); return;
+        }
+        completeCustomer();
+    })
+}
+
+function configCreateProviderBtn(){
+    const providerForm = document.getElementById('provider-form');
+
+    providerForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        if (!providerForm.checkValidity()) {
+            showTransactionError('Verifique que los campos ingresados tengan el formato indicado'); return;
+        }
+        completeProvider();
+    })
+}
+
+async function completeCustomer(){
+    const clientName = document.getElementById('client-name').value;
+
+    if (clientName === ''){showTransactionError('Es obligatorio asignarle un nombre al cliente.'); return;}
+
+    var clientEmail = document.getElementById('client-email').value;
+    var clientPhone = document.getElementById('client-phone').value;
+    var clientAddress = document.getElementById('client-address').value;
+    var clientDNI = document.getElementById('client-dni').value;
+
+    const clientList = await api.getAllClients();
+
+    if (!clientList.success){
+        {showTransactionError('Ha ocurrido un error interno.' + clientList.error); return;}
+    }
+
+    if (clientList.clientList.find(client => client.email === clientEmail) && clientEmail !== ''){
+        showTransactionError('Ya existe un cliente registrado con ese email.'); return;
+    }
+    if (clientList.clientList.find(client => parseInt(client.phone,10) === parseInt(clientPhone,10)) && clientPhone !== ''){
+        showTransactionError('Ya existe un cliente registrado con ese telefono.'); return;
+    }
+    if (clientList.clientList.find(client => client.tax_id === clientDNI) && clientDNI !== ''){
+        showTransactionError('Ya existe un cliente registrado con ese dni.'); return;
+    }
+
+    clientEmail = (clientEmail === '') ? null : clientEmail;
+    clientPhone = (clientPhone === '') ? null : clientPhone;
+    clientAddress = (clientAddress === '') ? null : clientAddress;
+    clientDNI = (clientDNI === '') ? null : clientDNI;
+
+    const client = {'name' : clientName, 'email' : clientEmail, 'phone' : clientPhone, 'address' : clientAddress, 'dni' : clientDNI};
+
+    const result = await api.createClient(client);
+
+    if (!result.success){
+        {showTransactionError('Ha ocurrido un error interno. No se pudo registrar el cliente'); return;}
+    }
+
+    console.log('Cliente registrado');
+
+    clientEmail = (clientEmail === null) ? 'No asignado' : clientEmail;
+    clientPhone = (clientPhone === null) ? 'No asignado' : clientPhone;
+    clientAddress = (clientAddress === null) ? 'No asignado' : clientAddress;
+    clientDNI = (clientDNI === null) ? 'No asignado' : clientDNI;
+
+    const transactionSuccessBody = `
+    <h3 class="flex-row all-center" style="margin-top: 10px">Se ha creado el cliente con éxito.</h3>
+    <div class="flex-column" style="flex-wrap: wrap; gap: 15px; margin-top: 25px; overflow: hidden"> 
+        <div class="flex-column"><h4>Nombre</h4><p>${clientName}</p></div>
+        <div class="flex-column"><h4>Email</h4><p>${clientEmail}</p></div>
+        <div class="flex-column"><h4>Telefono</h4><p>${clientPhone}</p></div>
+        <div class="flex-column"><h4>Direccion</h4><p>${clientAddress}</p></div>
+        <div class="flex-column"><h4>DNI</h4><p>${clientDNI}</p></div>
+    </div>
+    <p style="margin-top: 15px; font-size: 0.75rem">Actualiza la pagina para ver tus cambios.</p>
+    <div class="flex-column all-center">
+        <div class="btn btn-primary reload-btn" data-location="customers">Actualizar Pagina</div>
+        <div class="btn btn-secondary" id="success-return-btn">Cerrar</div>
+    </div>`;
+
+    showTransactionSuccess(transactionSuccessBody);
+}
+
+async function setupProviders(){
+    const response = await api.getOrderedProviders();
+    if (response.success){
+        const providers = response.providerList;
+        console.log(providers);
+        if (providers.date.descending.length === 0){ populateEmptyProviderModal(); return; }
+        populateProviderModal(providers);
+    }
+    else{
+        console.log('no salio bien' + response.error);
+    }
+}
+
+function populateEmptyProviderModal(){
+    const providerModals = document.querySelectorAll('.provider-view');
+    providerModals.forEach(modal => {
+        modal.innerHTML = `<div class="flex-row"><div class="flex-column">
+            <h2>No has creado ningun Proveedor</h2>
+            <button class="btn btn-primary new-transaction-btn" data-transaction="provider">Crea tu Primer Proveedor</button>
+            </div></div>`;
+    })
+}
+
+function populateProviderModal(providers){
+    const providersByNameDesc = providers.name.descending;
+    const providersByNameAsc = providers.name.ascending;
+    const providersByEmailDesc = providers.email.descending;
+    const providersByEmailAsc = providers.email.ascending;
+    const providersByDateDesc = providers.date.descending;
+    const providersByDateAsc = providers.date.ascending;
+    const providersByPhoneDesc = providers.phone.descending;
+    const providersByPhoneAsc = providers.phone.ascending;
+    const providersByAddressDesc = providers.address.descending;
+    const providersByAddressAsc = providers.address.ascending;
+
+    const providerEmailDescending = document.getElementById('providers-table-email-descending');
+    const providerEmailAscending = document.getElementById('providers-table-email-ascending');
+    const providerDateDescending = document.getElementById('providers-table-date-descending');
+    const providerDateAscending = document.getElementById('providers-table-date-ascending');
+    const providerNameDescending = document.getElementById('providers-table-name-descending');
+    const providerNameAscending = document.getElementById('providers-table-name-ascending');
+    const providerPhoneDescending = document.getElementById('providers-table-phone-descending');
+    const providerPhoneAscending = document.getElementById('providers-table-phone-ascending');
+    const providerAddressDescending = document.getElementById('providers-table-address-descending');
+    const providerAddressAscending = document.getElementById('providers-table-address-ascending');
+
+    providersByNameDesc.forEach(provider =>{
+        providerNameDescending.innerHTML += createProviderRow(provider);
+    })
+    providersByNameAsc.forEach(provider =>{
+        providerNameAscending.innerHTML += createProviderRow(provider);
+    })
+    providersByEmailDesc.forEach(provider=>{
+        providerEmailDescending.innerHTML += createProviderRow(provider);
+    })
+    providersByEmailAsc.forEach(provider =>{
+        providerEmailAscending.innerHTML += createProviderRow(provider);
+    })
+    providersByDateDesc.forEach(provider =>{
+        providerDateDescending.innerHTML += createProviderRow(provider);
+    })
+    providersByDateAsc.forEach(provider =>{
+        providerDateAscending.innerHTML += createProviderRow(provider);
+    })
+    providersByPhoneDesc.forEach(provider =>{
+        providerPhoneDescending.innerHTML += createProviderRow(provider);
+    })
+    providersByPhoneAsc.forEach(provider =>{
+        providerPhoneAscending.innerHTML += createProviderRow(provider);
+    })
+    providersByAddressDesc.forEach(provider =>{
+        providerAddressDescending.innerHTML += createProviderRow(provider);
+    })
+    providersByAddressAsc.forEach(provider =>{
+        providerAddressAscending.innerHTML += createProviderRow(provider);
+    })
+}
+
+function createProviderRow (provider){
+    const text = 'Nombre : ' + provider.full_name;
+    return text;
+}
+
+async function setupClients(){
+    const response = await api.getOrderedClients();
+    if (response.success){
+        const clients = response.clientList;
+        if (clients.date.descending.length === 0){ populateEmptyClientModal(); return; }
+        console.log(clients);
+        populateClientModal(clients);
+    }
+    else{
+        console.log('no salio bien' + response.error);
+    }
+}
+
+function populateEmptyClientModal(){
+    const clientModals = document.querySelectorAll('.customer-view');
+    clientModals.forEach(modal => {
+        modal.innerHTML = `<div class="flex-row"><div class="flex-column">
+            <h2>No has creado ningun cliente</h2>
+            <button class="btn btn-primary new-transaction-btn" data-transaction="customer">Crea tu Primer Cliente</button>
+            </div></div>`;
+    })
+}
+
+function populateClientModal(clients){
+    const clientsByNameDesc = clients.name.descending;
+    const clientsByNameAsc = clients.name.ascending;
+    const clientsByEmailDesc = clients.email.descending;
+    const clientsByEmailAsc = clients.email.ascending;
+    const clientsByDateDesc = clients.date.descending;
+    const clientsByDateAsc = clients.date.ascending;
+    const clientsByPhoneDesc = clients.phone.descending;
+    const clientsByPhoneAsc = clients.phone.ascending;
+    const clientsByAddressDesc = clients.address.descending;
+    const clientsByAddressAsc = clients.address.ascending;
+    const clientsByDniDesc = clients.tax_id.descending;
+    const clientsByDniAsc = clients.tax_id.ascending;
+
+    const customerEmailDescending = document.getElementById('customers-table-email-descending');
+    const customerEmailAscending = document.getElementById('customers-table-email-ascending');
+    const customerDateDescending = document.getElementById('customers-table-date-descending');
+    const customerDateAscending = document.getElementById('customers-table-date-ascending');
+    const customerNameDescending = document.getElementById('customers-table-name-descending');
+    const customerNameAscending = document.getElementById('customers-table-name-ascending');
+    const customerPhoneDescending = document.getElementById('customers-table-phone-descending');
+    const customerPhoneAscending = document.getElementById('customers-table-phone-ascending');
+    const customerAddressDescending = document.getElementById('customers-table-address-descending');
+    const customerAddressAscending = document.getElementById('customers-table-address-ascending');
+    const customerDniDescending = document.getElementById('customers-table-dni-descending');
+    const customerDniAscending = document.getElementById('customers-table-dni-ascending');
+
+    clientsByNameDesc.forEach(client =>{
+        customerNameDescending.innerHTML += createClientRow(client);
+    })
+    clientsByNameAsc.forEach(client =>{
+        customerNameAscending.innerHTML += createClientRow(client);
+    })
+    clientsByEmailDesc.forEach(client =>{
+        customerEmailDescending.innerHTML += createClientRow(client);
+    })
+    clientsByEmailAsc.forEach(client =>{
+        customerEmailAscending.innerHTML += createClientRow(client);
+    })
+    clientsByDateDesc.forEach(client =>{
+        customerDateDescending.innerHTML += createClientRow(client);
+    })
+    clientsByDateAsc.forEach(client =>{
+        customerDateAscending.innerHTML += createClientRow(client);
+    })
+    clientsByPhoneDesc.forEach(client =>{
+        customerPhoneDescending.innerHTML += createClientRow(client);
+    })
+    clientsByPhoneAsc.forEach(client =>{
+        customerPhoneAscending.innerHTML += createClientRow(client);
+    })
+    clientsByAddressDesc.forEach(client =>{
+        customerAddressDescending.innerHTML += createClientRow(client);
+    })
+    clientsByAddressAsc.forEach(client =>{
+        customerAddressAscending.innerHTML += createClientRow(client);
+    })
+    clientsByDniDesc.forEach(client =>{
+        customerDniDescending.innerHTML += createClientRow(client);
+    })
+    clientsByDniAsc.forEach(client =>{
+        customerDniAscending.innerHTML += createClientRow(client);
+    })
+    /*console.log('Clientes Ordenados Cantidad de Ventas descendiendo = ' + clients.sales.descending);
+    console.log('Clientes Ordenados Cantidad de Ventas ascendiendo = ' + clients.sales.ascending);*/
+}
+
+function createClientRow (client){
+    const text = 'Nombre : ' + client.full_name;
+    return text;
+}
+
+async function completeProvider(){
+    const providerName = document.getElementById('provider-name').value;
+
+    if (providerName === ''){showTransactionError('Es obligatorio asignarle un nombre al proveedor.'); return;}
+
+    var providerEmail = document.getElementById('provider-email').value;
+    var providerPhone = document.getElementById('provider-phone').value;
+    var providerAddress = document.getElementById('provider-address').value;
+
+    const providerList = await api.getAllProviders();
+
+    if (!providerList.success){
+        {showTransactionError('Ha ocurrido un error interno.' + providerList.error); return;}
+    }
+
+    if (providerList.providerList.find(provider => provider.email === providerEmail) && providerEmail !== ''){
+        showTransactionError('Ya existe un provedor registrado con ese email.'); return;
+    }
+    if (providerList.providerList.find(provider => parseInt(provider.phone,10) === parseInt(providerPhone,10)) && providerPhone !== ''){
+        showTransactionError('Ya existe un provedor registrado con ese telefono.'); return;
+    }
+
+    providerEmail = (providerEmail === '') ? null : providerEmail;
+    providerPhone = (providerPhone === '') ? null : providerPhone;
+    providerAddress = (providerAddress === '') ? null : providerAddress;
+
+
+    const provider = {'name' : providerName, 'email' : providerEmail, 'phone' : providerPhone, 'address' : providerAddress};
+
+    const result = await api.createProvider(provider);
+
+    if (!result.success){
+        {showTransactionError('Ha ocurrido un error interno. No se pudo registrar el provedor '); return;}
+    }
+
+    providerEmail = (providerEmail === null) ? 'No asignado' : providerEmail;
+    providerPhone = (providerPhone === null) ? 'No asignado' : providerPhone;
+    providerAddress = (providerAddress === null) ? 'No asignado' : providerAddress;
+
+    const transactionSuccessBody = `
+    <h3 class="flex-row all-center" style="margin-top: 10px">Se ha creado el proveedor con éxito.</h3>
+    <div class="flex-column" style="flex-wrap: wrap; gap: 15px; margin-top: 25px; overflow: hidden"> 
+        <div class="flex-column"><h4>Nombre</h4><p>${providerName}</p></div>
+        <div class="flex-column"><h4>Email</h4><p>${providerEmail}</p></div>
+        <div class="flex-column"><h4>Telefono</h4><p>${providerPhone}</p></div>
+        <div class="flex-column"><h4>Direccion</h4><p>${providerAddress}</p></div>
+    </div>
+    <p style="margin-top: 15px; font-size: 0.75rem">Actualiza la pagina para ver tus cambios.</p>
+    <div class="flex-column all-center">
+        <div class="btn btn-primary reload-btn" data-location="providers">Actualizar Pagina</div>
+        <div class="btn btn-secondary" id="success-return-btn">Cerrar</div>
+    </div>`;
+
+    showTransactionSuccess(transactionSuccessBody);
+}
+
+function setupReloadBtns(){
+    const reloadBtns = document.querySelectorAll('.reload-btn');
+    const successReturnBtn = document.getElementById('success-return-btn');
+
+    successReturnBtn.addEventListener('click', () => {
+        hideTransactionSuccess();
+    })
+    reloadBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const menuToOpen = btn.dataset.location;
+            const url = window.location.pathname + '?location=' + menuToOpen;
+            window.location.href = url;
+        })
+    })
+}
+
+function setupSendEmailBtn(emailInfo){
+    const sendEmailBtn = document.getElementById('send-sale-email-btn');
+    if (!sendEmailBtn) {return; }
+
+    sendEmailBtn.addEventListener('click',() =>{
+        sendSaleEmail(emailInfo);
+    })
+}
+
+function sendSaleEmail(emailInfo){
+    console.log('Enviando email...');
+    console.log('Factura :');
+    console.log(emailInfo.saleList);
+    console.log('Cliente :');
+    console.log(emailInfo.clientInfo.name);
+    console.log('Email :');
+    console.log(emailInfo.clientInfo.email);
+}
+
+function showTransactionSuccess(body){
+    const transactionModal = document.getElementById('new-transaction-container');
+    const modalContainer = document.getElementById('transaction-success-modal');
+    const modalContainerBody = document.getElementById('success-modal-body');
+
+    modalContainerBody.innerHTML = body;
+    modalContainer.classList.remove('hidden');
+    transactionModal.classList.add('hidden');
+    setupReloadBtns();
+}
+
+
+//  ---- Funciones auxiliares de Transacciones ----
+
+
+function getForm(transactionType){
+    let HTML;
+
+    switch (transactionType) {
+    case 'sale':
+        HTML = getSaleForm();
+        break;
+    case 'receipt':
+        HTML = getReceiptForm();
+        break;
+    case 'customer':
+        HTML = getCustomerForm();
+        break;
+    case 'provider':
+        HTML = getProviderForm();
+        break;
+    }
+
+    return HTML;
+}
+
+function getSaleForm() {
+    return `<form class="flex-column" method="get" action="/StockiFy/dashboard.php">
+                                <h4 class="transaction-error-message hidden" style="color: var(--accent-red)"></h4>
+                                <div class="flex-row all-center">
+                                    <h2>Productos</h2>
+                                    <div class="product-picker-container">
+                                    <div class="btn picker-btn" data-modal-target="item-picker-modal" data-type="sale">
+                                    Agregar Producto</div>
+                                    </div>
+                                </div>       
+                                <div class="flex-column" id="product-list-container"></div>
+                                <div class="flex-row all-center">
+                                    <h2>Cliente</h2>
+                                    <h4 id="sale-client-name">Ninguno</h4>
+                                    <div class="btn picker-btn" data-modal-target="client-picker-modal">Cambiar</div>
+                                </div>
+                                </div>
+                                <div class="flex-row all-center">
+                                <h2>Total = $<span id="price-text">0</h2>
+                                </div>
+                                <input name="price" id="price-input" value="0" hidden>
+                                <input name="product-list" id="product-list" hidden>
+                                <input name="client-data" id="client-id-input" hidden>
+                                <input name="price" id="price-input" value="0" hidden>            
+                                <div class="btn btn-primary complete-transaction-btn" data-type="sale">Confirmar Venta</div>
+                                </form>`;
+}
+
+function getReceiptForm() {
+    return `<form class="flex-column" method="get" action="/StockiFy/dashboard.php">
+                                <h4 class="transaction-error-message hidden" style="color: var(--accent-red)"></h4>
+                                <div class="flex-row all-center">
+                                    <h2>Productos</h2>
+                                    <div class="product-picker-container">
+                                    <div class="btn picker-btn" data-modal-target="item-picker-modal" data-type="receipt">
+                                    Agregar Producto</div>
+                                    </div>
+                                </div>       
+                                <div class="flex-column" id="product-list-container"></div>
+                                <div class="flex-row all-center">
+                                    <h2>Proveedor</h2>
+                                    <h4 id="receipt-provider-name">Ninguno</h4>
+                                    <div class="btn picker-btn" data-modal-target="provider-picker-modal">Cambiar</div>
+                                </div>
+                                </div>
+                                <div class="flex-row all-center">
+                                <h2>Total = $<span id="price-text">0</h2>
+                                </div>
+                                <input name="price" id="price-input" value="0" hidden>
+                                <input name="product-list" id="product-list" hidden>
+                                <input name="provider-id" id="provider-id-input" hidden>
+                                <input name="price" id="price-input" value="0" hidden>            
+                                <div class="btn btn-primary complete-transaction-btn" data-type="receipt">Confirmar Compra</div>
+                                </form>`;
+}
+
+function getCustomerForm() {
+    return `<form class="flex-column" method="get" action="/StockiFy/dashboard.php" id="customer-form">
+                                <h4 class="transaction-error-message hidden" style="color: var(--accent-red)"></h4>
+                                <label for="client-name"><h2>Nombre</h2></label>
+                                <input type="text" name="name" id="client-name" placeholder="Juan Perez" value="" required>
+                                <hr>
+                                <label for="client-email" class="flex-row" style="gap: 5px"><h2>Email</h2><p>(Opcional)</p></label>
+                                <input type="email" name="email" id="client-email" placeholder="cliente@gmail.com" value="">
+                                <label for="client-phone" class="flex-row" style="gap: 5px"><h2>Telefono </h2><p>(Opcional)</p></label>
+                                <input type="text" name="phone" id="client-phone" placeholder="Numero sin espacios." 
+                                value="" minlength="8" pattern="[0-9]+">
+                                <label for="client-address" class="flex-row" style="gap: 5px"><h2>Dirección </h2><p>(Opcional)</p></label>
+                                <input type="text" name="address" id="client-address" placeholder="Calle 1085, Localidad" value="">
+                                <label for="client-dni" class="flex-row" style="gap: 5px"><h2>D.N.I </h2><p>(Opcional)</p></label>
+                                <input type="text" name="tax-id" id="client-dni" placeholder="11.111.111" value="" 
+                                pattern="\\d{1,2}\\.\\d{3}\\.\\d{3}">           
+                                <button class="btn btn-primary complete-transaction-btn" data-type="customer">Crear Cliente</button>
+                                </form>`;
+}
+
+function getProviderForm() {
+    return `<form class="flex-column" method="get" action="/StockiFy/dashboard.php" id="provider-form">
+                                <h4 class="transaction-error-message hidden" style="color: var(--accent-red)"></h4>
+                                <label for="client-name"><h2>Nombre</h2></label>
+                                <input type="text" name="name" id="provider-name" placeholder="Distribuidora 1" value="" required>
+                                <hr>
+                                <label for="client-email" class="flex-row" style="gap: 5px"><h2>Email</h2><p>(Opcional)</p></label>
+                                <input type="email" name="email" id="provider-email" placeholder="cliente@gmail.com" value="">
+                                <label for="client-phone" class="flex-row" style="gap: 5px"><h2>Telefono </h2><p>(Opcional)</p></label>
+                                <input type="text" name="phone" id="provider-phone" placeholder="Numero sin espacios." 
+                                value="" minlength="8" pattern="[0-9]+">
+                                <label for="client-address" class="flex-row" style="gap: 5px"><h2>Dirección </h2><p>(Opcional)</p></label>
+                                <input type="text" name="address" id="provider-address" placeholder="Calle 1085, Localidad" value="">       
+                                <button class="btn btn-primary complete-transaction-btn" data-type="customer">Crear Proveedor</button>
+                                </form>`;
+}
+
+function showTransactionError(message){
+    const transactionError = document.querySelectorAll('.transaction-error-message');
+
+    transactionError.forEach(error => {
+        error.innerHTML = message;
+        error.classList.remove('hidden')
+    });
+}
+
+//'Picker modal' Son los container para seleccionar productos y clientes/proveedores para agregar a la transaccion.
+function showPickerModal(pickerModalID){
+    document.querySelectorAll('.picker-modal').forEach(modal => modal.classList.add('hidden'));
+
+    const pickerToShow = document.getElementById(pickerModalID);
+    const transactionModal = document.getElementById('transaction-picker-modal');
+
+    pickerToShow.classList.remove('hidden');
+    transactionModal.classList.remove('hidden');
+}
+
+function showProductList(tableID){
+    document.querySelectorAll('.product-list').forEach(wrapper => wrapper.classList.add('hidden'));
+    const productListWrapper = document.getElementById('product-list-wrapper');
+    const productListToShow = document.getElementById(tableID);
+
+    productListWrapper.classList.remove('hidden');
+    productListToShow.classList.remove('hidden');
+}
+
+function hideTransactionError(){
+    const transactionError = document.querySelectorAll('.transaction-error-message');
+
+    transactionError.forEach(error => {
+        error.classList.add('hidden')
+    });
+}
+
+function hideTransactionModal(){
+    const transactionModal = document.getElementById('transaction-picker-modal');
+    transactionModal.classList.add('hidden');
+}
+
+function hideTransactionSuccess(){
+    const modalContainer = document.getElementById('transaction-success-modal');
+    const greyBg = document.getElementById('grey-background');
+    modalContainer.classList.add('hidden');
+    greyBg.classList.add('hidden');
+}
+
+
+
+
+
+/* ---------------------- FIN DE FUNCIONES DE NANO  ---------------------- */
+
+
+
+
+
 
 document.addEventListener('DOMContentLoaded', init);

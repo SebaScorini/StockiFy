@@ -46,6 +46,8 @@ function setupHeader(isLoggedIn) {
     const nav = document.getElementById('header-nav');
     if (!nav) return;
 
+    /*    CODIGO DE NANO. Establece el header correctamente     */
+
     if (isLoggedIn) {
         nav.innerHTML = `
             <a href="/StockiFy/dashboard.php" class="btn btn-primary">Ir al Panel</a> 
@@ -60,6 +62,7 @@ function setupHeader(isLoggedIn) {
                 </div>
             </div>            
         `;
+        /*    Establece el comportamiento del Dropdown "Mi cuenta"     */
         setup.setupMiCuenta();
     } else {
         nav.innerHTML = `

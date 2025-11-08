@@ -1,3 +1,14 @@
+<!--
+
+
+EN EL INDEX MODIFIQUE UN POCO A LO EXISTENTE Y LE AGREGUE CASI TODAS COSAS NUEVAS,
+DEBERIA FUNCIONAR SIN PROBLEMAS
+
+
+-->
+
+
+
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/auth_helper.php';

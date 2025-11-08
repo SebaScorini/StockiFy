@@ -5,7 +5,6 @@ async function handleResponse(response) {
         const errorMessage = errorData?.message || `Error del servidor: ${response.status}`;
         throw new Error(errorMessage);
     }
-    console.log(response);
     return response.json(); // Si todo esta bien, devuelvo el JSON.
 }
 
@@ -150,13 +149,74 @@ export async function deleteDatabase() {
     return handleResponse(response);
 }
 
-// --- FUNCIONES DE ESTADISTICAS ---
+// ---                        FUNCIONES DE NANO                               ---
+
+// --- Funciones de estadistica
 
 export async function updateStatistics(tableID, dates) {
     const response = await fetch('/StockiFy/api/statistics/update.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({tableID, dates}),
+    });
+    return handleResponse(response);
+}
+
+export async function getDailyStatistics(tableID){
+    const response = await fetch('/StockiFy/api/statistics/update-daily.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({tableID}),
+    });
+    return handleResponse(response);
+}
+
+export async function getOrderedClients(){
+    const response = await fetch('/StockiFy/api/customers/get-ordered-customers.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse(response);
+}
+
+export async function getAllClients(){
+    const response = await fetch('/StockiFy/api/customers/get-all-customers.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse(response);
+}
+
+export async function createClient(client){
+    const response = await fetch('/StockiFy/api/customers/create-customer.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({client}),
+    });
+    return handleResponse(response);
+}
+
+export async function getAllProviders(){
+    const response = await fetch('/StockiFy/api/providers/get-all.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse(response);
+}
+
+export async function getOrderedProviders(){
+    const response = await fetch('/StockiFy/api/providers/get-ordered.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse(response);
+}
+
+export async function createProvider(provider){
+    const response = await fetch('/StockiFy/api/providers/create.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({provider}),
     });
     return handleResponse(response);
 }
