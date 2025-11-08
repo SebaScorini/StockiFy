@@ -229,3 +229,72 @@ export async function sendSaleEmail(emailInfo){
     });
     return handleResponse(response);
 }
+
+export async function getCustomerById(id){
+    const response = await fetch('/StockiFy/api/customers/get-by-id.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({id}),
+    });
+    return handleResponse(response);
+}
+
+export async function createSale(saleInfo){
+    const response = await fetch('/StockiFy/api/sales/create.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(saleInfo),
+    });
+    return handleResponse(response);
+}
+
+export async function createReceipt(receiptInfo){
+    const response = await fetch('/StockiFy/api/receipts/create.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(receiptInfo),
+    });
+    return handleResponse(response);
+}
+
+export async function getAllProducts(){
+    const response = await fetch('/StockiFy/api/products/get-all.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse(response);
+}
+
+export async function getSaleItemlist(saleId){
+    const response = await fetch('/StockiFy/api/sales/get-product-list.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(saleId),
+    });
+    return handleResponse(response);
+}
+
+export async function getReceiptItemlist(receiptId){
+    const response = await fetch('/StockiFy/api/receipts/get-product-list.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(receiptId),
+    });
+    return handleResponse(response);
+}
+
+export async function getUserSales(){
+    const response = await fetch('/StockiFy/api/sales/get-user-sales.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse(response);
+}
+
+export async function getUserReceipts(){
+    const response = await fetch('/StockiFy/api/receipts/get-user-receipts.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse(response);
+}

@@ -3,6 +3,7 @@
 import * as api from './api.js';
 import * as setup from './setupMiCuentaDropdown.js';
 import { openImportModal, initializeImportModal, setStockifyColumns } from './import.js';
+import {getCustomerById} from "./api.js";
 
 let allData = [];
 let currentTableColumns = [];
@@ -77,7 +78,9 @@ async function handleStockUpdate(event) {
 async function updateDailyStatistics(inventoryId) {
     const hourlyStatistics = await api.getDailyStatistics(inventoryId);
     if (hourlyStatistics){
+        console.log(hourlyStatistics);
         const groupedStatistics = groupHourlyData(hourlyStatistics);
+        console.log(groupedStatistics);
         populateGroupedStatistics(groupedStatistics);
         populateHourlyGraphs(hourlyStatistics);
     }
@@ -598,13 +601,20 @@ async function init() {
             </div>   
                            `;
 
+
+
     //PREPARA EL DROPDOWN DE "MI CUENTA"
     setup.setupMiCuenta();
+
     await setupClients();
     await setupProviders();
+
     createCharts();
     setupStatPickers();
+
     await updateDailyStatistics('all');
+    await setupSaleList();
+    await setupReceiptList();
 
     //PREPARA EL SELECTOR DE INVENTARIO PARA LAS ESTADISTICAS DIARIAS
     setupInventoryPicker();
@@ -858,6 +868,61 @@ function getReloadVariables(){
     console.log(menuToClick);
 
     menuToClick.click();
+}
+
+async function setupSaleList(){
+    const response = await api.getUserSales();
+    if (response.success) {
+        const saleList = response.saleList;
+        await populateSaleView(saleList);
+        //setupSaleModals();
+    }
+}
+
+async function populateSaleView(saleList) {
+    const dateDescendingContainer = document.getElementById('sales-table-date-descending');
+    const dateAscendingContainer = document.getElementById('sales-table-date-ascending');
+    const idDescendingContainer = document.getElementById('sales-table-id-descending');
+    const idAscendingContainer = document.getElementById('sales-table-id-ascending');
+    const customerDescendingContainer = document.getElementById('sales-table-client-descending');
+    const customerAscendingContainer = document.getElementById('sales-table-client-ascending');
+    const priceDescendingContainer = document.getElementById('sales-table-price-descending');
+    const priceAscendingContainer = document.getElementById('sales-table-price-ascending');
+
+    const dateDescendingList = saleList.date.descending;
+    const dateAscendingList = saleList.date.ascending;
+    const idDescendingList = saleList.id.descending;
+    const idAscendingList = saleList.id.ascending;
+    const customerDescendingList = saleList.customer.descending;
+    const customerAscendingList = saleList.customer.ascending;
+    const priceDescendingList = saleList.price.descending;
+    const priceAscendingList = saleList.price.ascending;
+
+
+    for (const sale of dateDescendingList) {
+        const text = await createSaleRow(sale);
+        dateDescendingContainer.innerHTML += text;
+    }
+}
+
+async function createSaleRow(sale){
+    let customerName;
+
+    if (sale.customer_id === null){customerName = "No asignado";}
+    else{
+        const result = await api.getCustomerById(sale.customer_id);
+        const customer = result.clientInfo;
+        customerName = customer.full_name;
+    }
+
+    const text = "ID = " + sale.id + ". Fecha = " + sale.sale_date + ". Cliente = " + customerName + ". Precio = " + sale.total_amount +  ".";
+    return text;
+}
+
+
+async function setupReceiptList(){
+    const response = await api.getUserReceipts();
+    console.log(response);
 }
 
 function setupOrderBy(){
@@ -1225,11 +1290,8 @@ function renderProductList(itemList,transactionType){
 }
 
 async function populateTransactionClientList(){
-    // const clients = await api.getAllClients(); OBTENCION DE LISTA DE CLIENTES
-
-    const clientes = [{id:1,name:'Cliente 1',email:'cliente1@gmail.com'},
-        {id:2,name:'Cliente 2',email:null},
-        {id:3,name:'Cliente 3',email:'cliente3@gmail.com'}];
+    const response = await api.getAllClients();
+    const clientes = response.clientList;
 
     const clientModal = document.getElementById('client-picker-modal');
 
@@ -1244,8 +1306,8 @@ async function populateTransactionClientList(){
     clientes.forEach(client => {
         const newClientItem = document.createElement('div');
         newClientItem.dataset.clientID = client.id;
-        newClientItem.dataset.clientName = client.name;
-        newClientItem.innerHTML = client.name;
+        newClientItem.dataset.clientName = client.full_name;
+        newClientItem.innerHTML = client.full_name;
         newClientItem.className = 'client-picker-item';
         clientModal.appendChild(newClientItem);
     })
@@ -1275,11 +1337,9 @@ function selectClient(clientID, clientName){
 }
 
 async function populateTransactionProviderList(){
-    // const clients = await api.getAllProviders(); OBTENCION DE LISTA DE PROVEEDORES
 
-    const providers = [{id:1,name:'Proveedor 1',email:'proveedor1@gmail.com'},
-        {id:2,name:'Proveedor 2',email:'proveedor2@gmail.com'},
-        {id:3,name:'Proveedor 3',email:'proveedor3@gmail.com'}];
+    const response = await api.getAllProviders();
+    const providers = response.providerList;
 
     const providerModal = document.getElementById('provider-picker-modal');
 
@@ -1294,8 +1354,8 @@ async function populateTransactionProviderList(){
     providers.forEach(provider => {
         const newProviderItem = document.createElement('div');
         newProviderItem.dataset.providerID = provider.id;
-        newProviderItem.dataset.providerName = provider.name;
-        newProviderItem.innerHTML = provider.name;
+        newProviderItem.dataset.providerName = provider.full_name;
+        newProviderItem.innerHTML = provider.full_name;
         newProviderItem.className = 'provider-picker-item';
         providerModal.appendChild(newProviderItem);
     })
@@ -1347,11 +1407,12 @@ async function populateProductPicker(itemList,transactionType){
         configureTablePickers();
 
         //LA VARIABLE PRODUCTOS DEBE HACER UN FETCH A LA API PARA OBTENER TODOS LOS PRODUCTOS DEL USUARIO
-        const products = [
-            {name :'Producto 1', pID : 1, tID : 2, stock: 4, salePrice : 5000, receiptPrice : 3000},
-            {name :'Producto 2', pID : 2, tID : 11, stock: 20, salePrice : 10000, receiptPrice: 12000},
-            {name :'Producto 3', pID : 3, tID : 9, stock: 2, salePrice : 15000, receiptPrice: 20000}
-        ];
+
+        const response = await api.getAllProducts();
+
+        if (!response.success) {showTransactionError(response.error); return;}
+
+        const products = response.productList;
 
         populateProductModal(products,tables);
         configureProductSelection(products,itemList,transactionType);
@@ -1465,11 +1526,11 @@ function setupCompleteTransactionBtn(itemList){
     const buttons = document.querySelectorAll('.complete-transaction-btn');
 
     buttons.forEach(button => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', async () => {
             const transactionType = button.dataset.type;
 
             if (transactionType ==='sale'){
-                const emailInfo = completeSale(itemList);
+                const emailInfo = await completeSale(itemList);
                 if (emailInfo) {setupSendEmailBtn(emailInfo);}
 
             }
@@ -1478,35 +1539,30 @@ function setupCompleteTransactionBtn(itemList){
     })
 }
 
-function completeSale(itemList){
+async function completeSale(itemList){
     if (itemList.length === 0) {showTransactionError('Agregar al menos un producto.'); return;}
 
     let clientID = document.getElementById('client-id-input').value;
     const totalPrice = document.getElementById('price-input').value;
+    const clientName = document.getElementById('sale-client-name').innerHTML;
 
     if (clientID === '' || isNaN(clientID)) {clientID = null;}
 
-    var clientName, hasEmail, emailInfo = null;
+    const saleInfo = {'itemList' : itemList, 'clientID' : clientID, 'totalPrice' : totalPrice};
 
-    // client = api.getProviderByID(providerID);
-    // if (!client) {clientName = 'No asignado'; hasEmail = false}
-    // else {clientName = client.name; hasEmail = (client.email!==null);
+    var response = await api.createSale(saleInfo);
+    if (!response.success) {showTransactionError('Ha ocurrido un error interno = ' + response.error); return;}
 
-    const clientes = [{id:1,name:'Cliente 1',email:'cliente1@gmail.com'},
-        {id:2,name:'Cliente 2',email:null},
-        {id:3,name:'Cliente 3',email:'cliente3@gmail.com'}];
+    const saleID = response.saleId;
 
-    const clienteAsignado = clientes.find(cliente => cliente.id === parseInt(clientID,10));
+    response = await api.getCustomerById(clientID);
+    if (!response.success) {showTransactionError('Ha ocurrido un error interno = ' + response.error); return;}
 
-    console.log(clienteAsignado);
+    const client = response.clientInfo;
+    var hasEmail = false, emailInfo = null;
 
-    if (clienteAsignado) {
-        clientName = clienteAsignado.name;
-        hasEmail = (clienteAsignado.email!==null);
-    }
-    else{
-        clientName = 'No asignado';
-        hasEmail = false;
+    if (client){
+        hasEmail = (client.email!==null);
     }
 
     const saleList = itemList.map(item => {
@@ -1524,7 +1580,7 @@ function completeSale(itemList){
     }).join('');
 
     const saleTicket = `<div style="margin-top: 20px; padding: 5px; border: var(--border-strong); border-radius: var(--border-radius)">
-        <hr> <h2 style="text-align: right">Lista de Productos</h2>
+        <hr> <div class="flex-row"><p>Número de venta = ${saleID}</p><h2 style="text-align: right">Lista de Productos</h2></div>
     <div class="flex-column" style="flex-wrap: wrap; gap: 15px; overflow: hidden; margin-top: 15px;"> 
          <div class="flex-row" style="text-align: right; gap: 15px;"><h4 style="width: 100px">Nombre</h4>
          <h4 style="width: 70px">Cantidad</h4><h4 style="width: 65px">Precio de Venta</h4><h4 style="width: 80px">Precio Total</h4></div>
@@ -1547,26 +1603,29 @@ function completeSale(itemList){
     </div>`;
 
     if (hasEmail) {
-        emailInfo = {saleList : saleTicket, clientInfo : clienteAsignado};
+        emailInfo = {saleList : saleTicket, clientInfo : client};
     }
 
     showTransactionSuccess(transactionSuccessBody);
     return emailInfo;
 }
 
-function completeReceipt(itemList){
+async function completeReceipt(itemList){
 
     if (itemList.length === 0) {showTransactionError('Agregar al menos un producto.'); return;}
+
     let providerID = document.getElementById('provider-id-input').value;
+    const providerName = document.getElementById('receipt-provider-name').innerHTML;
     const totalPrice = document.getElementById('price-input').value;
 
     if (providerID === '' || isNaN(providerID)) {providerID = null;}
-    console.log(providerID, totalPrice);
-    console.log(itemList);
 
-    // providerName = api.getProviderByID(providerID);
+    const receiptInfo = {'itemList' : itemList, 'providerID' : providerID, 'totalPrice' : totalPrice};
 
-    const providerName = (providerID!==null) ? ('Proveedor ' + providerID) : 'No Asignado';
+    var response = await api.createReceipt(receiptInfo);
+    if (!response.success) {showTransactionError('Ha ocurrido un error interno = ' + response.error); return;}
+
+    const receiptID = response.receiptId;
 
     const receiptList = itemList.map(item => {
         const name = item.name;
@@ -1583,7 +1642,7 @@ function completeReceipt(itemList){
     }).join('');
 
     const receiptTicket = `<div style="margin-top: 20px; padding: 5px; border: var(--border-strong); border-radius: var(--border-radius)">
-        <hr> <h2 style="text-align: right">Lista de Productos</h2>
+        <hr> <div class="flex-row"><p>Número de Compra = ${receiptID}</p><h2 style="text-align: right">Lista de Productos</h2></div>
     <div class="flex-column" style="flex-wrap: wrap; gap: 15px; overflow: hidden; margin-top: 15px;"> 
          <div class="flex-row" style="text-align: right; gap: 15px;"><h4 style="width: 100px">Nombre</h4>
          <h4 style="width: 70px">Cantidad</h4><h4 style="width: 65px">Precio de Compra</h4><h4 style="width: 80px">Precio Total</h4></div>
@@ -1948,7 +2007,8 @@ function setupSendEmailBtn(emailInfo){
     if (!sendEmailBtn) {return; }
 
     sendEmailBtn.addEventListener('click',() =>{
-        sendSaleEmail(emailInfo);
+        console.log(emailInfo.saleList);
+        console.log(emailInfo.clientInfo);
     })
 }
 
