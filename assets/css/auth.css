@@ -1,0 +1,54 @@
+﻿/*
+ * Archivo: public/assets/css/auth.css
+ * Descripción: Estilos para centrar los formularios de Login y Registro.
+ */
+
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.auth-form-container {
+    /* Aca heredo todos los estilos de .view-container de main.css */
+    /* Este contenedor se usa en el HTML para aplicar esos estilos */
+    /* Y para cualquier ajuste específico si fuera necesario */
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-group {
+    text-align: left;
+}
+
+.auth-form .btn {
+    margin-top: 1rem;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--color-gray);
+}
+
+.auth-footer a {
+    color: var(--accent-color);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}

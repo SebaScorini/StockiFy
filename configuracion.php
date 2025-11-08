@@ -16,26 +16,13 @@
 </head>
 
 <?php
-    if ($_SERVER["REQUEST_METHOD"] == "POST"){
-        $current_user = [
-            "name" => $_POST["name"],
-            "surname" => $_POST["surname"],
-            "email" => $_POST["email"],
-            "password" => $_POST["password"]
-        ];
-    }
-    else {
-        $current_user = [
-                "name" => "Stefano",
-                "surname" => "Biglia",
-                "email" => "bigliastefano2005@gmail.com",
-                "password" => "contraseña",
-        ];
-    }
 
-    if (!$current_user){
-        header("Location: index.php");
-        exit;
+    require_once __DIR__ . '/vendor/autoload.php';
+    require_once __DIR__ . '/auth_helper.php';
+    $currentUser = getCurrentUser();
+
+    if (!isset($_SESSION['user_id'])) {
+        header('Location: /StockiFy/index.php');
     }
 ?>
 
@@ -44,7 +31,7 @@
         <p id="msj-bubble" class="view-container"></p>
     </div>
     <header>
-        <a href="/" id="header-logo">
+        <a href="/StockiFy/index.php" id="header-logo">
             <img src="assets/img/LogoE.png" alt="Stocky Logo">
         </a>
         <nav id="header-nav">
@@ -67,19 +54,19 @@
             <div class="flex-column all-center" id="config-container">
                 <form class="flex-column justify-left align-center" method="post" action="./configuracion.php" id="form-micuenta">
                     <label for="nombre" style="margin-top: 0">Nombre</label>
-                    <input class="config-input" type="text" id="nombre" name="name" value=<?php echo $current_user['name']?>>
+                    <input class="config-input" type="text" id="nombre" name="name" value=<?php echo $currentUser['full_name']?>>
 
                     <label for="apellido">Apellido</label>
-                    <input class="config-input" type="text" id="apellido" name="surname" value=<?php echo $current_user['surname']?>>
+                    <input class="config-input" type="text" id="apellido" name="surname" value=<?php echo $currentUser['full_name']?>>
 
                     <label for="email">Email</label>
-                    <input class="input-locked config-input" type="email" id="email" name="email" value=<?php echo $current_user['email']?> readonly>
+                    <input class="input-locked config-input" type="email" id="email" name="email" value=<?php echo $currentUser['email']?> readonly>
                     <p class="btn btn-modificar" style="margin-bottom: 0" id="btn-modif-email">Modificar Email</p>
 
                     <label for="contraseña-hidden">Contraseña</label>
                     <div class="flex-row all-center" style="gap: 0.3rem;">
                         <input class="input-locked" type="text" id="contraseña-fake" value="************" disabled>
-                        <input class="input-locked hidden config-input" type="text" id="contraseña" name="password" value=<?php echo $current_user['password']?> readonly>
+                        <input class="input-locked hidden config-input" type="text" id="contraseña" name="password" value=<?php echo $currentUser['password']?> readonly>
                         <div id='btn-password' class="btn flex-row all-center"><img src="./assets/img/password-hidden.png" id="pass-img"></div>
                     </div>
                     <p class="btn btn-modificar" id="btn-modif-pass">Modificar Contraseña</p>
