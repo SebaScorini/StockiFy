@@ -46,7 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const dbName = document.getElementById('dbNameInput').value.trim();
         columns += document.getElementById('columnsInput').value.trim();
-        console.log(columns);
         const submitButton = createDbForm.querySelector('button[type="submit"]');
 
         console.log(dbName);

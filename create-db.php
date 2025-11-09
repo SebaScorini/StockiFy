@@ -32,6 +32,25 @@
                 <input type="text" id="dbNameInput" name="dbName" placeholder="Ej: Inventario Principal" required>
             </div>
 
+            <!--
+
+            <h2>Columnas Recomendadas</h2>
+
+            <div class="form-group">
+                <label for="min-stock-input">Stock Mínimo</label>
+                <input type="checkbox" id="min-stock-input" name="min-stock" value="0" required>
+                <label for="sale-price-input">Precio de Venta</label>
+                <input type="checkbox" id="sale-price-input" name="sale-price" value="0" required>
+                <label for="receipt-price-input">Precio de Compra</label>
+                <input type="checkbox" id="receipt-price-input" name="receipt-price" value="0" required>
+                <label for="hard-gain-input">Margen de Ganancia (Valor Fijo)</label>
+                <input type="radio" id="hard-gain-input" name="gain" value="hard" required>
+                <label for="percentage-gain-input">Margen de Ganancia (Valor Fijo)</label>
+                <input type="radio" id=percentage-gain-input" name="gain" value="percentage" required>
+            </div>
+
+             -->
+
             <div class="form-group">
                 <label for="columnsInput">Nombres de las Columnas (separados por coma):</label>
                 <textarea id="columnsInput" name="columns" rows="3" placeholder="Ej: SKU, Producto, Precio, Cantidad" required></textarea>
