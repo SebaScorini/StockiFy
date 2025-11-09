@@ -298,3 +298,11 @@ export async function getUserReceipts(){
     });
     return handleResponse(response);
 }
+
+export async function getCurrentInventoryPreferences(){
+    const response = await fetch('/StockiFy/api/database/get-preferences-current.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse(response);
+}

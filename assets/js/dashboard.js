@@ -473,7 +473,7 @@ async function setupInventoryPicker() {
 
 
 // -- Renderizado de Tabla --
-function renderTable(columns, data) {
+async function renderTable(columns, data) {
     const tableHead = document.querySelector('#data-table thead');
     const tableBody = document.querySelector('#data-table tbody');
     if (!tableHead || !tableBody) {
@@ -486,6 +486,13 @@ function renderTable(columns, data) {
     tableBody.addEventListener('click', handleStockUpdate);
     tableBody.addEventListener('change', handleStockUpdate);
     console.log("Listeners de stock (click y change) añadidos/actualizados en tbody.");
+
+    const inventoryPreferences = await api.getCurrentInventoryPreferences();
+
+    if (!inventoryPreferences.success) {
+        console.error("Error crítico: No se encontraron las preferencias del inventario.");
+        return;
+    }
 
     if (!data || data.length === 0) {
         // Estado vacío
@@ -511,7 +518,37 @@ function renderTable(columns, data) {
     } else {
         // Estado con datos
         // Renderizo cabeceras (con primera letra mayúscula)
-        tableHead.innerHTML = `<tr>${columns.map(col => `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`).join('')}</tr>`;
+        tableHead.innerHTML = `<tr>${columns.map(col => {
+            switch (col.toLowerCase()) {
+                case 'min_stock':
+                    if (inventoryPreferences.min_stock === 1) {
+                        return `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
+                    }
+                    return '';
+                case 'sale_price':
+                    if (inventoryPreferences.sale_price === 1) {
+                        return `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
+                    }
+                    return '';
+                case 'receipt_price':
+                    if (inventoryPreferences.receipt_price === 1) {
+                        return `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
+                    }
+                    return '';
+                case 'hard_gain':
+                    if (inventoryPreferences.hard_gain === 1) {
+                        return `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
+                    }
+                    return '';
+                case 'percentage_gain':
+                    if (inventoryPreferences.percentage_gain === 1) {
+                        return `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
+                    }
+                    return '';
+                default:
+                    return `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
+            }
+        }).join('')}</tr>`;
         // Renderizo filas
         tableBody.innerHTML = data.map(row => {
             const rowId = row['id'] ?? row['Id'] ?? row['ID']; // Busco ID case-insensitive
@@ -524,11 +561,37 @@ function renderTable(columns, data) {
                 if (value === undefined && col.toLowerCase() === 'id') { value = row['id']; }
 
                 // Genero controles de stock si la columna es 'stock' (case-insensitive)
-                if (col.toLowerCase() === 'stock') {
-                    return `<td class="stock-cell" data-item-id="${rowId}"><button class="stock-btn minus">-</button><input type="number" class="stock-input" value="${value ?? 0}" min="0"><button class="stock-btn plus">+</button></td>`;
-                } else {
-                    // Para otras columnas, muestro el valor
-                    return `<td>${value ?? ''}</td>`;
+                
+                switch (col.toLowerCase()) {
+                    case 'stock':
+                        return `<td class="stock-cell" data-item-id="${rowId}"><button class="stock-btn minus">-</button><input type="number" class="stock-input" value="${value ?? 0}" min="0"><button class="stock-btn plus">+</button></td>`;
+                    case 'min_stock':
+                        if (inventoryPreferences.min_stock === 1) {
+                            return `<td>${value ?? ''}</td>`;
+                        }
+                        return '';
+                    case 'sale_price':
+                        if (inventoryPreferences.sale_price === 1) {
+                            return `<td>${value ?? ''}</td>`;
+                        }
+                        return '';
+                    case 'receipt_price':
+                        if (inventoryPreferences.receipt_price === 1) {
+                            return `<td>${value ?? ''}</td>`;
+                        }
+                        return '';
+                    case 'hard_gain':
+                        if (inventoryPreferences.hard_gain === 1) {
+                            return `<td>${value ?? ''}</td>`;
+                        }
+                        return '';
+                    case 'percentage_gain':
+                        if (inventoryPreferences.percentage_gain === 1) {
+                            return `<td>${value ?? ''}</td>`;
+                        }
+                        return '';
+                    default:
+                        return `<td>${value ?? ''}</td>`;
                 }
             }).join('')}
             </tr>`;
@@ -701,30 +764,89 @@ async function init() {
     getReloadVariables();
 }
 
-function createEditableRow(columns) {
+async function createEditableRow(columns) {
     const tr = document.createElement('tr');
     tr.classList.add('editing-row'); // Clase para estilos específicos
 
+    const inventoryPreferences = await api.getCurrentInventoryPreferences();
+
+    if (!inventoryPreferences.success) {
+        console.error("Error crítico: No se encontraron las preferencias del inventario.");
+        return;
+    }
+
     columns.forEach(col => {
         const td = document.createElement('td');
-        if (col.toLowerCase() === 'id' || col.toLowerCase() === 'created_at') {
-            td.textContent = ''; // Celda vacía para columnas automáticas
-        } else if (col.toLowerCase() === 'stock') {
-            td.classList.add('stock-cell'); // Aplico estilo flex
-            td.innerHTML = `
+        switch (col.toLowerCase()) {
+            case 'id':
+            case 'created_at':
+                td.textContent = '';
+                break;
+            case 'stock':
+                td.classList.add('stock-cell'); // Aplico estilo flex
+                td.innerHTML = `
                  <button class="stock-btn minus" disabled>-</button>
                  <input type="number" class="stock-input" value="0" min="0" data-column="${col}"> 
-                 <button class="stock-btn plus" disabled>+</button>
-             `;
-        }
-
-        else {
-            // Input de texto genérico para otras columnas
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = col.charAt(0).toUpperCase() + col.slice(1);
-            input.dataset.column = col; // Guardo el nombre de la columna acá
-            td.appendChild(input);
+                 <button class="stock-btn plus" disabled>+</button>`;
+                break;
+            case 'min_stock':
+                if (inventoryPreferences.min_stock === 1) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = col.charAt(0).toUpperCase() + col.slice(1);
+                    input.dataset.column = col; // Guardo el nombre de la columna acá
+                    td.appendChild(input);
+                }
+                else{return}
+                break;
+            case 'sale_price':
+                if (inventoryPreferences.sale_price === 1) {
+                    console.log('a');
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = col.charAt(0).toUpperCase() + col.slice(1);
+                    input.dataset.column = col; // Guardo el nombre de la columna acá
+                    td.appendChild(input);
+                }
+                else{return}
+                break;
+            case 'receipt_price':
+                if (inventoryPreferences.receipt_price === 1) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = col.charAt(0).toUpperCase() + col.slice(1);
+                    input.dataset.column = col; // Guardo el nombre de la columna acá
+                    td.appendChild(input);
+                }
+                else{return}
+                break;
+            case 'hard_gain':
+                if (inventoryPreferences.hard_gain === 1) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = col.charAt(0).toUpperCase() + col.slice(1);
+                    input.dataset.column = col; // Guardo el nombre de la columna acá
+                    td.appendChild(input);
+                }
+                else{return}
+                break;
+            case 'percentage_gain':
+                if (inventoryPreferences.percentage_gain === 1) {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = col.charAt(0).toUpperCase() + col.slice(1);
+                    input.dataset.column = col; // Guardo el nombre de la columna acá
+                    td.appendChild(input);
+                }
+                else{return}
+                break;
+            default:
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = col.charAt(0).toUpperCase() + col.slice(1);
+                input.dataset.column = col; // Guardo el nombre de la columna acá
+                td.appendChild(input);
+                break;
         }
         tr.appendChild(td);
     });
@@ -740,14 +862,14 @@ function createEditableRow(columns) {
     return tr;
 }
 
-function handleAddRowClick() {
+async function handleAddRowClick() {
     const tableBody = document.querySelector('#data-table tbody');
     if (!tableBody || tableBody.querySelector('.editing-row')) {
         // Si no hay body o ya hay una fila editándose, no hago nada
         return;
     }
     // Creo la nueva fila editable
-    const newRow = createEditableRow(currentTableColumns);
+    const newRow = await createEditableRow(currentTableColumns);
     // La inserto al PRINCIPIO del tbody
     tableBody.prepend(newRow);
 
