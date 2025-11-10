@@ -49,23 +49,20 @@ class InventoryModel
             $tableName = "user_{$userId}_{$safeBaseName}";
 
             $columnDefinitions = [];
+            $userColumns = [];
             foreach ($columns as $columnName) {
                 $trimmedName = trim($columnName);
                 if (empty($trimmedName)) continue;
-                $safeColumnName = preg_replace('/[^a-zA-Z0-9_]/', '', $trimmedName);
+                $safeColumnName = $this->sanitizeColumnName($trimmedName);
                 if (empty($safeColumnName)) continue;
-                if (strtolower($safeColumnName) === 'id' || strtolower($safeColumnName) === 'created_at' || strtolower($safeColumnName) === 'stock' || strtolower($safeColumnName) === 'name'
-                || strtolower($safeColumnName) === 'nombre'
-                ) continue;
-                if (strtolower($safeColumnName) === 'min_stock' || strtolower($safeColumnName) === 'stockmínimo' || strtolower($safeColumnName) === 'stockminimo'
+                if (strtolower($safeColumnName) === 'id' || strtolower($safeColumnName) === 'created_at' || strtolower($safeColumnName) === 'stock' || strtolower($safeColumnName) === ' stock' || strtolower($safeColumnName) === 'name'
+                || strtolower($safeColumnName) === 'nombre' || strtolower($safeColumnName) === 'min_stock' || strtolower($safeColumnName) === 'stockmínimo' || strtolower($safeColumnName) === 'stockminimo'
                 || strtolower($safeColumnName) === 'sale_price' || strtolower($safeColumnName) === 'preciodeventa'
                 || strtolower($safeColumnName) === 'receipt_price' || strtolower($safeColumnName) === 'preciodecompra'
                 || strtolower($safeColumnName) === 'hard_gain' || strtolower($safeColumnName) === 'margendeganancia'
                 || strtolower($safeColumnName) === 'percentage_gain') continue;
                 $columnDefinitions[] = "`{$safeColumnName}` TEXT";
-            }
-            if (empty($columnDefinitions)) {
-                throw new \InvalidArgumentException("No se proporcionaron nombres de columna válidos.");
+                $userColumns[] = $safeColumnName;
             }
 
             $minStockDefault = (int) $tablePreferences['min_stock']['default'];
@@ -73,6 +70,20 @@ class InventoryModel
             $receiptPriceDefault = (float) $tablePreferences['receipt_price']['default'];
             $gainDefault = (float) $tablePreferences['hard_gain']['default'];
 
+            if (empty($columnDefinitions)) {
+                $sql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `stock` TEXT,
+                `name` TEXT,
+                `min_stock` INT DEFAULT {$minStockDefault},
+                `sale_price` DECIMAL(10,2) DEFAULT {$salePriceDefault},
+                `receipt_price` DECIMAL(10,2) DEFAULT {$receiptPriceDefault},
+                `hard_gain` DECIMAL(10,2) DEFAULT {$gainDefault},
+                `percentage_gain` DECIMAL(10,2) DEFAULT {$gainDefault},
+                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )";
+            }
+            else{
             $sql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
                 `stock` TEXT,
@@ -85,17 +96,25 @@ class InventoryModel
                 " . implode(', ', $columnDefinitions) . ",
                 `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )";
+            }
+
             $createStmt = $this->db->prepare($sql);
             if (!$createStmt->execute()) {
                 $errorInfo = $createStmt->errorInfo();
                 throw new \PDOException("Error al crear la tabla física: " . ($errorInfo[2] ?? 'Error desconocido'));
             }
 
+            $columnJson = ['name','stock','min_stock','sale_price','receipt_price','hard_gain','percentage_gain'];
+
+            if (!empty($userColumns)) {
+                $columnJson = array_merge($columnJson, $userColumns);
+            }
+
             $checkMeta = $this->db->prepare("SELECT id FROM user_tables WHERE inventory_id = ?");
             $checkMeta->execute([$inventoryId]);
             if ($checkMeta->fetchColumn() === false) {
                 $stmt = $this->db->prepare("INSERT INTO user_tables (inventory_id, table_name, columns_json) VALUES (?, ?, ?)");
-                if (!$stmt->execute([$inventoryId, $tableName, json_encode($columns)])) {
+                if (!$stmt->execute([$inventoryId, $tableName, json_encode($columnJson)])) {
                     $errorInfo = $stmt->errorInfo();
                     throw new \PDOException("Error al guardar metadatos de la tabla: " . ($errorInfo[2] ?? 'Error desconocido'));
                 }
@@ -212,4 +231,13 @@ class InventoryModel
             throw $e;
         }
     }
+    private function sanitizeColumnName(string $columnName): string
+    {
+        $safeName = preg_replace('/[^a-zA-Z0-9]/', '', $columnName);
+        if (empty($safeName) || is_numeric(substr($safeName, 0, 1))) {
+            throw new \InvalidArgumentException("El nombre de la columna es inválido.");
+        }
+        return $safeName;
+    }
 }
+

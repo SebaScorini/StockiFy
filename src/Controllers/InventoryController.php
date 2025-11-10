@@ -26,9 +26,9 @@ class InventoryController
 
         $data = json_decode(file_get_contents('php://input'), true);
 
-        if (empty($data['dbName']) || empty($data['columns'])) {
+        if (empty($data['dbName'])) {
             http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'El nombre y las columnas son obligatorios.']);
+            echo json_encode(['success' => false, 'message' => 'El nombre es obligatorios.']);
             return;
         }
 

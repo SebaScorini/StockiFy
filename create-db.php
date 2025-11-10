@@ -78,7 +78,7 @@
 
             <div class="form-group">
                 <label for="columnsInput">Nombres de las Columnas (separados por coma):</label>
-                <textarea id="columnsInput" name="columns" rows="3" placeholder="Ej: SKU, Producto, Precio, Cantidad" required></textarea>
+                <textarea id="columnsInput" name="columns" rows="3" placeholder="Ej: SKU, Producto, Precio, Cantidad"></textarea>
                 <small style="color: var(--color-gray); display: block; margin-top: 5px;">Podrás importar datos para estas columnas más adelante.</small>
             </div>
 

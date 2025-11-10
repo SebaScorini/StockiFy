@@ -551,7 +551,7 @@
     </main>
 </div>
 
-<div id="import-modal" class="modal-overlay hidden">
+<div id="import-modal" class="modal-overlay hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
     <div class="modal-content view-container"> <button id="close-modal-btn" class="modal-close-btn">&times;</button>
 
         <div class="modal-header">
