@@ -1767,7 +1767,23 @@ async function completeSale(itemList){
     </div>`;
 
     if (hasEmail) {
-        emailInfo = {saleList : saleTicket, clientInfo : client};
+        // Construir emailInfo en el formato esperado por send-email.php
+        emailInfo = {
+            to: client.email,
+            subject: `Factura de su compra - Venta #${saleID}`,
+            sale: {
+                id: saleID,
+                date: new Date().toISOString().slice(0,19).replace('T',' '),
+                customer: client.name,
+                items: itemList.map(item => ({
+                    name: item.name,
+                    quantity: item.amount,
+                    unit_price: item.salePrice,
+                    total: item.totalPrice
+                })),
+                total: totalPrice
+            }
+        };
     }
 
     showTransactionSuccess(transactionSuccessBody);
@@ -2175,8 +2191,34 @@ function setupSendEmailBtn(emailInfo){
 }
 
 async function sendSaleEmail(emailInfo){
-    const response = await api.sendSaleEmail(emailInfo);
-    console.log(response);
+    const sendEmailBtn = document.getElementById('send-sale-email-btn');
+    const originalText = sendEmailBtn.textContent;
+    
+    try {
+        sendEmailBtn.textContent = 'Enviando...';
+        sendEmailBtn.disabled = true;
+        
+        const response = await api.sendSaleEmail(emailInfo);
+        
+        if (response.success) {
+            sendEmailBtn.textContent = '✓ Enviado';
+            sendEmailBtn.style.backgroundColor = 'var(--success-color)';
+            // Deshabilitar permanentemente después de éxito
+            sendEmailBtn.onclick = null;
+        } else {
+            throw new Error(response.error || 'Error al enviar el email');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        sendEmailBtn.textContent = '✗ Error al enviar';
+        sendEmailBtn.style.backgroundColor = 'var(--error-color)';
+        // Permitir reintentar después de 2 segundos
+        setTimeout(() => {
+            sendEmailBtn.textContent = originalText;
+            sendEmailBtn.style.backgroundColor = 'var(--accent-color-medium-opacity)';
+            sendEmailBtn.disabled = false;
+        }, 2000);
+    }
 }
 
 function showTransactionSuccess(body){

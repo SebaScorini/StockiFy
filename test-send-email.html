@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Test envio factura - StockiFy</title>
+  <style>body{font-family:Arial;margin:2rem}label,input,button{display:block;margin:0.5rem 0}#out{white-space:pre-wrap;background:#f7f7f7;padding:1rem;border:1px solid #ddd}</style>
+</head>
+<body>
+  <h1>Enviar factura (test)</h1>
+  <label for="to">Destinatario (to)</label>
+  <input id="to" value="tu.email@ejemplo.com">
+  <label for="subject">Asunto</label>
+  <input id="subject" value="Factura de prueba - StockiFy">
+  <button id="send">Enviar</button>
+  <h2>Resultado</h2>
+  <div id="out">-</div>
+
+  <script>
+    document.getElementById('send').addEventListener('click', async () => {
+      const to = document.getElementById('to').value;
+      const subject = document.getElementById('subject').value;
+
+      const payload = {
+        emailInfo: {
+          to,
+          subject,
+          from: 'no-reply@stockify.local',
+          fromName: 'StockiFy Test',
+          sale: {
+            id: 1001,
+            date: new Date().toISOString().slice(0,19).replace('T',' '),
+            customer: 'Cliente desde UI',
+            items: [
+              { name: 'Producto UI A', quantity: 1, unit_price: 9.99, total: 9.99 },
+              { name: 'Producto UI B', quantity: 3, unit_price: 4.5, total: 13.5 }
+            ],
+            total: 23.49
+          }
+        },
+        testMode: true
+      };
+
+      const out = document.getElementById('out');
+      out.textContent = 'Enviando...';
+
+      try {
+        const res = await fetch('/StockiFy/api/sales/send-email.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const txt = await res.text();
+        out.textContent = `HTTP ${res.status}\n${txt}`;
+      } catch (err) {
+        out.textContent = 'Error: ' + err.toString();
+      }
+    });
+  </script>
+</body>
+</html>
