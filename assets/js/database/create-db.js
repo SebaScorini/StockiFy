@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
                            `;
 
     setup.setupMiCuenta();
+    prepareRecomendedColumns();
 
 
     const createDbForm = document.getElementById('createDbForm');
@@ -42,7 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
     createDbForm.addEventListener('submit', async (event) => {
         event.preventDefault(); // Detenemos el envío normal
 
-        let columns = 'name,stock,min_stock,sale_price,receipt_price,';
+        var columns = 'name,stock,min_stock,sale_price,receipt_price,hard_gain,percentage_gain,';
+
+        const preferences = getUserPreferences();
 
         const dbName = document.getElementById('dbNameInput').value.trim();
         columns += document.getElementById('columnsInput').value.trim();
@@ -60,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         messageDiv.textContent = '';
 
         try {
-            const result = await api.createDatabase(dbName, columns);
+            const result = await api.createDatabase(dbName, columns, preferences);
 
             if (result.success) {
                 messageDiv.textContent = result.message + "\nSerás redirigido al panel.";
@@ -97,4 +100,135 @@ async function checkUserStatus(){
         // Si hay un error de sesión, lo mando al login
         window.location.href = '/StockiFy/index.php';
     }
+}
+
+function prepareRecomendedColumns(){
+    const gainCheckbox = document.getElementById('gain-input');
+    const minStockCheckbox = document.getElementById('min-stock-input');
+    const salePriceCheckbox = document.getElementById('sale-price-input');
+    const receiptPriceCheckbox = document.getElementById('receipt-price-input');
+
+    const percentageRadio = document.getElementById('percentage-gain-input');
+    const hardRadio = document.getElementById('hard-gain-input');
+
+    percentageRadio.addEventListener('change', updatePercentageRadio);
+    hardRadio.addEventListener('change', updateHardRadio);
+    function updatePercentageRadio() {
+        percentageRadio.value = 1;
+        percentageRadio.checked = true;
+        hardRadio.value = 0;
+        hardRadio.checked = false;
+    }
+
+    function updateHardRadio(){
+        hardRadio.value = 1;
+        hardRadio.checked = true;
+        percentageRadio.value = 0;
+        percentageRadio.checked = false;
+    }
+
+    function updateMinStockInput() {
+        const isChecked = minStockCheckbox.checked;
+        const defaultInput = document.getElementById('min-stock-default-input');
+
+        defaultInput.disabled = !isChecked;
+
+        minStockCheckbox.value = isChecked ? "1" : "0";
+
+        if (!isChecked) {
+            defaultInput.value = "";
+        }
+    }
+
+    function updateSalePriceInput() {
+        const isChecked = salePriceCheckbox.checked;
+        const defaultInput = document.getElementById('sale-price-default-input');
+
+        defaultInput.disabled = !isChecked;
+
+        salePriceCheckbox.value = isChecked ? "1" : "0";
+
+        if (!isChecked) {
+            defaultInput.value = "";
+        }
+    }
+
+    function updateReceiptPriceInput() {
+        const isChecked = receiptPriceCheckbox.checked;
+        const defaultInput = document.getElementById('receipt-price-default-input');
+
+        defaultInput.disabled = !isChecked;
+
+        receiptPriceCheckbox.value = isChecked ? "1" : "0";
+
+        if (!isChecked) {
+            defaultInput.value = "";
+        }
+    }
+
+    function updateGainInput() {
+        const isChecked = gainCheckbox.checked;
+        const defaultInput = document.getElementById('gain-default-input');
+
+        const percentageRadio = document.getElementById('percentage-gain-input');
+        const hardRadio = document.getElementById('hard-gain-input');
+
+        percentageRadio.disabled = !isChecked;
+        hardRadio.disabled = !isChecked;
+        defaultInput.disabled = !isChecked;
+
+        gainCheckbox.value = isChecked ? "1" : "0";
+
+        if (isChecked) {
+            percentageRadio.checked = true;
+            percentageRadio.value = "1";
+            hardRadio.checked = false;
+            hardRadio.value = "0";
+        } else {
+            percentageRadio.checked = false;
+            hardRadio.checked = false;
+            percentageRadio.value = "0";
+            hardRadio.value = "0";
+            defaultInput.value = "";
+        }
+    }
+
+    updateGainInput();
+    updateMinStockInput();
+    updateSalePriceInput();
+    updateReceiptPriceInput();
+
+    gainCheckbox.addEventListener('change', updateGainInput);
+    minStockCheckbox.addEventListener('change', updateMinStockInput);
+    salePriceCheckbox.addEventListener('change', updateSalePriceInput);
+    receiptPriceCheckbox.addEventListener('change', updateReceiptPriceInput);
+}
+
+function getUserPreferences(){
+    const minStockCheckbox = document.getElementById('min-stock-input');
+    const salePriceCheckbox = document.getElementById('sale-price-input');
+    const receiptPriceCheckbox = document.getElementById('receipt-price-input');
+    const percentageRadio = document.getElementById('percentage-gain-input');
+    const hardRadio = document.getElementById('hard-gain-input');
+
+    const gainDefaultInput = document.getElementById('gain-default-input');
+    const minStockDefaultInput = document.getElementById('min-stock-default-input');
+    const salePriceDefaultInput = document.getElementById('sale-price-default-input');
+    const receiptPriceDefaultInput = document.getElementById('receipt-price-default-input');
+
+    const gainDefault = (gainDefaultInput.value === '') ? 0 : parseFloat(gainDefaultInput.value);
+    const minStockDefault = (minStockDefaultInput.value === '') ? 0 : parseFloat(minStockDefaultInput.value);
+    const salePriceDefault = (salePriceDefaultInput.value === '') ? 0 : parseFloat(salePriceDefaultInput.value);
+    const receiptPriceDefault = (receiptPriceDefaultInput.value === '') ? 0 : parseFloat(receiptPriceDefaultInput.value);
+
+
+    const preferences = {
+        min_stock: {active: parseInt(minStockCheckbox.value,10), default: minStockDefault},
+        sale_price: {active: parseInt(salePriceCheckbox.value,10), default: salePriceDefault},
+        receipt_price: {active: parseInt(receiptPriceCheckbox.value,10), default: receiptPriceDefault},
+        percentage_gain: {active: parseInt(percentageRadio.value,10), default: gainDefault},
+        hard_gain: {active: parseInt(hardRadio.value,10), default: gainDefault}
+    }
+
+    return preferences;
 }
