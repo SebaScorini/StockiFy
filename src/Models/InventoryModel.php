@@ -25,15 +25,18 @@ class InventoryModel
      * @return string El nombre real de la tabla creada.
      * @throws Exception Si algo falla, lanza una excepción.
      */
-    public function createInventoryAndTable(string $inventoryName, int $userId, string $baseTableName, array $columns): array
+    public function createInventoryAndTable(string $inventoryName, int $userId, string $baseTableName, array $columns, array $tablePreferences): array
     {
         if (!$this->db->inTransaction()) {
             $this->db->beginTransaction();
         }
 
         try {
-            $stmt = $this->db->prepare("INSERT INTO inventories (name, user_id) VALUES (:name, :user_id)");
-            $stmt->execute([':name' => $inventoryName, ':user_id' => $userId]);
+            $stmt = $this->db->prepare("INSERT INTO inventories (name, user_id, min_stock, sale_price, receipt_price, hard_gain, percentage_gain) 
+                                            VALUES (:name, :user_id, :min_stock, :sale_price, :receipt_price, :hard_gain, :percentage_gain)");
+            $stmt->execute([':name' => $inventoryName, ':user_id' => $userId, ':min_stock' => $tablePreferences['min_stock']['active'],
+                ':sale_price' => $tablePreferences['sale_price']['active'], ':receipt_price' => $tablePreferences['receipt_price']['active'],
+                ':hard_gain' => $tablePreferences['hard_gain']['active'], ':percentage_gain' => $tablePreferences['percentage_gain']['active']]);
             $inventoryId = (int)$this->db->lastInsertId();
             if (!$inventoryId) {
                 throw new \PDOException("No se pudo crear el registro del inventorio principal.");
@@ -51,15 +54,34 @@ class InventoryModel
                 if (empty($trimmedName)) continue;
                 $safeColumnName = preg_replace('/[^a-zA-Z0-9_]/', '', $trimmedName);
                 if (empty($safeColumnName)) continue;
-                if (strtolower($safeColumnName) === 'id' || strtolower($safeColumnName) === 'created_at') continue;
+                if (strtolower($safeColumnName) === 'id' || strtolower($safeColumnName) === 'created_at' || strtolower($safeColumnName) === 'stock' || strtolower($safeColumnName) === 'name'
+                || strtolower($safeColumnName) === 'nombre'
+                ) continue;
+                if (strtolower($safeColumnName) === 'min_stock' || strtolower($safeColumnName) === 'stockmínimo' || strtolower($safeColumnName) === 'stockminimo'
+                || strtolower($safeColumnName) === 'sale_price' || strtolower($safeColumnName) === 'preciodeventa'
+                || strtolower($safeColumnName) === 'receipt_price' || strtolower($safeColumnName) === 'preciodecompra'
+                || strtolower($safeColumnName) === 'hard_gain' || strtolower($safeColumnName) === 'margendeganancia'
+                || strtolower($safeColumnName) === 'percentage_gain') continue;
                 $columnDefinitions[] = "`{$safeColumnName}` TEXT";
             }
             if (empty($columnDefinitions)) {
                 throw new \InvalidArgumentException("No se proporcionaron nombres de columna válidos.");
             }
 
+            $minStockDefault = (int) $tablePreferences['min_stock']['default'];
+            $salePriceDefault = (float) $tablePreferences['sale_price']['default'];
+            $receiptPriceDefault = (float) $tablePreferences['receipt_price']['default'];
+            $gainDefault = (float) $tablePreferences['hard_gain']['default'];
+
             $sql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `stock` TEXT,
+                `name` TEXT,
+                `min_stock` INT DEFAULT {$minStockDefault},
+                `sale_price` DECIMAL(10,2) DEFAULT {$salePriceDefault},
+                `receipt_price` DECIMAL(10,2) DEFAULT {$receiptPriceDefault},
+                `hard_gain` DECIMAL(10,2) DEFAULT {$gainDefault},
+                `percentage_gain` DECIMAL(10,2) DEFAULT {$gainDefault},
                 " . implode(', ', $columnDefinitions) . ",
                 `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )";

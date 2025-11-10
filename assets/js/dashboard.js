@@ -78,9 +78,7 @@ async function handleStockUpdate(event) {
 async function updateDailyStatistics(inventoryId) {
     const hourlyStatistics = await api.getDailyStatistics(inventoryId);
     if (hourlyStatistics){
-        console.log(hourlyStatistics);
         const groupedStatistics = groupHourlyData(hourlyStatistics);
-        console.log(groupedStatistics);
         populateGroupedStatistics(groupedStatistics);
         populateHourlyGraphs(hourlyStatistics);
     }
@@ -520,29 +518,35 @@ async function renderTable(columns, data) {
         // Renderizo cabeceras (con primera letra mayúscula)
         tableHead.innerHTML = `<tr>${columns.map(col => {
             switch (col.toLowerCase()) {
+                case 'id':
+                    return '';
+                case 'created_at':
+                    return '';
+                case 'name':
+                    return `<th>Nombre</th>`;
                 case 'min_stock':
                     if (inventoryPreferences.min_stock === 1) {
-                        return `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
+                        return `<th>Stock Mínimo</th>`;
                     }
                     return '';
                 case 'sale_price':
                     if (inventoryPreferences.sale_price === 1) {
-                        return `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
+                        return `<th>Precio de Venta</th>`;
                     }
                     return '';
                 case 'receipt_price':
                     if (inventoryPreferences.receipt_price === 1) {
-                        return `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
+                        return `<th>Precio de Compra</th>`;
                     }
                     return '';
                 case 'hard_gain':
                     if (inventoryPreferences.hard_gain === 1) {
-                        return `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
+                        return `<th>Margen de Ganancia (Valor Fijo)</th>`;
                     }
                     return '';
                 case 'percentage_gain':
                     if (inventoryPreferences.percentage_gain === 1) {
-                        return `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
+                        return `<th>Margen de Ganancia (Porcentaje)</th>`;
                     }
                     return '';
                 default:
@@ -563,6 +567,10 @@ async function renderTable(columns, data) {
                 // Genero controles de stock si la columna es 'stock' (case-insensitive)
                 
                 switch (col.toLowerCase()) {
+                    case 'id':
+                        return '';
+                    case 'created_at':
+                        return '';
                     case 'stock':
                         return `<td class="stock-cell" data-item-id="${rowId}"><button class="stock-btn minus">-</button><input type="number" class="stock-input" value="${value ?? 0}" min="0"><button class="stock-btn plus">+</button></td>`;
                     case 'min_stock':
@@ -640,6 +648,41 @@ function setupMenuNavigation() {
     console.log("Navegación del menú lateral configurada.");
 }
 
+async function checkPreferences(){
+    const preferences = await api.getCurrentInventoryPreferences();
+
+    if(!preferences.success){
+        alert("Ha ocurrido un error al obtener las preferencias del usuario. Serás redirigido para volver a seleccionar el inventario.");
+        window.location.href = '/select-db.php';
+    }
+
+    console.log(preferences)
+
+    if (preferences.sale_price !== 1 || preferences.receipt_price !== 1){
+        const ventasContainer = document.getElementById('sales');
+        const comprasContainer = document.getElementById('receipts');
+        const estadisticasContainer = document.getElementById('analysis');
+
+        ventasContainer.querySelector('.menu-container').classList.add('hidden');
+        comprasContainer.querySelector('.menu-container').classList.add('hidden');
+        estadisticasContainer.querySelector('.menu-container').classList.add('hidden');
+
+        const notAvailableContainers = document.querySelectorAll('.not-available-container');
+
+        notAvailableContainers.forEach(container => {
+            const innerText = container.querySelector('.missing-preference-text');
+            innerText.innerHTML += `<p>${(preferences.sale_price !== 1) ? "Precio de venta" : ""}</p>`;
+            innerText.innerHTML += `<p>${(preferences.receipt_price !== 1) ? "Precio de Compra" : ""}</p>`;
+            container.classList.remove('hidden');
+        })
+    }
+    else{
+
+    }
+
+
+}
+
 // ---- 4. INICIALIZACIÓN ----
 async function init() {
     console.log("[INIT] Iniciando dashboard...");
@@ -666,31 +709,12 @@ async function init() {
 
 
 
-    //PREPARA EL DROPDOWN DE "MI CUENTA"
-    setup.setupMiCuenta();
-
-    await setupClients();
-    await setupProviders();
-
-    createCharts();
-    setupStatPickers();
-
-    await updateDailyStatistics('all');
-    await setupSaleList();
-    await setupReceiptList();
-
-    //PREPARA EL SELECTOR DE INVENTARIO PARA LAS ESTADISTICAS DIARIAS
-    setupInventoryPicker();
-
-    setupOrderBy();
-
     //PREPARA LOS FONDOS GRISES DE LOS MODALES
     setupReturnBtn();
     setupGreyBg();
 
-    //PREPARA LOS 4 SECTORES DE TRANSACCIONES (VENTAS, COMPRAS, CLIENTES, PROVEEDORES)
-    setupTransactions();
-
+    //PREPARA EL DROPDOWN DE "MI CUENTA"
+    setup.setupMiCuenta();
 
     /* ---------------------- FIN CODIGO DE NANO  ---------------------- */
 
@@ -761,6 +785,24 @@ async function init() {
         }
     }
 
+    await checkPreferences();
+
+    setupOrderBy();
+
+    await setupClients();
+    await setupProviders();
+    await setupSaleList();
+    await setupReceiptList();
+
+    setupTransactions();
+
+    createCharts();
+    setupStatPickers();
+
+    await updateDailyStatistics('all');
+    await setupInventoryPicker();
+    setupRecomendedColumns();
+
     getReloadVariables();
 }
 
@@ -793,7 +835,7 @@ async function createEditableRow(columns) {
                 if (inventoryPreferences.min_stock === 1) {
                     const input = document.createElement('input');
                     input.type = 'text';
-                    input.placeholder = col.charAt(0).toUpperCase() + col.slice(1);
+                    input.placeholder = 'Stock Mínimo';
                     input.dataset.column = col; // Guardo el nombre de la columna acá
                     td.appendChild(input);
                 }
@@ -801,10 +843,9 @@ async function createEditableRow(columns) {
                 break;
             case 'sale_price':
                 if (inventoryPreferences.sale_price === 1) {
-                    console.log('a');
                     const input = document.createElement('input');
                     input.type = 'text';
-                    input.placeholder = col.charAt(0).toUpperCase() + col.slice(1);
+                    input.placeholder = 'Precio de Venta';
                     input.dataset.column = col; // Guardo el nombre de la columna acá
                     td.appendChild(input);
                 }
@@ -814,7 +855,7 @@ async function createEditableRow(columns) {
                 if (inventoryPreferences.receipt_price === 1) {
                     const input = document.createElement('input');
                     input.type = 'text';
-                    input.placeholder = col.charAt(0).toUpperCase() + col.slice(1);
+                    input.placeholder = 'Precio de Compra';
                     input.dataset.column = col; // Guardo el nombre de la columna acá
                     td.appendChild(input);
                 }
@@ -824,7 +865,7 @@ async function createEditableRow(columns) {
                 if (inventoryPreferences.hard_gain === 1) {
                     const input = document.createElement('input');
                     input.type = 'text';
-                    input.placeholder = col.charAt(0).toUpperCase() + col.slice(1);
+                    input.placeholder = 'Margen de Ganancia';
                     input.dataset.column = col; // Guardo el nombre de la columna acá
                     td.appendChild(input);
                 }
@@ -834,7 +875,7 @@ async function createEditableRow(columns) {
                 if (inventoryPreferences.percentage_gain === 1) {
                     const input = document.createElement('input');
                     input.type = 'text';
-                    input.placeholder = col.charAt(0).toUpperCase() + col.slice(1);
+                    input.placeholder = 'Margen de Ganancia';
                     input.dataset.column = col; // Guardo el nombre de la columna acá
                     td.appendChild(input);
                 }
@@ -893,7 +934,9 @@ async function handleSaveNewRow(event) {
     newRowElement.querySelectorAll('input[data-column]').forEach(input => {
         const colName = input.dataset.column;
         const value = input.value.trim();
-        newItemData[colName] = value;
+        if (value !== ''){
+            newItemData[colName] = value;
+        }
     });
 
     console.log("Datos a guardar:", newItemData); // Para depurar
@@ -1044,7 +1087,6 @@ async function createSaleRow(sale){
 
 async function setupReceiptList(){
     const response = await api.getUserReceipts();
-    console.log(response);
 }
 
 function setupOrderBy(){
@@ -1962,7 +2004,6 @@ async function setupClients(){
     if (response.success){
         const clients = response.clientList;
         if (clients.date.descending.length === 0){ populateEmptyClientModal(); return; }
-        console.log(clients);
         populateClientModal(clients);
     }
     else{
@@ -2314,6 +2355,170 @@ function hideTransactionSuccess(){
     const greyBg = document.getElementById('grey-background');
     modalContainer.classList.add('hidden');
     greyBg.classList.add('hidden');
+}
+
+async function setupRecomendedColumns(){
+    const preferences = await api.getCurrentInventoryPreferences();
+    if (!preferences.success) {
+        console.error("Error crítico: No se encontraron las preferencias del inventario." + preferences.error);
+        return;
+    }
+
+    const defaults = await api.getCurrentInventoryDefaults();
+    if (!defaults.success) {
+        console.error("Error crítico: No se encontraron los valores por defecto del inventario." + defaults.error);
+        return;
+    }
+
+    console.log(defaults);
+
+    const gainCheckbox = document.getElementById('gain-input');
+    const minStockCheckbox = document.getElementById('min-stock-input');
+    const salePriceCheckbox = document.getElementById('sale-price-input');
+    const receiptPriceCheckbox = document.getElementById('receipt-price-input');
+
+    const percentageRadio = document.getElementById('percentage-gain-input');
+    const hardRadio = document.getElementById('hard-gain-input');
+
+    percentageRadio.addEventListener('change', updatePercentageRadio);
+    hardRadio.addEventListener('change', updateHardRadio);
+
+    gainCheckbox.checked = (preferences.percentage_gain === 1 || preferences.hard_gain === 1);
+    minStockCheckbox.checked = (preferences.min_stock === 1);
+    salePriceCheckbox.checked = (preferences.sale_price === 1);
+    receiptPriceCheckbox.checked = (preferences.receipt_price === 1);
+    percentageRadio.checked = (preferences.percentage_gain === 1);
+    hardRadio.checked = (preferences.hard_gain === 1);
+    function updatePercentageRadio() {
+        percentageRadio.value = 1;
+        percentageRadio.checked = true;
+        hardRadio.value = 0;
+        hardRadio.checked = false;
+    }
+
+    function updateHardRadio(){
+        hardRadio.value = 1;
+        hardRadio.checked = true;
+        percentageRadio.value = 0;
+        percentageRadio.checked = false;
+    }
+    const minStockDefault = document.getElementById('min-stock-default-input');
+    const saveBtn = document.getElementById('save-changes-btn');
+
+    minStockDefault.addEventListener('input', () => {
+        if (parseInt(minStockDefault.value,10) !== defaults.min_stock && minStockDefault.value !== ''){
+            saveBtn.disabled = false;
+        }
+        else{
+            saveBtn.disabled = true;
+        }
+    })
+    function updateMinStockInput() {
+        const isChecked = minStockCheckbox.checked;
+        const defaultInput = document.getElementById('min-stock-default-input');
+
+        defaultInput.placeholder = (isChecked) ? defaults.min_stock : 'Valor por Defecto (0)';
+
+        defaultInput.disabled = !isChecked;
+
+        minStockCheckbox.value = isChecked ? "1" : "0";
+
+        if (!isChecked) {
+            defaultInput.value = "";
+        }
+    }
+
+    function updateSalePriceInput() {
+        const isChecked = salePriceCheckbox.checked;
+        const defaultInput = document.getElementById('sale-price-default-input');
+
+        defaultInput.disabled = !isChecked;
+
+        salePriceCheckbox.value = isChecked ? "1" : "0";
+
+        if (!isChecked) {
+            defaultInput.value = "";
+        }
+    }
+
+    function updateReceiptPriceInput() {
+        const isChecked = receiptPriceCheckbox.checked;
+        const defaultInput = document.getElementById('receipt-price-default-input');
+
+        defaultInput.disabled = !isChecked;
+
+        receiptPriceCheckbox.value = isChecked ? "1" : "0";
+
+        if (!isChecked) {
+            defaultInput.value = "";
+        }
+    }
+
+    function updateGainInput() {
+        const isChecked = gainCheckbox.checked;
+        const defaultInput = document.getElementById('gain-default-input');
+
+        const percentageRadio = document.getElementById('percentage-gain-input');
+        const hardRadio = document.getElementById('hard-gain-input');
+
+        percentageRadio.disabled = !isChecked;
+        hardRadio.disabled = !isChecked;
+        defaultInput.disabled = !isChecked;
+
+        gainCheckbox.value = isChecked ? "1" : "0";
+
+        if (isChecked) {
+            percentageRadio.checked = true;
+            percentageRadio.value = "1";
+            hardRadio.checked = false;
+            hardRadio.value = "0";
+        } else {
+            percentageRadio.checked = false;
+            hardRadio.checked = false;
+            percentageRadio.value = "0";
+            hardRadio.value = "0";
+            defaultInput.value = "";
+        }
+    }
+
+    updateGainInput();
+    updateMinStockInput();
+    updateSalePriceInput();
+    updateReceiptPriceInput();
+
+    gainCheckbox.addEventListener('change', updateGainInput);
+    minStockCheckbox.addEventListener('change', updateMinStockInput);
+    salePriceCheckbox.addEventListener('change', updateSalePriceInput);
+    receiptPriceCheckbox.addEventListener('change', updateReceiptPriceInput);
+}
+
+function getUserPreferences(){
+    const minStockCheckbox = document.getElementById('min-stock-input');
+    const salePriceCheckbox = document.getElementById('sale-price-input');
+    const receiptPriceCheckbox = document.getElementById('receipt-price-input');
+    const percentageRadio = document.getElementById('percentage-gain-input');
+    const hardRadio = document.getElementById('hard-gain-input');
+
+    const gainDefaultInput = document.getElementById('gain-default-input');
+    const minStockDefaultInput = document.getElementById('min-stock-default-input');
+    const salePriceDefaultInput = document.getElementById('sale-price-default-input');
+    const receiptPriceDefaultInput = document.getElementById('receipt-price-default-input');
+
+    const gainDefault = (gainDefaultInput.value === '') ? 0 : parseFloat(gainDefaultInput.value);
+    const minStockDefault = (minStockDefaultInput.value === '') ? 0 : parseFloat(minStockDefaultInput.value);
+    const salePriceDefault = (salePriceDefaultInput.value === '') ? 0 : parseFloat(salePriceDefaultInput.value);
+    const receiptPriceDefault = (receiptPriceDefaultInput.value === '') ? 0 : parseFloat(receiptPriceDefaultInput.value);
+
+
+    const preferences = {
+        min_stock: {active: parseInt(minStockCheckbox.value,10), default: minStockDefault},
+        sale_price: {active: parseInt(salePriceCheckbox.value,10), default: salePriceDefault},
+        receipt_price: {active: parseInt(receiptPriceCheckbox.value,10), default: receiptPriceDefault},
+        percentage_gain: {active: parseInt(percentageRadio.value,10), default: gainDefault},
+        hard_gain: {active: parseInt(hardRadio.value,10), default: gainDefault}
+    }
+
+    return preferences;
 }
 
 

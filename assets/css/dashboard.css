@@ -241,7 +241,7 @@
 /* Estilo específico para el botón de eliminar final */
 #confirm-delete-btn {
     background-color: var(--accent-red);
-    border-color: var(--accent-red);
+    border-color: var(--color-black);
     color: var(--color-white);
 }
 #confirm-delete-btn:disabled {

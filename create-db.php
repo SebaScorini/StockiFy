@@ -32,24 +32,49 @@
                 <input type="text" id="dbNameInput" name="dbName" placeholder="Ej: Inventario Principal" required>
             </div>
 
-            <!--
 
             <h2>Columnas Recomendadas</h2>
 
-            <div class="form-group">
-                <label for="min-stock-input">Stock Mínimo</label>
-                <input type="checkbox" id="min-stock-input" name="min-stock" value="0" required>
-                <label for="sale-price-input">Precio de Venta</label>
-                <input type="checkbox" id="sale-price-input" name="sale-price" value="0" required>
-                <label for="receipt-price-input">Precio de Compra</label>
-                <input type="checkbox" id="receipt-price-input" name="receipt-price" value="0" required>
-                <label for="hard-gain-input">Margen de Ganancia (Valor Fijo)</label>
-                <input type="radio" id="hard-gain-input" name="gain" value="hard" required>
-                <label for="percentage-gain-input">Margen de Ganancia (Valor Fijo)</label>
-                <input type="radio" id=percentage-gain-input" name="gain" value="percentage" required>
+            <div class="form-group flex-column" style="align-items: start;">
+                <div class="flex-row">
+                    <input type="checkbox" id="min-stock-input" name="min-stock" value="0">
+                    <h4 style="height: fit-content;">Stock Mínimo</h4>
+                </div>
+                <input style="width: 180px; justify-self: right;" type="text" id="min-stock-default-input" name="min-stock-default" placeholder="Valor por Defecto (0)">
             </div>
-
-             -->
+            <div class="form-group flex-column" style="align-items: start;">
+                <div class="flex-row">
+                    <input type="checkbox" id="sale-price-input" name="sale-price" value="0">
+                    <h4 style="height: fit-content;">Precio de Venta</h4>
+                </div>
+                <input style="width: 180px; justify-self: right;" type="text" id="sale-price-default-input" name="sale-price-default" placeholder="Valor por Defecto (0)">
+            </div>
+            <div class="form-group flex-column" style="align-items: start;">
+                <div class="flex-row">
+                    <input type="checkbox" id="receipt-price-input" name="receipt-price" value="0">
+                    <h4 style="height: fit-content;">Precio de Compra</h4>
+                </div>
+                <input style="width: 180px; justify-self: right;" type="text" id="receipt-price-default-input" name="receipt-price-default" placeholder="Valor por Defecto (0)">
+            </div>
+            <div class="form-group flex-column" style="align-items: start;">
+                <div class="flex-row">
+                    <input type="checkbox" id="gain-input" name="gain" value="0">
+                    <h4 style="height: fit-content;">Margen de Ganancia</h4>
+                </div>
+                <div class="flex-row">
+                    <input style="width: 180px; justify-self: right;" type="text" id="gain-default-input" name="gain-default" placeholder="Valor por Defecto (0)">
+                    <div class="form-group flex-column" style="align-items: start;">
+                        <div class="flex-row">
+                            <input type="radio" id="percentage-gain-input" name="gain-type" value="0">
+                            <p>Porcentaje</p>
+                        </div>
+                        <div class="flex-row">
+                            <input type="radio" id="hard-gain-input" name="gain-type" value="0">
+                            <p>Valor Fijo</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="form-group">
                 <label for="columnsInput">Nombres de las Columnas (separados por coma):</label>
