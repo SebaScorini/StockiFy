@@ -2129,13 +2129,13 @@ function setupSendEmailBtn(emailInfo){
     if (!sendEmailBtn) {return; }
 
     sendEmailBtn.addEventListener('click',() =>{
-        console.log(emailInfo.saleList);
-        console.log(emailInfo.clientInfo);
+        sendSaleEmail(emailInfo);
     })
 }
 
 async function sendSaleEmail(emailInfo){
-    const response = api.sendSaleEmail(emailInfo);
+    const response = await api.sendSaleEmail(emailInfo);
+    console.log(response);
 }
 
 function showTransactionSuccess(body){
