@@ -67,8 +67,8 @@ export async function getUserProfile() {
 }
 
 
-export async function createDatabase(dbName, columns) {
-    const requestBody = { dbName, columns };
+export async function createDatabase(dbName, columns, preferences) {
+    const requestBody = { dbName, columns, preferences };
     const response = await fetch('/StockiFy/api/database/create.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -301,6 +301,14 @@ export async function getUserReceipts(){
 
 export async function getCurrentInventoryPreferences(){
     const response = await fetch('/StockiFy/api/database/get-preferences-current.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse(response);
+}
+
+export async function getCurrentInventoryDefaults(){
+    const response = await fetch('/StockiFy/api/database/get-defaults-current.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
     });

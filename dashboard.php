@@ -107,12 +107,56 @@
         </div>
 
         <div id="config-db" class="dashboard-view hidden">
-            <h2>⚙️ Configurar Tabla</h2>
-            <p>Acá vas a poder agregar/eliminar columnas, gestionar stock bajo, códigos de barras, importar/exportar, etc.</p>
-            <div class="danger-zone" style="margin-top: 2rem; padding: 1rem; border: 2px solid var(--accent-red); border-radius: var(--border-radius);">
-                <h3 style="color: var(--accent-red);">Zona de Peligro</h3>
-                <p style="color: var(--color-gray);">Estas acciones son permanentes.</p>
-                <button id="delete-db-btn" class="btn btn-secondary" style="border-color: var(--accent-red); color: var(--accent-red);">Eliminar esta Base de Datos</button>
+            <div class="menu-container" style="padding: 3rem;">
+                <div style="padding: 1rem; border: var(--border-strong); border-radius: var(--border-radius);">
+                    <h3>Columnas Recomendadas</h3>
+                    <div class="form-group flex-column" style="align-items: start;">
+                        <div class="flex-row">
+                            <input type="checkbox" id="min-stock-input" name="min-stock" value="0">
+                            <h4 style="height: fit-content;">Stock Mínimo</h4>
+                        </div>
+                        <input style="width: 180px; justify-self: right;" type="text" id="min-stock-default-input" name="min-stock-default" placeholder="Valor por Defecto (0)">
+                    </div>
+                    <div class="form-group flex-column" style="align-items: start;">
+                        <div class="flex-row">
+                            <input type="checkbox" id="sale-price-input" name="sale-price" value="0">
+                            <h4 style="height: fit-content;">Precio de Venta</h4>
+                        </div>
+                        <input style="width: 180px; justify-self: right;" type="text" id="sale-price-default-input" name="sale-price-default" placeholder="Valor por Defecto (0)">
+                    </div>
+                    <div class="form-group flex-column" style="align-items: start;">
+                        <div class="flex-row">
+                            <input type="checkbox" id="receipt-price-input" name="receipt-price" value="0">
+                            <h4 style="height: fit-content;">Precio de Compra</h4>
+                        </div>
+                        <input style="width: 180px; justify-self: right;" type="text" id="receipt-price-default-input" name="receipt-price-default" placeholder="Valor por Defecto (0)">
+                    </div>
+                    <div class="form-group flex-column" style="align-items: start;">
+                        <div class="flex-row">
+                            <input type="checkbox" id="gain-input" name="gain" value="0">
+                            <h4 style="height: fit-content;">Margen de Ganancia</h4>
+                        </div>
+                        <div class="flex-row">
+                            <input style="width: 180px; justify-self: right;" type="text" id="gain-default-input" name="gain-default" placeholder="Valor por Defecto (0)">
+                            <div class="form-group flex-column" style="align-items: start;">
+                                <div class="flex-row">
+                                    <input type="radio" id="percentage-gain-input" name="gain-type" value="0">
+                                    <p>Porcentaje</p>
+                                </div>
+                                <div class="flex-row">
+                                    <input type="radio" id="hard-gain-input" name="gain-type" value="0">
+                                    <p>Valor Fijo</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" id="save-changes-btn" disabled>Guardar Cambios</button>
+                </div>
+                <div class="danger-zone" style="margin-top: 2rem; padding: 1rem; border: 2px solid var(--accent-red); border-radius: var(--border-radius);">
+                    <h3 style="color: var(--accent-red);">Zona de Peligro</h3>
+                    <p style="color: var(--color-gray);">Estas acciones son permanentes.</p>
+                    <button id="delete-db-btn" class="btn btn-secondary" style="border-color: var(--accent-red); color: var(--accent-red);">Eliminar esta Base de Datos</button>
+                </div>
             </div>
         </div>
 
@@ -120,6 +164,11 @@
 
         <!-- SECCION DE ESTADISTICAS DIARIAS. CODIGO COMPLETAMENTE NUEVO -->
         <div id="analysis" class="dashboard-view hidden">
+            <div class="not-available-container hidden">
+                <h2>Para calcular tus Estadísticas Diarias, primero debes activar los siguientes Campos Recomendados para la Base de Datos seleccionada:</h2>
+                <div class="missing-preference-text flex-column"></div>
+                <button class="btn btn-primary got-to-config-btn">Ir a Configuración</button>
+            </div>
             <div class="menu-container">
                 <div class="table-header">
                     <h2>Estadísticas Diarias 🔴</h2>
@@ -254,6 +303,11 @@
         <!--       SECCION DE VENTAS. CODIGO COMPLETAMENTE NUEVO         -->
 
         <div id="sales" class="dashboard-view hidden">
+            <div class="not-available-container hidden">
+                <h2>Para gestionar el registro de Ventas, primero debes activar los siguientes Campos Recomendados para la Base de Datos seleccionada:</h2>
+                <div class="missing-preference-text flex-column"></div>
+                <button class="btn btn-primary got-to-config-btn">Ir a Configuración</button>
+            </div>
             <div id="ventas-container" class="menu-container" style="overflow: visible;">
                 <div class="table-header">
                     <h2>Ventas</h2>
@@ -312,6 +366,11 @@
         <!--        SECCION DE COMPRAS. CODIGO COMPLETAMENTE NUEVO         -->
 
         <div id="receipts" class="dashboard-view hidden">
+            <div class="not-available-container hidden">
+                <h2>Para gestionar el registro de Compras, primero debes activar los siguientes Campos Recomendados para la Base de Datos seleccionada:</h2>
+                <div class="missing-preference-text flex-column"></div>
+                <button class="btn btn-primary got-to-config-btn">Ir a Configuración</button>
+            </div>
             <div id="receipts-container" class="menu-container" style="overflow: visible;">
                 <div class="table-header">
                     <h2>Compras</h2>
@@ -523,7 +582,7 @@
     </div>
 </div>
 
-<div id="delete-confirm-modal" class="modal-overlay hidden">
+<div id="delete-confirm-modal" class="modal-overlay hidden" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
     <div class="modal-content view-container" style="max-width: 450px;">
         <button id="close-delete-modal-btn" class="modal-close-btn">&times;</button>
 
@@ -540,7 +599,7 @@
 
         <div class="modal-footer">
             <button id="cancel-delete-btn" class="btn btn-secondary">Cancelar</button>
-            <button id="confirm-delete-btn" class="btn btn-primary" disabled style="background-color: var(--accent-red); border-color: var(--accent-red);">Eliminar Permanentemente</button>
+            <button id="confirm-delete-btn" class="btn btn-primary" disabled>Eliminar Permanentemente</button>
         </div>
     </div>
 </div>

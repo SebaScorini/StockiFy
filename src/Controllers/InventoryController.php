@@ -35,9 +35,10 @@ class InventoryController
         try {
             $inventoryModel = new InventoryModel();
             $columnsArray = explode(',', $data['columns']);
+            $tablePreferences = $data['preferences'];
 
             $creationResult = $inventoryModel->createInventoryAndTable(
-                $data['dbName'], $user['id'], $data['dbName'], $columnsArray
+                $data['dbName'], $user['id'], $data['dbName'], $columnsArray, $tablePreferences
             );
             $newInventoryId = $creationResult['id'];
             $tableName = $creationResult['tableName'];
@@ -90,7 +91,7 @@ class InventoryController
             }
             else {
                 http_response_code(500);
-                echo json_encode(['success' => false, 'message' => 'Ocurrió un error inesperado al crear la tabla.']);
+                echo json_encode(['success' => false, 'message' => 'Ocurrió un error inesperado al crear la tabla. ']);
                 error_log("Error en InventoryController::create: " . $e->getMessage());
             }
         }
