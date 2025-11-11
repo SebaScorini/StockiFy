@@ -4,11 +4,11 @@ import * as api from '../api.js';
 import { openImportModal, initializeImportModal } from '../import.js';
 import * as setup from "../setupMiCuentaDropdown.js";
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Inicializa el modal (busca sus elementos)
     initializeImportModal();
 
-    checkUserStatus();
+    await checkUserStatus();
     const nav = document.getElementById('header-nav');
     if (nav) nav.innerHTML = `<a href="/StockiFy/estadisticas.php" class="btn btn-secondary">Estadisticas</a>
                                    <div id="dropdown-container">
@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault(); // Detenemos el envío normal
 
 
+        //CODIGO DE NANO, CONSIGO LAS PREFERENCIAS DEL USUARIO
         const preferences = getUserPreferences();
 
         const dbName = document.getElementById('dbNameInput').value.trim();
@@ -101,30 +102,30 @@ async function checkUserStatus(){
     }
 }
 
+/* ---------------------- FUNCIONES DE NANO  ---------------------- */
+
+
 function prepareRecomendedColumns(){
+    const columnsContainer = document.getElementById('recomended-columns-form');
+    const openColumnasRecomendadasBtn = document.getElementById('open-columnas-recomendadas-btn');
+
+    openColumnasRecomendadasBtn.addEventListener('click', () => {
+        columnsContainer.classList.toggle('visible');
+        openColumnasRecomendadasBtn.classList.toggle('is-rotated');
+    })
+
     const gainCheckbox = document.getElementById('gain-input');
     const minStockCheckbox = document.getElementById('min-stock-input');
     const salePriceCheckbox = document.getElementById('sale-price-input');
     const receiptPriceCheckbox = document.getElementById('receipt-price-input');
 
-    const percentageRadio = document.getElementById('percentage-gain-input');
-    const hardRadio = document.getElementById('hard-gain-input');
+    const autoPriceCheckbox = document.getElementById('auto-price-input');
+    const autoIvaRadio = document.getElementById('auto-iva-input');
+    const autoGainRadio = document.getElementById('auto-gain-input');
+    const autoIvaGainRadio = document.getElementById('auto-iva-gain-input');
 
-    percentageRadio.addEventListener('change', updatePercentageRadio);
-    hardRadio.addEventListener('change', updateHardRadio);
-    function updatePercentageRadio() {
-        percentageRadio.value = 1;
-        percentageRadio.checked = true;
-        hardRadio.value = 0;
-        hardRadio.checked = false;
-    }
-
-    function updateHardRadio(){
-        hardRadio.value = 1;
-        hardRadio.checked = true;
-        percentageRadio.value = 0;
-        percentageRadio.checked = false;
-    }
+    const autoPriceTypeContainer = document.getElementById('auto-price-type-container');
+    const autoPriceLabel = document.getElementById('auto-price-checkbox');
 
     function updateMinStockInput() {
         const isChecked = minStockCheckbox.checked;
@@ -132,10 +133,12 @@ function prepareRecomendedColumns(){
 
         defaultInput.disabled = !isChecked;
 
-        minStockCheckbox.value = isChecked ? "1" : "0";
-
         if (!isChecked) {
             defaultInput.value = "";
+            defaultInput.classList.remove('visible');
+        }
+        else{
+            defaultInput.classList.add('visible');
         }
     }
 
@@ -145,11 +148,20 @@ function prepareRecomendedColumns(){
 
         defaultInput.disabled = !isChecked;
 
-        salePriceCheckbox.value = isChecked ? "1" : "0";
-
         if (!isChecked) {
             defaultInput.value = "";
+            defaultInput.classList.remove('visible');
+            autoPriceCheckbox.checked = false;
+            autoIvaRadio.checked = false;
+            autoGainRadio.checked = false;
+            autoIvaGainRadio.checked = false;
+            autoPriceLabel.classList.remove('visible');
+            autoPriceTypeContainer.classList.remove('visible');
         }
+        else{
+            defaultInput.classList.add('visible');
+        }
+        updateReceiptPriceInput();
     }
 
     function updateReceiptPriceInput() {
@@ -158,11 +170,18 @@ function prepareRecomendedColumns(){
 
         defaultInput.disabled = !isChecked;
 
-        receiptPriceCheckbox.value = isChecked ? "1" : "0";
-
         if (!isChecked) {
             defaultInput.value = "";
+            defaultInput.classList.remove('visible');
+            autoPriceLabel.classList.remove('visible');
+            autoPriceCheckbox.checked = false;
+            autoPriceTypeContainer.classList.remove('visible');
         }
+        else{
+            defaultInput.classList.add('visible');
+            if (salePriceCheckbox.checked){autoPriceLabel.classList.add('visible');}
+        }
+        updateAutoPrice();
     }
 
     function updateGainInput() {
@@ -171,36 +190,67 @@ function prepareRecomendedColumns(){
 
         const percentageRadio = document.getElementById('percentage-gain-input');
         const hardRadio = document.getElementById('hard-gain-input');
+        const gainTypeContainer = document.getElementById('gain-type-container');
 
         percentageRadio.disabled = !isChecked;
         hardRadio.disabled = !isChecked;
         defaultInput.disabled = !isChecked;
 
-        gainCheckbox.value = isChecked ? "1" : "0";
-
-        if (isChecked) {
-            percentageRadio.checked = true;
-            percentageRadio.value = "1";
-            hardRadio.checked = false;
-            hardRadio.value = "0";
-        } else {
+        if (!isChecked) {
             percentageRadio.checked = false;
             hardRadio.checked = false;
-            percentageRadio.value = "0";
-            hardRadio.value = "0";
             defaultInput.value = "";
+            defaultInput.classList.remove('visible');
+            gainTypeContainer.classList.remove('visible');
+        } else {
+            percentageRadio.checked = true;
+            hardRadio.checked = false;
+            defaultInput.classList.add('visible');
+            gainTypeContainer.classList.add('visible');
+            autoIvaRadio.checked = true;
+            autoGainRadio.checked = false;
+            autoIvaGainRadio.checked = false;
         }
+        updateAutoPrice();
     }
 
-    updateGainInput();
-    updateMinStockInput();
-    updateSalePriceInput();
-    updateReceiptPriceInput();
+    function updateAutoPrice(){
+        const isChecked = autoPriceCheckbox.checked;
+
+        if (!isChecked){
+            autoIvaRadio.checked = false;
+            autoGainRadio.checked = false;
+            autoIvaGainRadio.checked = false;
+            autoPriceTypeContainer.classList.remove('visible');
+        }
+        else{
+            autoPriceTypeContainer.classList.add('visible');
+            autoIvaRadio.checked = true;
+            autoGainRadio.checked = false;
+            autoIvaGainRadio.checked = false;
+
+            if (!gainCheckbox.checked){
+                autoGainRadio.disabled = true;
+                autoIvaGainRadio.disabled = true;
+            }
+            else{
+                autoGainRadio.disabled = false;
+                autoIvaGainRadio.disabled = false;
+            }
+        }
+    }
 
     gainCheckbox.addEventListener('change', updateGainInput);
     minStockCheckbox.addEventListener('change', updateMinStockInput);
     salePriceCheckbox.addEventListener('change', updateSalePriceInput);
     receiptPriceCheckbox.addEventListener('change', updateReceiptPriceInput);
+    autoPriceCheckbox.addEventListener('change', updateAutoPrice);
+
+    updateGainInput();
+    updateMinStockInput();
+    updateSalePriceInput();
+    updateReceiptPriceInput();
+    updateAutoPrice();
 }
 
 function getUserPreferences(){
@@ -209,6 +259,7 @@ function getUserPreferences(){
     const receiptPriceCheckbox = document.getElementById('receipt-price-input');
     const percentageRadio = document.getElementById('percentage-gain-input');
     const hardRadio = document.getElementById('hard-gain-input');
+    const autoPrice = document.getElementById('auto-price-input');
 
     const gainDefaultInput = document.getElementById('gain-default-input');
     const minStockDefaultInput = document.getElementById('min-stock-default-input');
@@ -220,14 +271,23 @@ function getUserPreferences(){
     const salePriceDefault = (salePriceDefaultInput.value === '') ? 0 : parseFloat(salePriceDefaultInput.value);
     const receiptPriceDefault = (receiptPriceDefaultInput.value === '') ? 0 : parseFloat(receiptPriceDefaultInput.value);
 
+    let auto_price_type;
+
+    if (autoPrice.checked){auto_price_type = document.querySelector('input[name="price-type"]:checked').value;}
+    else{auto_price_type = null;}
+
 
     const preferences = {
-        min_stock: {active: parseInt(minStockCheckbox.value,10), default: minStockDefault},
-        sale_price: {active: parseInt(salePriceCheckbox.value,10), default: salePriceDefault},
-        receipt_price: {active: parseInt(receiptPriceCheckbox.value,10), default: receiptPriceDefault},
-        percentage_gain: {active: parseInt(percentageRadio.value,10), default: gainDefault},
-        hard_gain: {active: parseInt(hardRadio.value,10), default: gainDefault}
+        min_stock: {active: (minStockCheckbox.checked) ? 1 : 0, default: minStockDefault},
+        sale_price: {active: (salePriceCheckbox.checked) ? 1 : 0, default: salePriceDefault},
+        receipt_price: {active: (receiptPriceCheckbox.checked) ? 1 : 0, default: receiptPriceDefault},
+        percentage_gain: {active: (percentageRadio.checked) ? 1 : 0, default: gainDefault},
+        hard_gain: {active: (hardRadio.checked) ? 1 : 0, default: gainDefault},
+        auto_price: (autoPrice.checked) ? 1 : 0,
+        auto_price_type: auto_price_type
     }
 
     return preferences;
 }
+
+/* ---------------------- FIN DE FUNCIONES DE NANO  ---------------------- */

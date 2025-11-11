@@ -32,45 +32,72 @@
                 <input type="text" id="dbNameInput" name="dbName" placeholder="Ej: Inventario Principal" required>
             </div>
 
-
-            <h2>Columnas Recomendadas</h2>
-
-            <div class="form-group flex-column" style="align-items: start;">
-                <div class="flex-row">
-                    <input type="checkbox" id="min-stock-input" name="min-stock" value="0">
-                    <h4 style="height: fit-content;">Stock Mínimo</h4>
+            <div style="border: var(--border-strong); border-radius: var(--border-radius); padding 0 5px;">
+                <div class="flex-row" style="width: 100%; align-items: center; justify-content: space-between; padding: 10px">
+                    <h5>Columnas Recomendadas</h5>
+                    <img src="./assets/img/arrow-pointing-down.png" alt="Flecha para abir o cerrar menú de dropdown." id="open-columnas-recomendadas-btn" style="height: 30px; padding: 10px">
                 </div>
-                <input style="width: 180px; justify-self: right;" type="text" id="min-stock-default-input" name="min-stock-default" placeholder="Valor por Defecto (0)">
-            </div>
-            <div class="form-group flex-column" style="align-items: start;">
-                <div class="flex-row">
-                    <input type="checkbox" id="sale-price-input" name="sale-price" value="0">
-                    <h4 style="height: fit-content;">Precio de Venta</h4>
-                </div>
-                <input style="width: 180px; justify-self: right;" type="text" id="sale-price-default-input" name="sale-price-default" placeholder="Valor por Defecto (0)">
-            </div>
-            <div class="form-group flex-column" style="align-items: start;">
-                <div class="flex-row">
-                    <input type="checkbox" id="receipt-price-input" name="receipt-price" value="0">
-                    <h4 style="height: fit-content;">Precio de Compra</h4>
-                </div>
-                <input style="width: 180px; justify-self: right;" type="text" id="receipt-price-default-input" name="receipt-price-default" placeholder="Valor por Defecto (0)">
-            </div>
-            <div class="form-group flex-column" style="align-items: start;">
-                <div class="flex-row">
-                    <input type="checkbox" id="gain-input" name="gain" value="0">
-                    <h4 style="height: fit-content;">Margen de Ganancia</h4>
-                </div>
-                <div class="flex-row">
-                    <input style="width: 180px; justify-self: right;" type="text" id="gain-default-input" name="gain-default" placeholder="Valor por Defecto (0)">
-                    <div class="form-group flex-column" style="align-items: start;">
-                        <div class="flex-row">
-                            <input type="radio" id="percentage-gain-input" name="gain-type" value="0">
-                            <p>Porcentaje</p>
+                <div id="recomended-columns-form" style="padding-top: 0">
+                    <div class="form-group flex-column recomended-column-group">
+                        <input type="checkbox" class="hidden-checkbox" id="min-stock-input" name="min-stock" value="0">
+                        <label for="min-stock-input" class="btn btn-secondary btn-checkbox-toggle" style="font-size: 13px;">
+                            Stock Mínimo
+                        </label>
+                        <input style="width: 180px;" class="default-value-input" type="text" id="min-stock-default-input" name="min-stock-default" placeholder="Valor por Defecto (0)">
+                    </div>
+                    <div class="form-group flex-column recomended-column-group">
+                        <input type="checkbox" class="hidden-checkbox" id="sale-price-input" name="sale-price" value="0">
+                        <label for="sale-price-input" class="btn btn-secondary btn-checkbox-toggle" style="font-size: 13px;">
+                            Precio de Venta
+                        </label>
+                        <input style="width: 180px;" class="default-value-input" type="text" id="sale-price-default-input" name="sale-price-default" placeholder="Valor por Defecto (0)">
+                    </div>
+                    <div class="form-group flex-column recomended-column-group">
+                        <div class="flex-column all-center" style="gap: 10px">
+                            <input type="checkbox" class="hidden-checkbox" id="receipt-price-input" name="receipt-price" value="0">
+                            <label for="receipt-price-input" class="btn btn-secondary btn-checkbox-toggle" style="font-size: 13px;">
+                                Precio de Compra
+                            </label>
                         </div>
+                        <input style="width: 180px;" class="default-value-input" type="text" id="receipt-price-default-input" name="receipt-price-default" placeholder="Valor por Defecto (0)">
+                        <div class="flex-column" style="position: relative; z-index: 10;">
+                            <input type="checkbox" class="hidden-checkbox" id="auto-price-input" name="auto-price" value="0">
+                            <label for="auto-price-input" id="auto-price-checkbox" class="btn btn-secondary btn-checkbox-toggle" style="font-size: 11px;">
+                                Calcular Automaticamente
+                            </label>
+                            <div class="form-group flex-column" id="auto-price-type-container" style="align-items: start;">
+                                <div class="flex-row">
+                                    <input type="radio" id="auto-iva-input" name="price-type" value="iva">
+                                    <p>Precio de Venta + IVA 21%</p>
+                                </div>
+                                <div class="flex-row">
+                                    <input type="radio" id="auto-gain-input" name="price-type" value="gain">
+                                    <p>Precio de Venta + Margen de Ganancia</p>
+                                </div>
+                                <div class="flex-row">
+                                    <input type="radio" id="auto-iva-gain-input" name="price-type" value="gain-iva">
+                                    <p>Precio de Venta + Margen de Ganancia + IVA 21%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group flex-column recomended-column-group">
+                        <input type="checkbox" class="hidden-checkbox" id="gain-input" name="gain" value="0">
+                        <label for="gain-input" class="btn btn-secondary btn-checkbox-toggle" style="font-size: 13px;">
+                            Margen de Ganancia
+                        </label>
                         <div class="flex-row">
-                            <input type="radio" id="hard-gain-input" name="gain-type" value="0">
-                            <p>Valor Fijo</p>
+                            <input style="width: 180px;" class="default-value-input" type="text" id="gain-default-input" name="gain-default" placeholder="Valor por Defecto (0)">
+                            <div class="form-group flex-column" id="gain-type-container" style="align-items: start;">
+                                <div class="flex-row">
+                                    <input type="radio" id="percentage-gain-input" name="gain-type">
+                                    <p>Porcentaje</p>
+                                </div>
+                                <div class="flex-row">
+                                    <input type="radio" id="hard-gain-input" name="gain-type">
+                                    <p>Valor Fijo</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -8,6 +8,7 @@ use App\core\Database;
 use App\Models\InventoryModel;
 
 try {
+
     $pdo = Database::getInstance();
     $inventoryModel = new InventoryModel();
 

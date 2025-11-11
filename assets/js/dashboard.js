@@ -73,401 +73,6 @@ async function handleStockUpdate(event) {
         cell.querySelectorAll('button, input').forEach(el => el.disabled = false);
     }
 }
-// -- Estadisticas --
-
-async function updateDailyStatistics(inventoryId) {
-    const hourlyStatistics = await api.getDailyStatistics(inventoryId);
-    if (hourlyStatistics){
-        const groupedStatistics = groupHourlyData(hourlyStatistics);
-        populateGroupedStatistics(groupedStatistics);
-        populateHourlyGraphs(hourlyStatistics);
-    }
-}
-
-function createCharts(){
-    const stockIngresado = document.getElementById('stock-ingresado-graph');
-    const stockVendido = document.getElementById('stock-vendido-graph');
-    const ventas = document.getElementById('ventas-graph');
-    const compras = document.getElementById('compras-graph');
-    const gastos = document.getElementById('gastos-graph');
-    const ingresos = document.getElementById('ingresos-graph');
-    const ganancias = document.getElementById('ganancias-graph');
-    const clientes = document.getElementById('clientes-graph');
-    const proveedores = document.getElementById('proveedores-graph');
-
-    var options = {
-        name:{
-        },
-        chart: {
-            type: 'area',
-            height: 600,
-            width: 500
-        },
-        series: [],
-        xaxis: {
-            categories: []
-        },
-        noData: {
-            text: "Cargando datos..." // Mensaje mientras no hay datos
-        }
-    };
-
-    const stockIngresadoChart = new ApexCharts(stockIngresado,options);
-    stockIngresadoChart.render();
-    stockIngresado.myChartInstance = stockIngresadoChart;
-
-    const stockVendidoChart = new ApexCharts(stockVendido,options);
-    stockVendidoChart.render();
-    stockVendido.myChartInstance = stockVendidoChart;
-
-    const gastosChart = new ApexCharts(gastos,options);
-    gastosChart.render();
-    gastos.myChartInstance = gastosChart;
-
-    const ingresosChart = new ApexCharts(ingresos,options);
-    ingresosChart.render();
-    ingresos.myChartInstance = ingresosChart;
-
-    const gananciasChart = new ApexCharts(ganancias,options);
-    gananciasChart.render();
-    ganancias.myChartInstance = gananciasChart;
-
-    const clientesChart = new ApexCharts(clientes,options);
-    clientesChart.render();
-    clientes.myChartInstance = clientesChart;
-
-    const proveedoresChart = new ApexCharts(proveedores,options);
-    proveedoresChart.render();
-    proveedores.myChartInstance = proveedoresChart;
-
-    const ventasChart = new ApexCharts(ventas,options);
-    ventasChart.render();
-    ventas.myChartInstance = ventasChart;
-
-    const comprasChart = new ApexCharts(compras,options);
-    comprasChart.render();
-    compras.myChartInstance = comprasChart;
-
-}
-
-function setupStatPickers(){
-    const statPickers = document.querySelectorAll('.daily-stat-item');
-    statPickers.forEach(picker => {
-        picker.addEventListener('click', () => {
-            document.querySelectorAll('.stat-graph').forEach(graph => graph.classList.add('hidden'));
-
-            const graphContainerID = picker.dataset.graph + '-container';
-            console.log(graphContainerID);
-
-            const containerToShow = document.getElementById(graphContainerID);
-            containerToShow.classList.remove('hidden');
-
-        })
-    })
-}
-
-function populateHourlyGraphs(hourlyStatistics){
-
-    const hours = [];
-    const currentHour = new Date().getHours();
-    var i;
-
-    for (i = 0; i <= currentHour ; i++){
-        hours.push(i + " hs");
-    }
-
-    const stockIngresado = document.getElementById('stock-ingresado-graph');
-    const stockVendido = document.getElementById('stock-vendido-graph');
-    const ventas = document.getElementById('ventas-graph');
-    const compras = document.getElementById('compras-graph');
-    const gastos = document.getElementById('gastos-graph');
-    const ingresos = document.getElementById('ingresos-graph');
-    const ganancias = document.getElementById('ganancias-graph');
-    const clientes = document.getElementById('clientes-graph');
-    const proveedores = document.getElementById('proveedores-graph');
-
-    var options = {
-        chart: {
-            type: 'area',
-            height: 600,
-            width: 500
-        },
-        series: [{
-            data: hourlyStatistics.stock.stockIngresado
-        }],
-        xaxis: {
-            categories: hours
-        }
-    };
-
-    const stockIngresadoChart = stockIngresado.myChartInstance;
-    stockIngresadoChart.updateOptions(options);
-
-    options = {
-        chart: {
-            type: 'area',
-            height: 600,
-            width: 500
-        },
-        series: [{
-            data: hourlyStatistics.stock.stockVendido
-        }],
-        xaxis: {
-            categories: hours
-        }
-    };
-    const stockVendidoChart = stockVendido.myChartInstance;
-    stockVendidoChart.updateOptions(options);
-
-    options = {
-        chart: {
-            type: 'area',
-            height: 600,
-            width: 500
-        },
-        series: [{
-            data: hourlyStatistics.monetarias.gastos
-        }],
-        xaxis: {
-            categories: hours
-        }
-    };
-    const gastosChart = gastos.myChartInstance;
-    gastosChart.updateOptions(options);
-
-    options = {
-        chart: {
-            type: 'area',
-            height: 600,
-            width: 500
-        },
-        series: [{
-            data: hourlyStatistics.monetarias.ingresos
-        }],
-        xaxis: {
-            categories: hours
-        }
-    };
-    const ingresosChart = ingresos.myChartInstance;
-    ingresosChart.updateOptions(options);
-
-    options = {
-        chart: {
-            type: 'area',
-            height: 600,
-            width: 500
-        },
-        series: [{
-            data: hourlyStatistics.monetarias.ganancias
-        }],
-        xaxis: {
-            categories: hours
-        }
-    };
-    const gananciasChart = ganancias.myChartInstance;
-    gananciasChart.updateOptions(options);
-
-    options = {
-        chart: {
-            type: 'area',
-            height: 600,
-            width: 500
-        },
-        series: [{
-            data: hourlyStatistics.transacciones.ventasRealizadas
-        }],
-        xaxis: {
-            categories: hours
-        }
-    };
-    const ventasChart = ventas.myChartInstance;
-    ventasChart.updateOptions(options);
-
-    options = {
-        chart: {
-            type: 'area',
-            height: 600,
-            width: 500
-        },
-        series: [{
-            data: hourlyStatistics.transacciones.comprasRealizadas
-        }],
-        xaxis: {
-            categories: hours
-        }
-    };
-    const comprasChart = compras.myChartInstance;
-    comprasChart.updateOptions(options);
-
-    options = {
-        chart: {
-            type: 'area',
-            height: 600,
-            width: 500
-        },
-        series: [{
-            data: hourlyStatistics.conexiones.nuevosClientes
-        }],
-        xaxis: {
-            categories: hours
-        }
-    };
-    const clientesChart = clientes.myChartInstance;
-    clientesChart.updateOptions(options);
-
-    options = {
-        chart: {
-            type: 'area',
-            height: 600,
-            width: 500
-        },
-        series: [{
-            data: hourlyStatistics.conexiones.nuevosProveedores
-        }],
-        xaxis: {
-            categories: hours
-        }
-    };
-    const proveedoresChart = proveedores.myChartInstance;
-    proveedoresChart.updateOptions(options);
-}
-
-function populateGroupedStatistics(stats){
-    const stockIngresado = document.getElementById('daily-stock-ingresado');
-    const stockVendido = document.getElementById('daily-stock-vendido');
-    const gastos = document.getElementById('daily-gastos');
-    const ingresos = document.getElementById('daily-ingresos');
-    const ganancias = document.getElementById('daily-ganancias');
-    const clientes = document.getElementById('daily-clientes');
-    const proveedores = document.getElementById('daily-proveedores');
-    const ventas = document.getElementById('daily-ventas');
-    const compras = document.getElementById('daily-compras');
-
-    stockIngresado.innerHTML = stats.stock.stockIngresado;
-    stockVendido.innerHTML = stats.stock.stockVendido;
-    gastos.innerHTML = stats.monetarias.gastos;
-    ingresos.innerHTML = stats.monetarias.ingresos;
-    ganancias.innerHTML = stats.monetarias.ganancias;
-    clientes.innerHTML = stats.conexiones.nuevosClientes;
-    proveedores.innerHTML = stats.conexiones.nuevosProveedores;
-    ventas.innerHTML = stats.transacciones.ventasRealizadas;
-    compras.innerHTML = stats.transacciones.comprasRealizadas;
-}
-
-function groupHourlyData(hourlyData) {
-    var groupedData = {
-        conexiones: {
-            nuevosClientes: 0,
-            nuevosProveedores: 0
-        },
-        transacciones: {
-            ventasRealizadas: 0,
-            comprasRealizadas: 0
-        },
-        stock: {
-            stockIngresado: 0,
-            stockVendido: 0
-        },
-        monetarias: {
-            gastos: 0,
-            ingresos: 0,
-            ganancias: 0
-        }
-    };
-
-    groupedData.conexiones.nuevosClientes = hourlyData.conexiones.nuevosClientes.reduce((acum,valor) => {
-        return acum + valor;
-    })
-    groupedData.conexiones.nuevosProveedores = hourlyData.conexiones.nuevosProveedores.reduce((acum,valor) => {
-        return acum + valor;
-    })
-    groupedData.transacciones.ventasRealizadas = hourlyData.transacciones.ventasRealizadas.reduce((acum,valor) => {
-        return acum + valor;
-    })
-    groupedData.transacciones.comprasRealizadas = hourlyData.transacciones.comprasRealizadas.reduce((acum,valor) => {
-        return acum + valor;
-    })
-    groupedData.stock.stockIngresado = hourlyData.stock.stockIngresado.reduce((acum,valor) => {
-        return acum + valor;
-    })
-    groupedData.stock.stockVendido = hourlyData.stock.stockVendido.reduce((acum,valor) => {
-        return acum + valor;
-    })
-    groupedData.monetarias.gastos = hourlyData.monetarias.gastos.reduce((acum,valor) => {
-        return acum + valor;
-    })
-    groupedData.monetarias.ingresos = hourlyData.monetarias.ingresos.reduce((acum,valor) => {
-        return acum + valor;
-    })
-    groupedData.monetarias.ganancias = hourlyData.monetarias.ganancias.reduce((acum,valor) => {
-        return acum + valor;
-    })
-
-    return groupedData;
-}
-
-async function setupInventoryPicker() {
-    const user = await api.getUserProfile();
-    if (user){
-        const inventories = user['databases'];
-
-        const inventoriesDropdown = document.getElementById('inventories-dropdown');
-
-        inventories.forEach(inventory => {
-            const inventoryBtn = document.createElement('div');
-
-            inventoryBtn.className = 'inventory-btn';
-            inventoryBtn.dataset.value = inventory.id;
-            inventoryBtn.innerHTML = `<h4>${inventory.name}</h4>`;
-
-                inventoriesDropdown.appendChild(inventoryBtn);
-        })
-
-        const inventoryPicker = document.getElementById('inventory-picker');
-
-
-        const allBtns = inventoriesDropdown.querySelectorAll('.inventory-btn');
-        allBtns.forEach(btn =>{
-            btn.addEventListener('click', () => {
-                updateDailyStatistics(btn.dataset.value);
-                inventoryPicker.innerHTML = `<h4>${btn.innerHTML}</h4>`;
-            })
-        })
-
-
-
-        inventoryPicker.addEventListener('click', () => {
-            if(!inventoryPicker.classList.contains('clicked')){
-                inventoriesDropdown.classList.remove('hidden');
-                inventoryPicker.classList.add('clicked');
-            }
-            else{
-                inventoriesDropdown.classList.add('hidden');
-                inventoryPicker.classList.remove('clicked');
-            }
-        });
-
-        window.addEventListener('click', (event) => {
-            if (inventoryPicker.classList.contains('clicked') && !inventoryPicker.contains(event.target) &&
-                !inventoriesDropdown.contains(event.target)) {
-                inventoriesDropdown.classList.add('hidden');
-                inventoryPicker.classList.remove('clicked');
-            }
-        });
-
-        inventoriesDropdown.addEventListener('click', () => {
-            if(!inventoryPicker.classList.contains('clicked')){
-                inventoriesDropdown.classList.remove('hidden');
-                inventoryPicker.classList.add('clicked');
-            }
-            else{
-                inventoriesDropdown.classList.add('hidden');
-                inventoryPicker.classList.remove('clicked');
-            }
-        });
-
-    }
-}
 
 
 // -- Renderizado de Tabla --
@@ -516,6 +121,12 @@ async function renderTable(columns, data) {
     } else {
         // Estado con datos
         // Renderizo cabeceras (con primera letra mayúscula)
+
+
+        /* ---------------------- CODIGO DE NANO  ---------------------- */
+
+
+        //Genere switch-cases para las columnas recomendadas de la tabla actual.
         tableHead.innerHTML = `<tr>${columns.map(col => {
             switch (col.toLowerCase()) {
                 case 'id':
@@ -536,7 +147,19 @@ async function renderTable(columns, data) {
                     return '';
                 case 'receipt_price':
                     if (inventoryPreferences.receipt_price === 1) {
-                        return `<th>Precio de Compra</th>`;
+                        let autoType;
+                        switch (inventoryPreferences.auto_price_type) {
+                            case 'iva':
+                                autoType = 'IVA';
+                                break;
+                            case 'gain':
+                                autoType = 'Margen de Ganancia';
+                                break;
+                            default:
+                                autoType = 'IVA + Margen de Ganancia';
+                                break
+                        }
+                        return `<th>Precio de Compra ${(inventoryPreferences.auto_price === 1) ? '<br>(Calculado con ' + autoType  + ')' : ''}</th>`;
                     }
                     return '';
                 case 'hard_gain':
@@ -604,6 +227,8 @@ async function renderTable(columns, data) {
             }).join('')}
             </tr>`;
         }).join('');
+
+        /* ---------------------- FIN CODIGO DE NANO  ---------------------- */
     }
 }
 
@@ -648,50 +273,13 @@ function setupMenuNavigation() {
     console.log("Navegación del menú lateral configurada.");
 }
 
-async function checkPreferences(){
-    const preferences = await api.getCurrentInventoryPreferences();
-
-    if(!preferences.success){
-        alert("Ha ocurrido un error al obtener las preferencias del usuario. Serás redirigido para volver a seleccionar el inventario.");
-        window.location.href = '/select-db.php';
-    }
-
-    console.log(preferences)
-
-    if (preferences.sale_price !== 1 || preferences.receipt_price !== 1){
-        const ventasContainer = document.getElementById('sales');
-        const comprasContainer = document.getElementById('receipts');
-        const estadisticasContainer = document.getElementById('analysis');
-
-        ventasContainer.querySelector('.menu-container').classList.add('hidden');
-        comprasContainer.querySelector('.menu-container').classList.add('hidden');
-        estadisticasContainer.querySelector('.menu-container').classList.add('hidden');
-
-        const notAvailableContainers = document.querySelectorAll('.not-available-container');
-
-        notAvailableContainers.forEach(container => {
-            const innerText = container.querySelector('.missing-preference-text');
-            innerText.innerHTML += `<p>${(preferences.sale_price !== 1) ? "Precio de venta" : ""}</p>`;
-            innerText.innerHTML += `<p>${(preferences.receipt_price !== 1) ? "Precio de Compra" : ""}</p>`;
-            container.classList.remove('hidden');
-        })
-    }
-    else{
-
-    }
-
-
-}
-
 // ---- 4. INICIALIZACIÓN ----
 async function init() {
     console.log("[INIT] Iniciando dashboard...");
 
     /* ---------------------- CODIGO DE NANO  ---------------------- */
 
-
     //PREPARA EL HEADER CORRECTAMENTE
-
 
     const nav = document.getElementById('header-nav');
     if (nav) nav.innerHTML = `
@@ -706,8 +294,6 @@ async function init() {
                 </div>
             </div>   
                            `;
-
-
 
     //PREPARA LOS FONDOS GRISES DE LOS MODALES
     setupReturnBtn();
@@ -785,7 +371,12 @@ async function init() {
         }
     }
 
-    await checkPreferences();
+    /* ---------------------- CODIGO DE NANO  ---------------------- */
+
+
+    //PREPARO FUNCIONALIDADES EXTRA
+
+    //Lo voy a acomodar mejor despues!!
 
     setupOrderBy();
 
@@ -799,23 +390,79 @@ async function init() {
     createCharts();
     setupStatPickers();
 
-    await updateDailyStatistics('all');
     await setupInventoryPicker();
-    setupRecomendedColumns();
+    await updateDailyStatistics('all');
+    await setupRecomendedColumns();
 
     getReloadVariables();
+
+    /* ---------------------- FIN CODIGO DE NANO  ---------------------- */
 }
 
 async function createEditableRow(columns) {
     const tr = document.createElement('tr');
     tr.classList.add('editing-row'); // Clase para estilos específicos
 
-    const inventoryPreferences = await api.getCurrentInventoryPreferences();
+    /* ---------------------- CODIGO DE NANO  ---------------------- */
 
+    //Consigo preferencias y defaults para columnas recomendadas de la tabla actual
+
+    const inventoryPreferences = await api.getCurrentInventoryPreferences();
     if (!inventoryPreferences.success) {
         console.error("Error crítico: No se encontraron las preferencias del inventario.");
         return;
     }
+
+    const inventoryDefaults = await api.getCurrentInventoryDefaults();
+    if (!inventoryDefaults.success) {
+        console.error("Error crítico: No se encontraron los defaults del inventario.");
+        return;
+    }
+
+    //Declaro variables para la asignación automatica de precio de Compra
+
+    let receiptPrice = parseFloat(inventoryDefaults.receipt_price);
+    let salePrice = parseFloat(inventoryDefaults.sale_price);
+    let gainValue = parseFloat(inventoryDefaults.hard_gain);
+
+    let receiptPriceInput = null;
+    let salePriceInput = null;
+    let gainValueInput = null;
+
+    function getAutoPrice(){
+        let autoPrice;
+        const type = inventoryPreferences.auto_price_type;
+
+        try{
+            switch (type) {
+                case 'iva':
+                    autoPrice = parseFloat(salePrice) * 1.21;
+                    break;
+                case 'gain':
+                    if (inventoryPreferences.percentage_gain === 1) {
+                        autoPrice = parseFloat(salePrice) * (1 + (parseFloat(gainValue) / 100));
+                    }
+                    else {autoPrice = parseFloat(salePrice) + parseFloat(gainValue);}
+                    break;
+                default:
+                    autoPrice = parseFloat(salePrice) * 1.21;
+                    if (inventoryPreferences.percentage_gain === 1) {
+                        autoPrice = autoPrice * (1 + (parseFloat(gainValue) / 100));
+                    }
+                    else {autoPrice += parseFloat(gainValue);}
+                    break;
+            }
+            if (isNaN(autoPrice)){autoPrice = inventoryDefaults.receipt_price;}
+            return autoPrice;
+        }
+        catch(error){
+            //Si algo salió mal, devuelvo el valor por defecto.
+            console.log('Entrada Invalida. Valor de Compra no actualizado');
+            return inventoryDefaults.receipt_price;
+        }
+    }
+
+    // CREE EL SWITCH para cada columna recomendada, se le asignan sus valores por defecto automaticamente.
 
     columns.forEach(col => {
         const td = document.createElement('td');
@@ -831,11 +478,19 @@ async function createEditableRow(columns) {
                  <input type="number" class="stock-input" value="0" min="0" data-column="${col}"> 
                  <button class="stock-btn plus" disabled>+</button>`;
                 break;
+            case 'name':
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.placeholder = 'Nombre';
+                nameInput.dataset.column = col; // Guardo el nombre de la columna acá
+                td.appendChild(nameInput);
+                break;
             case 'min_stock':
                 if (inventoryPreferences.min_stock === 1) {
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.placeholder = 'Stock Mínimo';
+                    input.value = inventoryDefaults.min_stock;
                     input.dataset.column = col; // Guardo el nombre de la columna acá
                     td.appendChild(input);
                 }
@@ -846,8 +501,12 @@ async function createEditableRow(columns) {
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.placeholder = 'Precio de Venta';
+                    input.value = salePrice;
                     input.dataset.column = col; // Guardo el nombre de la columna acá
                     td.appendChild(input);
+
+                    //Guardo el input en variables globales para utilizarlos en el calculo del precio de compra
+                    salePriceInput = input;
                 }
                 else{return}
                 break;
@@ -856,6 +515,12 @@ async function createEditableRow(columns) {
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.placeholder = 'Precio de Compra';
+                    console.log(receiptPrice);
+                    input.value = receiptPrice;
+
+                    //Guardo el input en variables globales para utilizarlos en el calculo del precio de compra
+                    receiptPriceInput = input;
+
                     input.dataset.column = col; // Guardo el nombre de la columna acá
                     td.appendChild(input);
                 }
@@ -866,6 +531,11 @@ async function createEditableRow(columns) {
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.placeholder = 'Margen de Ganancia';
+                    input.value = gainValue;
+
+                    //Guardo el input en variables globales para utilizarlos en el calculo del precio de compra
+                    gainValueInput = input;
+
                     input.dataset.column = col; // Guardo el nombre de la columna acá
                     td.appendChild(input);
                 }
@@ -876,6 +546,11 @@ async function createEditableRow(columns) {
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.placeholder = 'Margen de Ganancia';
+                    input.value = gainValue;
+
+                    //Guardo el input en variables globales para utilizarlos en el calculo del precio de compra
+                    gainValueInput = input;
+
                     input.dataset.column = col; // Guardo el nombre de la columna acá
                     td.appendChild(input);
                 }
@@ -891,6 +566,28 @@ async function createEditableRow(columns) {
         }
         tr.appendChild(td);
     });
+
+    //Si el usuario tiene activo el calculo automático de precio de compra, lo calculo
+
+    if (inventoryPreferences.auto_price === 1) {
+        const updateReceiptPrice = () => {
+            salePrice = salePriceInput.value;
+            if (gainValueInput){gainValue = gainValueInput.value;}
+            else {gainValue = 0;}
+
+            if (gainValue === ''){gainValue = 0;}
+            if (salePrice === ''){salePrice = 0;}
+            receiptPrice = getAutoPrice();
+            receiptPriceInput.value = receiptPrice.toFixed(2);
+        };
+
+        salePriceInput.addEventListener('input', updateReceiptPrice);
+        if (gainValueInput){gainValueInput.addEventListener('input', updateReceiptPrice)};
+
+        updateReceiptPrice();
+    }
+
+    /* ---------------------- FIN CODIGO DE NANO  ---------------------- */
 
     const actionTd = document.createElement('td');
     actionTd.classList.add('action-buttons');
@@ -948,7 +645,7 @@ async function handleSaveNewRow(event) {
         const result = await api.addItemToTable(newItemData); // Llamo a la API
         if (result.success && result.newItem) {
             allData.unshift(result.newItem); // Añado el nuevo item al principio de mis datos locales
-            renderTable(currentTableColumns, allData); // Vuelvo a renderizar toda la tabla
+            await renderTable(currentTableColumns, allData); // Vuelvo a renderizar toda la tabla
         } else {
             throw new Error(result.message || "Error al guardar la fila.");
         }
@@ -1022,7 +719,11 @@ async function handleConfirmDelete() {
     }
 }
 
+
+
 /* ---------------------- FUNCIONES DE NANO  ---------------------- */
+
+
 
 function getReloadVariables(){
     const urlParams = new URLSearchParams(window.location.search);
@@ -1216,18 +917,21 @@ function setupTransactions(){
     const newTransacionButtons = document.querySelectorAll('.new-transaction-btn');
     const greyBg = document.getElementById('grey-background');
 
+    configTransactionModalsReturn();
+    configureTablePickerDropdown();
+
     newTransacionButtons.forEach(button =>{
-        button.addEventListener('click', () =>{
+        button.addEventListener('click', async () =>{
             const transactionModal = document.getElementById('new-transaction-container');
             transactionModal.classList.remove('hidden');
             greyBg.classList.remove('hidden');
-            populateTransactionContainer(button.dataset.transaction);
+            await populateTransactionContainer(button.dataset.transaction);
         })
     })
 }
 
 //Llena el modal de transacción segun la transacción elegida
-function populateTransactionContainer(transactionType){
+async function populateTransactionContainer(transactionType){
     const transactionFormContainer = document.getElementById('transaction-form-container');
     let itemList= [];
 
@@ -1235,11 +939,11 @@ function populateTransactionContainer(transactionType){
 
     if (transactionType === 'sale' || transactionType ===  'receipt'){
             //Prepara el selector de productos
-            populateProductPicker(itemList,transactionType);
+            await populateProductPicker(itemList,transactionType);
             //Prepara el selector de clientes
-            populateTransactionClientList();
+            await populateTransactionClientList();
             //Prepara el selector de provedores
-            populateTransactionProviderList();
+            await populateTransactionProviderList();
             //Prepara los botones para subir/bajar la cantidad de productos
             setupQuantityBtns(transactionType,itemList);
             //Prepara los botones para eliminar items de la lista
@@ -1253,8 +957,6 @@ function populateTransactionContainer(transactionType){
     else if (transactionType === 'customer') {configCreateClientBtn(); }
     else {configCreateProviderBtn(); }
 
-    configTransactionModalsReturn();
-
     //Prepara los botones que completan las transacciones de compra/venta
     setupCompleteTransactionBtn(itemList);
 
@@ -1263,9 +965,11 @@ function populateTransactionContainer(transactionType){
 function configTransactionModalsReturn(){
     const returnBtn = document.getElementById('modal-return-btn');
     const transactionPickerModals = document.getElementById('transaction-picker-modal');
+    const itemPickerHeader = document.getElementById('item-picker-header');
 
     returnBtn.addEventListener('click', () => {
         transactionPickerModals.classList.add('hidden');
+        itemPickerHeader.classList.add('hidden');
     })
 }
 
@@ -1563,24 +1267,34 @@ function addProduct(selectedProduct,itemList,transactionType) {
 }
 
 async function populateProductPicker(itemList,transactionType){
-    const user = await api.getUserProfile();
-    if (user){
-        const tables = user['databases'];
+    const response = await api.getUserVerifiedTables();
+    if (!response.success) {showTransactionError(response.error); return;}
 
-        populateTablePicker(tables);
-        configureTablePickers();
+    const tables = response['verifiedInventories'];
 
-        //LA VARIABLE PRODUCTOS DEBE HACER UN FETCH A LA API PARA OBTENER TODOS LOS PRODUCTOS DEL USUARIO
+    populateTablePicker(tables);
+    configureTablePickers();
 
-        const response = await api.getAllProducts();
+    let products = [];
 
-        if (!response.success) {showTransactionError(response.error); return;}
+    try {
+        for (const table of tables){
+            const response = await api.getTableProducts(table.id);
+            if (!response.success) {showTransactionError(response.error);return;}
 
-        const products = response.productList;
+            const tableProducts = response.productList;
+            if (tableProducts.length === 0) {continue;}
 
-        populateProductModal(products,tables);
-        configureProductSelection(products,itemList,transactionType);
+            products.push(...tableProducts);
+        }
+    } catch (error) {
+        console.error("Error al procesar los inventarios del usuario:", error);
+        showTransactionError("Error inesperado de conexión.");
+        return;
     }
+
+    populateProductModal(products,tables);
+    configureProductSelection(products,itemList,transactionType);
 }
 
 function populateTablePicker(tables){
@@ -1593,7 +1307,7 @@ function populateTablePicker(tables){
     const tableItem = document.createElement('div');
 
     tableItem.dataset.tID = 'all';
-    tableItem.innerHTML = 'Todas';
+    tableItem.innerHTML = 'Todos';
     tableItem.className = 'product-table-picker';
 
     inventoryPicker.appendChild(tableItem);
@@ -1613,11 +1327,16 @@ function populateTablePicker(tables){
 function populateProductModal(products, tables){
     const itemPickerBody = document.getElementById('item-list');
 
+    itemPickerBody.innerHTML = '';
+
     const allProductsDiv = document.createElement('div');
-    allProductsDiv.className = 'hidden flex-column product-list';
+    allProductsDiv.className = 'flex-column product-list';
     allProductsDiv.id = 'all';
 
+    let emptyList = true;
+
     products.forEach(product => {
+        emptyList = false;
         const item = document.createElement('div');
         item.dataset.tID = product.tID;
         item.dataset.pID = product.pID;
@@ -1626,6 +1345,8 @@ function populateProductModal(products, tables){
         allProductsDiv.appendChild(item);
     })
 
+    if (emptyList) {allProductsDiv.innerHTML = '<h3>No hay productos en el inventario</h3>';}
+
     const productListWrapper = document.createElement('div');
     productListWrapper.className = 'hidden';
     productListWrapper.id = 'product-list-wrapper';
@@ -1633,12 +1354,14 @@ function populateProductModal(products, tables){
     itemPickerBody.appendChild(allProductsDiv);
 
     tables.forEach(table => {
+        emptyList = true;
         const tableProductsDiv = document.createElement('div');
         tableProductsDiv.className = 'hidden flex-column product-list';
         tableProductsDiv.id = table.id;
 
         products.forEach(product => {
             if (product.tID !== table.id) return;
+            emptyList = false;
             const item = document.createElement('div');
             item.dataset.tID = product.tID;
             item.dataset.pID = product.pID;
@@ -1646,6 +1369,7 @@ function populateProductModal(products, tables){
             item.className = 'product-item';
             tableProductsDiv.appendChild(item);
         })
+        if (emptyList) {tableProductsDiv.innerHTML = '<h3>No hay productos en el inventario</h3>';}
         productListWrapper.appendChild(tableProductsDiv);
     })
     itemPickerBody.appendChild(productListWrapper);
@@ -1675,11 +1399,26 @@ function configureProductSelection(products,itemList,transactionType){
     })
 }
 
+function configureTablePickerDropdown(){
+    const inventoryPickerName = document.getElementById('inventory-picker-name');
+    const itemPickerHeader = document.getElementById('item-picker-header');
+
+    inventoryPickerName.addEventListener('click', () => {
+        itemPickerHeader.classList.toggle('hidden');
+    })
+}
+
 function configureTablePickers(){
     const tablePickers = document.querySelectorAll('.product-table-picker');
+
     tablePickers.forEach(table => {
         table.addEventListener('click', () => {
             const tableID = table.dataset.tID;
+            const itemPickerHeader = document.getElementById('item-picker-header');
+            const inventoryPickerName = document.getElementById('inventory-picker-name');
+
+            itemPickerHeader.classList.add('hidden');
+            inventoryPickerName.innerHTML = table.innerHTML;
             showProductList(tableID);
         })
     })
@@ -2100,8 +1839,6 @@ function populateClientModal(clients){
     clientsByDniAsc.forEach(client =>{
         customerDniAscending.innerHTML += createClientRow(client);
     })
-    /*console.log('Clientes Ordenados Cantidad de Ventas descendiendo = ' + clients.sales.descending);
-    console.log('Clientes Ordenados Cantidad de Ventas ascendiendo = ' + clients.sales.ascending);*/
 }
 
 function createClientRow (client){
@@ -2401,6 +2138,8 @@ function hideTransactionSuccess(){
 
 async function setupRecomendedColumns(){
     const preferences = await api.getCurrentInventoryPreferences();
+    const form = document.getElementById('recomended-columns-form');
+
     if (!preferences.success) {
         console.error("Error crítico: No se encontraron las preferencias del inventario." + preferences.error);
         return;
@@ -2412,18 +2151,30 @@ async function setupRecomendedColumns(){
         return;
     }
 
-    console.log(defaults);
+    const openColumnasRecomendadasBtn = document.getElementById('open-columnas-recomendadas-btn');
+
+    openColumnasRecomendadasBtn.addEventListener('click', () => {
+        form.classList.toggle('visible');
+        openColumnasRecomendadasBtn.classList.toggle('is-rotated');
+    })
 
     const gainCheckbox = document.getElementById('gain-input');
     const minStockCheckbox = document.getElementById('min-stock-input');
     const salePriceCheckbox = document.getElementById('sale-price-input');
     const receiptPriceCheckbox = document.getElementById('receipt-price-input');
-
     const percentageRadio = document.getElementById('percentage-gain-input');
     const hardRadio = document.getElementById('hard-gain-input');
 
-    percentageRadio.addEventListener('change', updatePercentageRadio);
-    hardRadio.addEventListener('change', updateHardRadio);
+    const autoPriceCheckbox = document.getElementById('auto-price-input');
+    const autoIvaRadio = document.getElementById('auto-iva-input');
+    const autoGainRadio = document.getElementById('auto-gain-input');
+    const autoIvaGainRadio = document.getElementById('auto-iva-gain-input');
+
+    const autoPriceLabel = document.getElementById('auto-price-checkbox');
+
+    const autoPriceTypeContainer = document.getElementById('auto-price-type-container');
+
+    autoPriceCheckbox.checked = (preferences.auto_price === 1);
 
     gainCheckbox.checked = (preferences.percentage_gain === 1 || preferences.hard_gain === 1);
     minStockCheckbox.checked = (preferences.min_stock === 1);
@@ -2431,43 +2182,35 @@ async function setupRecomendedColumns(){
     receiptPriceCheckbox.checked = (preferences.receipt_price === 1);
     percentageRadio.checked = (preferences.percentage_gain === 1);
     hardRadio.checked = (preferences.hard_gain === 1);
-    function updatePercentageRadio() {
-        percentageRadio.value = 1;
-        percentageRadio.checked = true;
-        hardRadio.value = 0;
-        hardRadio.checked = false;
-    }
 
-    function updateHardRadio(){
-        hardRadio.value = 1;
-        hardRadio.checked = true;
-        percentageRadio.value = 0;
-        percentageRadio.checked = false;
-    }
-    const minStockDefault = document.getElementById('min-stock-default-input');
-    const saveBtn = document.getElementById('save-changes-btn');
+    const minStockDefaultInput = document.getElementById('min-stock-default-input');
+    minStockDefaultInput.value = (minStockCheckbox.checked) ? defaults.min_stock : '';
 
-    minStockDefault.addEventListener('input', () => {
-        if (parseInt(minStockDefault.value,10) !== defaults.min_stock && minStockDefault.value !== ''){
-            saveBtn.disabled = false;
-        }
-        else{
-            saveBtn.disabled = true;
-        }
-    })
+    const gainDefaultInput = document.getElementById('gain-default-input');
+    gainDefaultInput.value = (gainCheckbox.checked) ? defaults.hard_gain : '';
+
+    const salePriceDefaultInput = document.getElementById('sale-price-default-input');
+    salePriceDefaultInput.value = (salePriceCheckbox.checked) ? defaults.sale_price : '';
+
+    const receiptPriceDefaultInput = document.getElementById('receipt-price-default-input');
+    receiptPriceDefaultInput.value = (receiptPriceCheckbox.checked) ? defaults.receipt_price : '';
+
     function updateMinStockInput() {
         const isChecked = minStockCheckbox.checked;
         const defaultInput = document.getElementById('min-stock-default-input');
 
-        defaultInput.placeholder = (isChecked) ? defaults.min_stock : 'Valor por Defecto (0)';
-
         defaultInput.disabled = !isChecked;
-
-        minStockCheckbox.value = isChecked ? "1" : "0";
 
         if (!isChecked) {
             defaultInput.value = "";
+            defaultInput.classList.remove('visible');
         }
+        else{
+            defaultInput.value = defaults.min_stock;
+            defaultInput.classList.add('visible');
+        }
+
+        checkFormState();
     }
 
     function updateSalePriceInput() {
@@ -2476,11 +2219,22 @@ async function setupRecomendedColumns(){
 
         defaultInput.disabled = !isChecked;
 
-        salePriceCheckbox.value = isChecked ? "1" : "0";
-
         if (!isChecked) {
-            defaultInput.value = "";
+            defaultInput.classList.remove('visible');
+            autoPriceCheckbox.checked = false;
+            autoIvaRadio.checked = false;
+            autoGainRadio.checked = false;
+            autoIvaGainRadio.checked = false;
+            autoPriceLabel.classList.remove('visible');
+            autoPriceTypeContainer.classList.remove('visible');
         }
+        else{
+            defaultInput.value = defaults.sale_price;
+            defaultInput.classList.add('visible');
+            updateReceiptPriceInput();
+        }
+        checkFormState();
+
     }
 
     function updateReceiptPriceInput() {
@@ -2489,49 +2243,160 @@ async function setupRecomendedColumns(){
 
         defaultInput.disabled = !isChecked;
 
-        receiptPriceCheckbox.value = isChecked ? "1" : "0";
-
         if (!isChecked) {
             defaultInput.value = "";
+            defaultInput.classList.remove('visible');
+            autoPriceLabel.classList.remove('visible');
+            autoPriceCheckbox.checked = false;
+            autoPriceTypeContainer.classList.remove('visible');
         }
+        else{
+            defaultInput.value = defaults.receipt_price;
+            defaultInput.classList.add('visible');
+            if (salePriceCheckbox.checked){autoPriceLabel.classList.add('visible');}
+            if (preferences.auto_price === 1) {autoPriceCheckbox.checked = true;}
+            updateAutoPrice();
+        }
+        checkFormState();
     }
 
     function updateGainInput() {
         const isChecked = gainCheckbox.checked;
         const defaultInput = document.getElementById('gain-default-input');
-
-        const percentageRadio = document.getElementById('percentage-gain-input');
-        const hardRadio = document.getElementById('hard-gain-input');
+        const gainTypeContainer = document.getElementById('gain-type-container');
 
         percentageRadio.disabled = !isChecked;
         hardRadio.disabled = !isChecked;
         defaultInput.disabled = !isChecked;
 
-        gainCheckbox.value = isChecked ? "1" : "0";
-
-        if (isChecked) {
-            percentageRadio.checked = true;
-            percentageRadio.value = "1";
-            hardRadio.checked = false;
-            hardRadio.value = "0";
-        } else {
+        if (!isChecked) {
             percentageRadio.checked = false;
             hardRadio.checked = false;
-            percentageRadio.value = "0";
-            hardRadio.value = "0";
             defaultInput.value = "";
+            defaultInput.classList.remove('visible');
+            gainTypeContainer.classList.remove('visible');
+        } else {
+            percentageRadio.checked = (preferences.percentage_gain === 1);
+            hardRadio.checked = (preferences.hard_gain === 1);
+
+            if (!percentageRadio.checked && !hardRadio.checked) {
+                percentageRadio.checked = true;
+            }
+
+            gainTypeContainer.classList.add('visible');
+            autoIvaRadio.checked = true;
+            autoGainRadio.checked = false;
+            autoIvaGainRadio.checked = false;
+
+            defaultInput.value = defaults.hard_gain;
+            defaultInput.classList.add('visible');
+            gainTypeContainer.classList.add('visible');
         }
+        updateAutoPrice();
+        checkFormState();
+    }
+
+    function updateAutoPrice(){
+        const isChecked = autoPriceCheckbox.checked;
+
+        if (!isChecked){
+            autoIvaRadio.checked = false;
+            autoGainRadio.checked = false;
+            autoIvaGainRadio.checked = false;
+            autoPriceTypeContainer.classList.remove('visible');
+        }
+        else{
+            if (preferences.auto_price !== 1 || !gainCheckbox.checked){
+                autoIvaRadio.checked = true;
+                autoGainRadio.checked = false;
+                autoIvaGainRadio.checked = false;
+            }
+            else{
+                console.log(preferences.auto_price_type);
+                autoIvaRadio.checked = (preferences.auto_price_type === 'iva');
+                autoGainRadio.checked = (preferences.auto_price_type === 'gain');
+                autoIvaGainRadio.checked = (preferences.auto_price_type === 'gain-iva');
+            }
+            if (!gainCheckbox.checked){
+                autoGainRadio.disabled = true;
+                autoIvaGainRadio.disabled = true;
+            }
+            else{
+                autoGainRadio.disabled = false;
+                autoIvaGainRadio.disabled = false;
+            }
+
+
+            autoPriceTypeContainer.classList.add('visible');
+        }
+        checkFormState();
+    }
+
+    gainCheckbox.addEventListener('change', updateGainInput);
+    minStockCheckbox.addEventListener('change', updateMinStockInput);
+    salePriceCheckbox.addEventListener('change', updateSalePriceInput);
+    receiptPriceCheckbox.addEventListener('change', updateReceiptPriceInput);
+    autoPriceCheckbox.addEventListener('change', updateAutoPrice);
+
+    const saveBtn = document.getElementById('save-changes-btn');
+
+    const allTrackedInputs = [
+        gainCheckbox, minStockCheckbox, salePriceCheckbox, receiptPriceCheckbox,
+        percentageRadio, hardRadio,
+        gainDefaultInput, minStockDefaultInput, salePriceDefaultInput, receiptPriceDefaultInput, autoPriceCheckbox,
+        autoIvaRadio, autoGainRadio, autoIvaGainRadio
+    ];
+
+    let initialState = {};
+
+    function captureInitialState() {
+        initialState = {};
+        allTrackedInputs.forEach(input => {
+            const prop = (input.type === 'checkbox' || input.type === 'radio') ? 'checked' : 'value';
+            initialState[input.id] = input[prop];
+        });
+    }
+
+    function checkFormState() {
+        let isChanged = false;
+
+        for (const input of allTrackedInputs) {
+            const prop = (input.type === 'checkbox' || input.type === 'radio') ? 'checked' : 'value';
+            if (input[prop] !== initialState[input.id]) {
+                isChanged = true;
+                break;
+            }
+        }
+        saveBtn.disabled = !isChanged;
     }
 
     updateGainInput();
     updateMinStockInput();
     updateSalePriceInput();
     updateReceiptPriceInput();
+    updateAutoPrice();
 
-    gainCheckbox.addEventListener('change', updateGainInput);
-    minStockCheckbox.addEventListener('change', updateMinStockInput);
-    salePriceCheckbox.addEventListener('change', updateSalePriceInput);
-    receiptPriceCheckbox.addEventListener('change', updateReceiptPriceInput);
+    captureInitialState();
+    saveBtn.disabled = true;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const setPreferences = getUserPreferences();
+
+        const response = await api.setCurrentInventoryPreferences(setPreferences);
+
+        if (response){
+            saveBtn.textContent = 'Guardado!';
+
+            alert('Preferencias guardadas correctamente.');
+            window.location.href = '/StockiFy/dashboard.php';
+        }
+        else{
+            alert('Ha ocurrido un error al guardar las preferencias del inventario.');
+        }
+    })
+
+    form.addEventListener('input', checkFormState);
 }
 
 function getUserPreferences(){
@@ -2540,6 +2405,7 @@ function getUserPreferences(){
     const receiptPriceCheckbox = document.getElementById('receipt-price-input');
     const percentageRadio = document.getElementById('percentage-gain-input');
     const hardRadio = document.getElementById('hard-gain-input');
+    const autoPrice = document.getElementById('auto-price-input');
 
     const gainDefaultInput = document.getElementById('gain-default-input');
     const minStockDefaultInput = document.getElementById('min-stock-default-input');
@@ -2551,16 +2417,419 @@ function getUserPreferences(){
     const salePriceDefault = (salePriceDefaultInput.value === '') ? 0 : parseFloat(salePriceDefaultInput.value);
     const receiptPriceDefault = (receiptPriceDefaultInput.value === '') ? 0 : parseFloat(receiptPriceDefaultInput.value);
 
+    let auto_price_type;
+
+    if (autoPrice.checked){auto_price_type = document.querySelector('input[name="price-type"]:checked').value;}
+    else{auto_price_type = null;}
+
 
     const preferences = {
-        min_stock: {active: parseInt(minStockCheckbox.value,10), default: minStockDefault},
-        sale_price: {active: parseInt(salePriceCheckbox.value,10), default: salePriceDefault},
-        receipt_price: {active: parseInt(receiptPriceCheckbox.value,10), default: receiptPriceDefault},
-        percentage_gain: {active: parseInt(percentageRadio.value,10), default: gainDefault},
-        hard_gain: {active: parseInt(hardRadio.value,10), default: gainDefault}
+        min_stock: {active: (minStockCheckbox.checked) ? 1 : 0, default: minStockDefault},
+        sale_price: {active: (salePriceCheckbox.checked) ? 1 : 0, default: salePriceDefault},
+        receipt_price: {active: (receiptPriceCheckbox.checked) ? 1 : 0, default: receiptPriceDefault},
+        percentage_gain: {active: (percentageRadio.checked) ? 1 : 0, default: gainDefault},
+        hard_gain: {active: (hardRadio.checked) ? 1 : 0, default: gainDefault},
+        auto_price: (autoPrice.checked) ? 1 : 0,
+        auto_price_type: auto_price_type
     }
 
     return preferences;
+}
+
+// -- Estadisticas --
+
+async function updateDailyStatistics(inventoryId) {
+    const hourlyStatistics = await api.getDailyStatistics(inventoryId);
+    if (hourlyStatistics){
+        const groupedStatistics = groupHourlyData(hourlyStatistics);
+        populateGroupedStatistics(groupedStatistics);
+        populateHourlyGraphs(hourlyStatistics);
+    }
+}
+
+function createCharts(){
+    const stockIngresado = document.getElementById('stock-ingresado-graph');
+    const stockVendido = document.getElementById('stock-vendido-graph');
+    const ventas = document.getElementById('ventas-graph');
+    const compras = document.getElementById('compras-graph');
+    const gastos = document.getElementById('gastos-graph');
+    const ingresos = document.getElementById('ingresos-graph');
+    const ganancias = document.getElementById('ganancias-graph');
+    const clientes = document.getElementById('clientes-graph');
+    const proveedores = document.getElementById('proveedores-graph');
+
+    var options = {
+        name:{
+        },
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [],
+        xaxis: {
+            categories: []
+        },
+        noData: {
+            text: "Cargando datos..." // Mensaje mientras no hay datos
+        }
+    };
+
+    const stockIngresadoChart = new ApexCharts(stockIngresado,options);
+    stockIngresadoChart.render();
+    stockIngresado.myChartInstance = stockIngresadoChart;
+
+    const stockVendidoChart = new ApexCharts(stockVendido,options);
+    stockVendidoChart.render();
+    stockVendido.myChartInstance = stockVendidoChart;
+
+    const gastosChart = new ApexCharts(gastos,options);
+    gastosChart.render();
+    gastos.myChartInstance = gastosChart;
+
+    const ingresosChart = new ApexCharts(ingresos,options);
+    ingresosChart.render();
+    ingresos.myChartInstance = ingresosChart;
+
+    const gananciasChart = new ApexCharts(ganancias,options);
+    gananciasChart.render();
+    ganancias.myChartInstance = gananciasChart;
+
+    const clientesChart = new ApexCharts(clientes,options);
+    clientesChart.render();
+    clientes.myChartInstance = clientesChart;
+
+    const proveedoresChart = new ApexCharts(proveedores,options);
+    proveedoresChart.render();
+    proveedores.myChartInstance = proveedoresChart;
+
+    const ventasChart = new ApexCharts(ventas,options);
+    ventasChart.render();
+    ventas.myChartInstance = ventasChart;
+
+    const comprasChart = new ApexCharts(compras,options);
+    comprasChart.render();
+    compras.myChartInstance = comprasChart;
+
+}
+
+function setupStatPickers(){
+    const statPickers = document.querySelectorAll('.daily-stat-item');
+    statPickers.forEach(picker => {
+        picker.addEventListener('click', () => {
+            document.querySelectorAll('.stat-graph').forEach(graph => graph.classList.add('hidden'));
+
+            const graphContainerID = picker.dataset.graph + '-container';
+            console.log(graphContainerID);
+
+            const containerToShow = document.getElementById(graphContainerID);
+            containerToShow.classList.remove('hidden');
+
+        })
+    })
+}
+
+function populateHourlyGraphs(hourlyStatistics){
+
+    const hours = [];
+    const currentHour = new Date().getHours();
+    var i;
+
+    for (i = 0; i <= currentHour ; i++){
+        hours.push(i + " hs");
+    }
+
+    const stockIngresado = document.getElementById('stock-ingresado-graph');
+    const stockVendido = document.getElementById('stock-vendido-graph');
+    const ventas = document.getElementById('ventas-graph');
+    const compras = document.getElementById('compras-graph');
+    const gastos = document.getElementById('gastos-graph');
+    const ingresos = document.getElementById('ingresos-graph');
+    const ganancias = document.getElementById('ganancias-graph');
+    const clientes = document.getElementById('clientes-graph');
+    const proveedores = document.getElementById('proveedores-graph');
+
+    var options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.stock.stockIngresado
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+
+    const stockIngresadoChart = stockIngresado.myChartInstance;
+    stockIngresadoChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.stock.stockVendido
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const stockVendidoChart = stockVendido.myChartInstance;
+    stockVendidoChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.monetarias.gastos
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const gastosChart = gastos.myChartInstance;
+    gastosChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.monetarias.ingresos
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const ingresosChart = ingresos.myChartInstance;
+    ingresosChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.monetarias.ganancias
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const gananciasChart = ganancias.myChartInstance;
+    gananciasChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.transacciones.ventasRealizadas
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const ventasChart = ventas.myChartInstance;
+    ventasChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.transacciones.comprasRealizadas
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const comprasChart = compras.myChartInstance;
+    comprasChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.conexiones.nuevosClientes
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const clientesChart = clientes.myChartInstance;
+    clientesChart.updateOptions(options);
+
+    options = {
+        chart: {
+            type: 'area',
+            height: 600,
+            width: 500
+        },
+        series: [{
+            data: hourlyStatistics.conexiones.nuevosProveedores
+        }],
+        xaxis: {
+            categories: hours
+        }
+    };
+    const proveedoresChart = proveedores.myChartInstance;
+    proveedoresChart.updateOptions(options);
+}
+
+function populateGroupedStatistics(stats){
+    const stockIngresado = document.getElementById('daily-stock-ingresado');
+    const stockVendido = document.getElementById('daily-stock-vendido');
+    const gastos = document.getElementById('daily-gastos');
+    const ingresos = document.getElementById('daily-ingresos');
+    const ganancias = document.getElementById('daily-ganancias');
+    const clientes = document.getElementById('daily-clientes');
+    const proveedores = document.getElementById('daily-proveedores');
+    const ventas = document.getElementById('daily-ventas');
+    const compras = document.getElementById('daily-compras');
+
+    stockIngresado.innerHTML = stats.stock.stockIngresado;
+    stockVendido.innerHTML = stats.stock.stockVendido;
+    gastos.innerHTML = stats.monetarias.gastos;
+    ingresos.innerHTML = stats.monetarias.ingresos;
+    ganancias.innerHTML = stats.monetarias.ganancias;
+    clientes.innerHTML = stats.conexiones.nuevosClientes;
+    proveedores.innerHTML = stats.conexiones.nuevosProveedores;
+    ventas.innerHTML = stats.transacciones.ventasRealizadas;
+    compras.innerHTML = stats.transacciones.comprasRealizadas;
+}
+
+function groupHourlyData(hourlyData) {
+    var groupedData = {
+        conexiones: {
+            nuevosClientes: 0,
+            nuevosProveedores: 0
+        },
+        transacciones: {
+            ventasRealizadas: 0,
+            comprasRealizadas: 0
+        },
+        stock: {
+            stockIngresado: 0,
+            stockVendido: 0
+        },
+        monetarias: {
+            gastos: 0,
+            ingresos: 0,
+            ganancias: 0
+        }
+    };
+
+    groupedData.conexiones.nuevosClientes = hourlyData.conexiones.nuevosClientes.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.conexiones.nuevosProveedores = hourlyData.conexiones.nuevosProveedores.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.transacciones.ventasRealizadas = hourlyData.transacciones.ventasRealizadas.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.transacciones.comprasRealizadas = hourlyData.transacciones.comprasRealizadas.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.stock.stockIngresado = hourlyData.stock.stockIngresado.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.stock.stockVendido = hourlyData.stock.stockVendido.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.monetarias.gastos = hourlyData.monetarias.gastos.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.monetarias.ingresos = hourlyData.monetarias.ingresos.reduce((acum,valor) => {
+        return acum + valor;
+    })
+    groupedData.monetarias.ganancias = hourlyData.monetarias.ganancias.reduce((acum,valor) => {
+        return acum + valor;
+    })
+
+    return groupedData;
+}
+
+async function setupInventoryPicker() {
+    const user = await api.getUserProfile();
+    if (user){
+        const inventories = user['databases'];
+
+        const inventoriesDropdown = document.getElementById('inventories-dropdown');
+
+        inventories.forEach(inventory => {
+            const inventoryBtn = document.createElement('div');
+
+            inventoryBtn.className = 'inventory-btn';
+            inventoryBtn.dataset.value = inventory.id;
+            inventoryBtn.innerHTML = `<h4>${inventory.name}</h4>`;
+
+            inventoriesDropdown.appendChild(inventoryBtn);
+        })
+
+        const inventoryPicker = document.getElementById('inventory-picker');
+
+
+        const allBtns = inventoriesDropdown.querySelectorAll('.inventory-btn');
+        allBtns.forEach(btn =>{
+            btn.addEventListener('click', () => {
+                updateDailyStatistics(btn.dataset.value);
+                inventoryPicker.innerHTML = `<h4>${btn.innerHTML}</h4>`;
+            })
+        })
+
+
+
+        inventoryPicker.addEventListener('click', () => {
+            if(!inventoryPicker.classList.contains('clicked')){
+                inventoriesDropdown.classList.remove('hidden');
+                inventoryPicker.classList.add('clicked');
+            }
+            else{
+                inventoriesDropdown.classList.add('hidden');
+                inventoryPicker.classList.remove('clicked');
+            }
+        });
+
+        window.addEventListener('click', (event) => {
+            if (inventoryPicker.classList.contains('clicked') && !inventoryPicker.contains(event.target) &&
+                !inventoriesDropdown.contains(event.target)) {
+                inventoriesDropdown.classList.add('hidden');
+                inventoryPicker.classList.remove('clicked');
+            }
+        });
+
+        inventoriesDropdown.addEventListener('click', () => {
+            if(!inventoryPicker.classList.contains('clicked')){
+                inventoriesDropdown.classList.remove('hidden');
+                inventoryPicker.classList.add('clicked');
+            }
+            else{
+                inventoriesDropdown.classList.add('hidden');
+                inventoryPicker.classList.remove('clicked');
+            }
+        });
+
+    }
 }
 
 

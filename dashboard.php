@@ -24,12 +24,17 @@
         </div>
     </div>
     <div id="transaction-picker-modal" class="hidden">
-        <div id="modal-return-btn" class="return-btn" style="top: 0; left: 0">Volver</div>
+        <div class="flex-row" style="justify-content: space-between; align-items: center; padding: 0.5rem;">
+            <div id="modal-return-btn" class="return-btn" style="top: 0; left: 0">Volver</div>
+            <div class="flex-row" style="padding: 0.5rem; align-items: center; justify-content: right;">
+                <div class="flex-column">
+                    <div id="inventory-picker-name" class="btn"><p>Todos los Inventarios</p></div>
+                    <div id="item-picker-header" class="flex-row hidden"></div>
+                </div>
+            </div>
+        </div>
         <div id="item-picker-modal" class="picker-modal flex-column">
-            <div id="item-picker-header" class="flex-row">
-            </div>
-            <div id="item-list" class="flex-column">
-            </div>
+            <div id="item-list" class="flex-column"></div>
         </div>
         <div id="client-picker-modal" class="picker-modal">
         </div>
@@ -107,50 +112,81 @@
         </div>
 
         <div id="config-db" class="dashboard-view hidden">
+            <!--                       CODIGO DE NANO                        -->
+
+            <!-- SECCION DE CONFIGURACIÓN DE LA TABLA, INCLUYE CONFIGURACIÓN DE COLUMNAS IMPORTANTES
+                                        Y ELIMINAR TABLA -->
             <div class="menu-container" style="padding: 3rem;">
                 <div style="padding: 1rem; border: var(--border-strong); border-radius: var(--border-radius);">
-                    <h3>Columnas Recomendadas</h3>
-                    <div class="form-group flex-column" style="align-items: start;">
-                        <div class="flex-row">
-                            <input type="checkbox" id="min-stock-input" name="min-stock" value="0">
-                            <h4 style="height: fit-content;">Stock Mínimo</h4>
-                        </div>
-                        <input style="width: 180px; justify-self: right;" type="text" id="min-stock-default-input" name="min-stock-default" placeholder="Valor por Defecto (0)">
+                    <div class="flex-row" style="width: 100%; align-items: center; justify-content: space-between; padding: 10px">
+                        <h2>Columnas Recomendadas</h2>
+                        <img src="./assets/img/arrow-pointing-down.png" alt="Flecha para abir o cerrar menú de dropdown." id="open-columnas-recomendadas-btn">
                     </div>
-                    <div class="form-group flex-column" style="align-items: start;">
-                        <div class="flex-row">
-                            <input type="checkbox" id="sale-price-input" name="sale-price" value="0">
-                            <h4 style="height: fit-content;">Precio de Venta</h4>
+                    <form id="recomended-columns-form">
+                        <div class="form-group flex-column recomended-column-group">
+                            <input type="checkbox" class="hidden-checkbox" id="min-stock-input" name="min-stock" value="0">
+                            <label for="min-stock-input" class="btn btn-secondary btn-checkbox-toggle">
+                                Stock Mínimo
+                            </label>
+                            <input style="width: 180px;" class="default-value-input" type="text" id="min-stock-default-input" name="min-stock-default" placeholder="Valor por Defecto (0)">
                         </div>
-                        <input style="width: 180px; justify-self: right;" type="text" id="sale-price-default-input" name="sale-price-default" placeholder="Valor por Defecto (0)">
-                    </div>
-                    <div class="form-group flex-column" style="align-items: start;">
-                        <div class="flex-row">
-                            <input type="checkbox" id="receipt-price-input" name="receipt-price" value="0">
-                            <h4 style="height: fit-content;">Precio de Compra</h4>
+                        <div class="form-group flex-column recomended-column-group">
+                            <input type="checkbox" class="hidden-checkbox" id="sale-price-input" name="sale-price" value="0">
+                            <label for="sale-price-input" class="btn btn-secondary btn-checkbox-toggle">
+                                Precio de Venta
+                            </label>
+                            <input style="width: 180px;" class="default-value-input" type="text" id="sale-price-default-input" name="sale-price-default" placeholder="Valor por Defecto (0)">
                         </div>
-                        <input style="width: 180px; justify-self: right;" type="text" id="receipt-price-default-input" name="receipt-price-default" placeholder="Valor por Defecto (0)">
-                    </div>
-                    <div class="form-group flex-column" style="align-items: start;">
-                        <div class="flex-row">
-                            <input type="checkbox" id="gain-input" name="gain" value="0">
-                            <h4 style="height: fit-content;">Margen de Ganancia</h4>
-                        </div>
-                        <div class="flex-row">
-                            <input style="width: 180px; justify-self: right;" type="text" id="gain-default-input" name="gain-default" placeholder="Valor por Defecto (0)">
-                            <div class="form-group flex-column" style="align-items: start;">
-                                <div class="flex-row">
-                                    <input type="radio" id="percentage-gain-input" name="gain-type" value="0">
-                                    <p>Porcentaje</p>
-                                </div>
-                                <div class="flex-row">
-                                    <input type="radio" id="hard-gain-input" name="gain-type" value="0">
-                                    <p>Valor Fijo</p>
+                        <div class="form-group flex-column recomended-column-group">
+                            <div class="flex-column all-center" style="gap: 10px">
+                                <input type="checkbox" class="hidden-checkbox" id="receipt-price-input" name="receipt-price" value="0">
+                                <label for="receipt-price-input" class="btn btn-secondary btn-checkbox-toggle">
+                                    Precio de Compra
+                                </label>
+                            </div>
+                            <input style="width: 180px;" class="default-value-input" type="text" id="receipt-price-default-input" name="receipt-price-default" placeholder="Valor por Defecto (0)">
+                            <div class="flex-column" style="position: relative; z-index: 10;">
+                                <input type="checkbox" class="hidden-checkbox" id="auto-price-input" name="auto-price" value="0">
+                                <label for="auto-price-input" id="auto-price-checkbox" class="btn btn-secondary btn-checkbox-toggle">
+                                    Calcular Automaticamente
+                                </label>
+                                <div class="form-group flex-column" id="auto-price-type-container" style="align-items: start;">
+                                    <div class="flex-row">
+                                        <input type="radio" id="auto-iva-input" name="price-type" value="iva">
+                                        <p>Precio de Venta + IVA 21%</p>
+                                    </div>
+                                    <div class="flex-row">
+                                        <input type="radio" id="auto-gain-input" name="price-type" value="gain">
+                                        <p>Precio de Venta + Margen de Ganancia</p>
+                                    </div>
+                                    <div class="flex-row">
+                                        <input type="radio" id="auto-iva-gain-input" name="price-type" value="gain-iva">
+                                        <p>Precio de Venta + Margen de Ganancia + IVA 21%</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <button class="btn btn-primary" id="save-changes-btn" disabled>Guardar Cambios</button>
+                        <div class="form-group flex-column recomended-column-group">
+                            <input type="checkbox" class="hidden-checkbox" id="gain-input" name="gain" value="0">
+                            <label for="gain-input" class="btn btn-secondary btn-checkbox-toggle">
+                                Margen de Ganancia
+                            </label>
+                            <div class="flex-row">
+                                <input style="width: 180px;" class="default-value-input" type="text" id="gain-default-input" name="gain-default" placeholder="Valor por Defecto (0)">
+                                <div class="form-group flex-column" id="gain-type-container" style="align-items: start;">
+                                    <div class="flex-row">
+                                        <input type="radio" id="percentage-gain-input" name="gain-type">
+                                        <p>Porcentaje</p>
+                                    </div>
+                                    <div class="flex-row">
+                                        <input type="radio" id="hard-gain-input" name="gain-type">
+                                        <p>Valor Fijo</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="save-changes-btn" disabled>Guardar Cambios</button>
+                </form>
                 </div>
                 <div class="danger-zone" style="margin-top: 2rem; padding: 1rem; border: 2px solid var(--accent-red); border-radius: var(--border-radius);">
                     <h3 style="color: var(--accent-red);">Zona de Peligro</h3>
@@ -159,8 +195,6 @@
                 </div>
             </div>
         </div>
-
-        <!--                       CODIGO DE NANO                        -->
 
         <!-- SECCION DE ESTADISTICAS DIARIAS. CODIGO COMPLETAMENTE NUEVO -->
         <div id="analysis" class="dashboard-view hidden">
@@ -290,7 +324,7 @@
             </div>
         </div>
 
-        <!--                        FIN DE CODIGO                        -->
+        <!--                    FIN DE CODIGO DE NANO                        -->
 
         <div id="notifications" class="dashboard-view hidden">
             <h2>🔔 Notificaciones</h2>
@@ -426,7 +460,7 @@
             </div>
         </div>
 
-        <!--         FIN DE CODIGO DE NANO         -->
+        <!--         SECCIÓN DE CLIENTES. CODIGO COMPLETAMENTE NUEVO         -->
 
         <div id="customers" class="dashboard-view hidden">
             <div class="menu-container" style="overflow: visible;">
@@ -485,6 +519,8 @@
                 </div>
             </div>
         </div>
+
+        <!--         SECCIÓN DE PROVEEDORES. CODIGO COMPLETAMENTE NUEVO         -->
 
         <div id="providers" class="dashboard-view hidden">
             <div class="menu-container" style="overflow: visible;">
@@ -548,6 +584,8 @@
                 </div>
             </div>
         </div>
+
+        <!--        FIN DE CODIGO DE NANO         -->
     </main>
 </div>
 

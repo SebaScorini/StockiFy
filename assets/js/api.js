@@ -67,6 +67,9 @@ export async function getUserProfile() {
 }
 
 
+//CODIGO DE NANO. AGREGUÉ EL CAMPO "preferences" CON LAS PREFERENCIAS Y DEFAULTS DEL USUARIO
+//PARA LAS COLUMNAS RECOMENDADAS
+
 export async function createDatabase(dbName, columns, preferences) {
     const requestBody = { dbName, columns, preferences };
     const response = await fetch('/StockiFy/api/database/create.php', {
@@ -314,3 +317,31 @@ export async function getCurrentInventoryDefaults(){
     });
     return handleResponse(response);
 }
+
+export async function setCurrentInventoryPreferences(preferences){
+    const response = await fetch('/StockiFy/api/database/set-preferences-current.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(preferences),
+    });
+    return response;
+}
+
+export async function getUserVerifiedTables(){
+    const response = await fetch('/StockiFy/api/database/get-verified-tables.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse(response);
+}
+
+export async function getTableProducts(table){
+    const response = await fetch('/StockiFy/api/products/get-all-from-table.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(table),
+    });
+    return handleResponse(response);
+}
+
+/* ---------------------- FIN DE FUNCIONES DE NANO  ---------------------- */

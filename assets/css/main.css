@@ -504,6 +504,147 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
     border-radius: var(--border-radius);
 }
 
+
+.default-value-input{
+    width: 180px;
+    justify-self: right;
+    margin: -10px;
+    height: 0;
+    opacity: 0;
+    padding: 0;
+}
+
+.default-value-input.visible{
+    margin: 0 0 10px 10px;
+    height: 30px;
+    opacity: 1;
+    padding: 12px;
+}
+
+.recomended-column-label{
+    height: fit-content;
+}
+
+.recomended-column-group{
+    align-items: start;
+}
+
+#recomended-columns-form{
+    width: fit-content;
+    max-height: 0;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    transition: all 0.35s ease-in-out;
+}
+
+#recomended-columns-form.visible{
+    padding: 1rem;
+    max-height: 1000px;
+}
+
+.hidden-checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.btn-checkbox-toggle {
+    display: block;
+    text-align: left;
+    padding-left: 1.5rem;
+    width: fit-content;
+}
+
+.hidden-checkbox:checked + .btn-checkbox-toggle {
+    background-color: var(--accent-color);
+    color: var(--color-white);
+}
+
+.btn-checkbox-toggle::before {
+    content: '☐';
+    font-size: 1.2em;
+    margin-right: 12px;
+    font-family: sans-serif;
+}
+
+.hidden-checkbox:checked + .btn-checkbox-toggle::before {
+    content: '☑';
+}
+
+#gain-type-container{
+    height: 0;
+    opacity: 0;
+    margin-top: -10px;
+    transition: all 0.5s ease;
+}
+
+#gain-type-container.visible{
+    margin: 0 0 10px 10px;
+    height: fit-content;
+    opacity: 1;
+}
+
+#open-columnas-recomendadas-btn{
+    height: 40px;
+    padding: 10px;
+    border-radius: 10px;
+    transition: all 0.5s ease;
+}
+
+#open-columnas-recomendadas-btn:hover{
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+#open-columnas-recomendadas-btn:active{
+    background-color: rgba(0, 0, 0, 0.20);
+}
+
+#open-columnas-recomendadas-btn.is-rotated {
+    transform: rotate(180deg);
+}
+
+#auto-price-checkbox{
+    max-width: 0;
+    max-height: 0;
+    font-size: 0;
+    opacity: 0;
+    padding: 0;
+    transition: all var(--transition-speed) ease;
+}
+
+#auto-price-checkbox.visible{
+    font-size: 14px;
+    max-width: fit-content;
+    max-height: fit-content;
+    opacity: 1;
+    padding: 5px 10px;
+    margin-bottom: 15px;
+}
+
+#auto-price-type-container{
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    font-size: 13px;
+    transition: all var(--transition-speed) ease;
+}
+
+#auto-price-type-container.visible {
+    max-height: 500px;
+    opacity: 1;
+    margin-top: -10px;
+    margin-bottom: 5px;
+}
+
+#auto-price-checkbox {
+    width: 100%;
+    margin: 0;
+}
+
 /* ---- Estilos de botones ---- */
 
 #btn-password{

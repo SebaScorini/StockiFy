@@ -396,8 +396,9 @@
     border: var(--border-strong);
     border-radius: var(--border-radius);
     box-shadow: 5px 5px 0 var(--color-black);
-    min-width: 250px;
-    padding: 0.5rem;
+    width: 400px;
+    height: 700px;
+    padding: 1rem;
 }
 
 #transaction-success-modal{
