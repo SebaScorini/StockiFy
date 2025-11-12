@@ -16,11 +16,11 @@ try {
     $id = $data['id'];
     $pdo = Database::getInstance();
 
-    $client = $pdo->prepare("SELECT * FROM customers WHERE id = ?");
-    $client->execute([$id]);
-    $client = $client->fetch();
+    $provider = $pdo->prepare("SELECT * FROM providers WHERE id = ?");
+    $provider->execute([$id]);
+    $provider = $provider->fetch();
 
-    $response = ['clientInfo' => $client, 'success' => true];
+    $response = ['providerInfo' => $provider, 'success' => true];
 
     header('Content-Type: application/json');
 } catch (Exception $e) {

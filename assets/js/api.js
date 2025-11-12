@@ -371,4 +371,22 @@ export async function updateSaleList(productList){
     return handleResponse(response);
 }
 
+export async function getReceiptData(receiptID, tableID){
+    const response = await fetch('/StockiFy/api/receipts/get-receipt-data.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({receiptID,tableID}),
+    });
+    return handleResponse(response);
+}
+
+export async function getProdivderById(id){
+    const response = await fetch('/StockiFy/api/providers/get-by-id.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({id}),
+    });
+    return handleResponse(response);
+}
+
 /* ---------------------- FIN DE FUNCIONES DE NANO  ---------------------- */

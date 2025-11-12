@@ -741,7 +741,6 @@ async function setupSaleList(){
     if (response.success) {
         const saleList = response.saleList;
         await populateSaleView(saleList);
-        //setupSaleModals();
     }
 }
 
@@ -769,6 +768,43 @@ async function populateSaleView(saleList) {
         const saleDiv = await createSaleRow(sale);
         dateDescendingContainer.appendChild(saleDiv);
     }
+
+    for (const sale of dateAscendingList) {
+        const saleDiv = await createSaleRow(sale);
+        dateAscendingContainer.appendChild(saleDiv);
+    }
+
+    for (const sale of idDescendingList) {
+        const saleDiv = await createSaleRow(sale);
+        idDescendingContainer.appendChild(saleDiv);
+    }
+
+    for (const sale of idAscendingList) {
+        const saleDiv = await createSaleRow(sale);
+        idAscendingContainer.appendChild(saleDiv);
+    }
+
+    for (const sale of customerDescendingList) {
+        const saleDiv = await createSaleRow(sale);
+        customerDescendingContainer.appendChild(saleDiv);
+    }
+
+    for (const sale of customerAscendingList) {
+        const saleDiv = await createSaleRow(sale);
+        customerAscendingContainer.appendChild(saleDiv);
+    }
+
+    for (const sale of priceDescendingList) {
+        const saleDiv = await createSaleRow(sale);
+        priceDescendingContainer.appendChild(saleDiv);
+    }
+
+    for (const sale of priceAscendingList) {
+        const saleDiv = await createSaleRow(sale);
+        priceAscendingContainer.appendChild(saleDiv);
+
+    }
+
 }
 
 async function createSaleRow(sale){
@@ -835,7 +871,7 @@ function showSaleModal(saleInfo){
          <hr>
     </div>`;
 
-    modal.innerHTML = `<div class="flex-row">N°${saleInfo.id}</div>
+    modal.innerHTML = `<div class="flex-row justify-between"><p></p><div>X</div></div>
                        <div class="product-list-container">
                        <div class="flex-row" style="justify-content: space-between; align-items: center">
                         <h3>Lista de Productos</h3>
@@ -851,8 +887,10 @@ function showSaleModal(saleInfo){
                         <div id="product-list-dropdown">${saleTicket}</div>
                         </div>
                         <div class="client-info-container">${customerInfo}</div>
-                        <div id="final-total-container">
-                            <h2 style="margin-top:auto; margin-bottom: 20px; text-align: right">Precio Total = $<span id="final-total-amount">${saleInfo.totalAmount}</span></h2>
+                        <div id="final-total-container" style="margin-top: auto; text-align:right;" class="flex-column;">
+                            <p style="font-size: 20px; font-weight: 600">Id = <span style="font-size: 17px; font-weight: 400">${saleInfo.id}</span></p>
+                            <p style="font-size: 20px; font-weight: 600">Fecha = <span style="font-size: 17px; font-weight: 400">${saleInfo.saleDate}</span></p>
+                            <h2 style="margin-bottom: 20px; text-align: right">Precio Total = $<span id="final-total-amount">${saleInfo.totalAmount}</span></h2>
                         </div>
                         `;
 
@@ -942,11 +980,11 @@ async function enableSaleEditing() {
 
         quantityCell.innerHTML = `<input type="number" class="edit-quantity" value="${itemData.quantity}" min="1" max="${itemMax}" xstyle="width: 70px; text-align: right; padding: 4px;">`;
         priceCell.innerHTML = `<input type="number" class="edit-price" value="${itemData.unit_price}" min="0" step="0.01" style="width: 65px; text-align: right; padding: 4px;">$`;
-        totalCell.innerHTML = `<input type="text" class="edit-total" value="${itemData.total_price.toFixed(2)}" style="width: 80px; border:none; background: #eee; text-align: right; padding: 4px;" readonly>$`;
+        totalCell.innerHTML = `<input type="text" class="edit-total" value="${itemData.total_price.toFixed(2)}" style="width: 80px; border:none; background: #eee; text-align: right; padding: 4px; height: fit-content;" readonly>$`;
     }
 
     const finalTotalContainer = document.getElementById('final-total-container');
-    finalTotalContainer.innerHTML = `<h2 style="margin-top:auto; margin-bottom: 20px; text-align: right">Precio Total = $<input type="text" id="final-total-input" value="${originalSaleInfo.totalAmount.toFixed(2)}" style="width: 100px; border:none; background: #eee; text-align: right; font-size: 1.5rem; font-weight: 900; color: var(--color-black);" readonly></h2>`;
+    finalTotalContainer.innerHTML = `<h2 style="margin-top:auto; margin-bottom: 20px; text-align: right">Precio Total = <input type="text" id="final-total-input" value="${originalSaleInfo.totalAmount.toFixed(2)}" style="width: fit-content; border:none; background: #eee; text-align: right; font-weight: 900; color: var(--color-black);" readonly></h2>`;
 
     modal.addEventListener('input', handleSaleEdit);
 }
@@ -1042,7 +1080,7 @@ async function handleSaveSale() {
     console.log("Datos de Venta Modificados (listos para enviar al backend):", updatedSaleData);
 
     const response = await api.updateSaleList(updatedSaleData);
-    if (response.success){alert("Cambios guardados en la consola. Recargue la página para verlos");}
+    if (response.success){alert("Se han guardados los cambios. Será redirigido."); window.location.reload();}
     else{alert("Ha ocurrido un error. No se pudieron guardar los cambios");console.log(response.error);}
 
     handleCancelSale();
@@ -1059,6 +1097,342 @@ function handleCancelSale() {
 
 async function setupReceiptList(){
     const response = await api.getUserReceipts();
+    if (response.success) {
+        const itemList = response.itemList;
+        await populateReceiptView(itemList);
+    }
+}
+
+async function populateReceiptView(itemList) {
+    const dateDescendingContainer = document.getElementById('receipts-table-date-descending');
+    const dateAscendingContainer = document.getElementById('receipts-table-date-ascending');
+    const idDescendingContainer = document.getElementById('receipts-table-id-descending');
+    const idAscendingContainer = document.getElementById('receipts-table-id-ascending');
+    const providerDescendingContainer = document.getElementById('receipts-table-provider-descending');
+    const providerAscendingContainer = document.getElementById('receipts-table-provider-ascending');
+    const priceDescendingContainer = document.getElementById('receipts-table-price-descending');
+    const priceAscendingContainer = document.getElementById('receipts-table-price-ascending');
+
+    const dateDescendingList = itemList.date.descending;
+    const dateAscendingList = itemList.date.ascending;
+    const idDescendingList = itemList.id.descending;
+    const idAscendingList = itemList.id.ascending;
+    const providerDescendingList = itemList.provider.descending;
+    const providerAscendingList = itemList.provider.ascending;
+    const priceDescendingList = itemList.price.descending;
+    const priceAscendingList = itemList.price.ascending;
+
+
+    for (const receipt of dateDescendingList) {
+        const receiptDiv = await createReceiptRow(receipt);
+        dateDescendingContainer.appendChild(receiptDiv);
+    }
+
+    for (const receipt of dateAscendingList) {
+        const receiptDiv = await createReceiptRow(receipt);
+        dateAscendingContainer.appendChild(receiptDiv);
+    }
+
+    for (const receipt of idDescendingList) {
+        const receiptDiv = await createReceiptRow(receipt);
+        idDescendingContainer.appendChild(receiptDiv);
+    }
+
+    for (const receipt of idAscendingList) {
+        const receiptDiv = await createReceiptRow(receipt);
+        idAscendingContainer.appendChild(receiptDiv);
+    }
+
+    for (const receipt of providerDescendingList) {
+        const receiptDiv = await createReceiptRow(receipt);
+        providerDescendingContainer.appendChild(receiptDiv);
+    }
+
+    for (const receipt of providerAscendingList) {
+        const receiptDiv = await createReceiptRow(receipt);
+        providerAscendingContainer.appendChild(receiptDiv);
+    }
+
+    for (const receipt of priceDescendingList) {
+        const receiptDiv = await createReceiptRow(receipt);
+        priceDescendingContainer.appendChild(receiptDiv);
+    }
+
+    for (const receipt of priceAscendingList) {
+        const receiptDiv = await createReceiptRow(receipt);
+        priceAscendingContainer.appendChild(receiptDiv);
+
+    }
+
+}
+
+async function createReceiptRow(receipt){
+    let providerName;
+
+    if (receipt.provider_id === null){providerName = "No asignado";}
+    else{
+        const result = await api.getProdivderById(receipt.provider_id);
+        const provider = result.providerInfo;
+        providerName = provider.full_name;
+    }
+
+    const receiptDiv = document.createElement('div');
+    receiptDiv.classList.add('receipt-row');
+    receiptDiv.dataset.receiptId = receipt.id;
+    receiptDiv.innerHTML = `<div class="flex-column" style="width: fit-content; justify-content: space-between">
+                            <h3>Número = ${receipt.id}</h3>
+                            <h2>$${receipt.total_amount}</h2>   
+                        </div>
+                        <div class="flex-column" style="width: fit-content; text-align: right">
+                            <p>${receipt.receipt_date}</p>
+                            <p class="customer-name">Proveedor = ${providerName}</p>   
+                        </div>`;
+    receiptDiv.addEventListener('click', async () => {
+        const receiptInfo = await api.getFullReceiptInfo(receipt.id);
+        showReceiptModal(receiptInfo);
+    });
+    return receiptDiv;
+}
+
+function showReceiptModal(receiptInfo){
+    const modal = document.getElementById('transaction-info-modal');
+
+    modal.originalReceiptInfo = JSON.parse(JSON.stringify(receiptInfo));
+
+    const itemList = receiptInfo.itemList;
+    let providerInfo;
+    if (!receiptInfo.providerInfo){
+        providerInfo = `<div class="flex-row justify-between">
+                                    <p>Proveedor</p>
+                                    <p>'No asignado'</p>
+                                </div>`;
+    }
+    else{providerInfo = newProviderInfo(receiptInfo.providerInfo);}
+
+    const receiptList = itemList.map((item, index) => {
+        const name = item.product_name;
+        const amount = item.quantity;
+        const price = item.unit_price;
+        const totalPrice = item.total_price;
+
+        return `<div class="flex-row receipt-item-row" style="gap: 15px;" data-index="${index}">
+                    <p style="width: 100px;overflow: hidden; text-wrap: nowrap; text-overflow: ellipsis">${name}</p>
+                    <p style="width: 70px;" class="item-quantity">${amount}</p>
+                    <p style="width: 65px;" class="item-price">${price}$</p>
+                    <p style="width: 80px;" class="item-total">${totalPrice}$</p>
+                 </div>`;
+    }).join('');
+
+    const receiptTicket = `<div class="flex-column" style="gap: 15px; margin-top:10px">    
+         <div class="flex-row" style="gap: 15px;"><h4 style="width: 100px">Nombre</h4>
+         <h4 style="width: 70px">Cantidad</h4><h4 style="width: 65px">Precio de Venta</h4><h4 style="width: 80px">Precio Total</h4></div>
+         <div id="receipt-item-list-wrapper" class="flex-column" style="max-height: 200px; overflow-y: auto;">${receiptList}</div>
+         <hr>
+    </div>`;
+
+    modal.innerHTML = `<div class="flex-row justify-between"><p></p><div>X</div></div>
+                       <div class="product-list-container">
+                       <div class="flex-row" style="justify-content: space-between; align-items: center">
+                        <h3>Lista de Productos</h3>
+                        <div class="flex-row all-center" style="gap: 10px;">
+                            <div id="edit-controls-container" class="flex-row hidden" style="gap: 10px;">
+                                <button id="save-receipt-btn" class="btn btn-primary" style="padding: 5px 10px; font-size: 0.8rem; margin-top: 0;" disabled>Guardar</button>
+                                <button id="cancel-receipt-btn" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.8rem; margin-top: 0;">Cancelar</button>
+                            </div>
+                            <button id="edit-receipt-btn" class="btn btn-secondary hidden" style="padding: 5px 10px; font-size: 0.8rem; margin-top: 0;">Editar</button>
+                            <img src="./assets/img/arrow-pointing-down.png" alt="Flecha" height="30px" id="product-list-btn" class="dropdown-arrow"/>
+                        </div>
+                        </div>
+                        <div id="product-list-dropdown">${receiptTicket}</div>
+                        </div>
+                        <div class="provider-info-container">${providerInfo}</div>
+                        <div id="final-total-container" style="margin-top: auto; text-align:right;" class="flex-column;">
+                            <p style="font-size: 20px; font-weight: 600">Id = <span style="font-size: 17px; font-weight: 400">${receiptInfo.id}</span></p>
+                            <p style="font-size: 20px; font-weight: 600">Fecha = <span style="font-size: 17px; font-weight: 400">${receiptInfo.receiptDate}</span></p>
+                            <h2 style="margin-bottom: 20px; text-align: right">Precio Total = $<span id="final-total-amount">${receiptInfo.totalAmount}</span></h2>
+                        </div>
+                        `;
+
+    modal.dataset.isEditing = 'false';
+
+    const productListBtn = document.getElementById('product-list-btn');
+    const listDropdown = document.getElementById('product-list-dropdown');
+    const editBtn = document.getElementById('edit-receipt-btn');
+
+    productListBtn.addEventListener('click', () => {
+        if (modal.dataset.isEditing === 'true') return;
+
+        listDropdown.classList.toggle('visible');
+        productListBtn.classList.toggle('rotated');
+
+        if (listDropdown.classList.contains('visible')) {
+            editBtn.classList.remove('hidden');
+        } else {
+            editBtn.classList.add('hidden');
+        }
+    })
+
+    const providerInfoBtn = document.getElementById('customer-info-btn');
+
+    if (providerInfoBtn){
+        providerInfoBtn.addEventListener('click', () => {
+            if (modal.dataset.isEditing === 'true') return;
+
+            const infoDropdown = document.getElementById('provider-info-dropdown');
+            infoDropdown.classList.toggle('visible');
+            providerInfoBtn.classList.toggle('rotated');
+        })
+    }
+
+    document.getElementById('edit-receipt-btn').addEventListener('click', enableReceiptEditing);
+    document.getElementById('cancel-receipt-btn').addEventListener('click', handleCancelReceipt);
+    document.getElementById('save-receipt-btn').addEventListener('click', handleSaveReceipt);
+
+    modal.classList.remove('hidden');
+}
+
+function newProviderInfo(providerInfo) {
+    return `<div class="flex-row justify-between" style="align-items: center">     
+                <div class="flex-row all-center" style="width: fit-content; gap: 10px">
+                    <h3>Cliente: </h3>
+                    <p style="font-weight: 600">${providerInfo.full_name}</p>
+                </div>    
+                <img src="./assets/img/arrow-pointing-down.png" alt="Flecha" height="30px" id="provider-info-btn" class="dropdown-arrow"/> 
+            </div>
+            <div class="flex-column" id="provider-info-dropdown">  
+                <p>Email = ${(providerInfo.email !== null) ? providerInfo.email : 'No asignado'}</p>
+                <p>Telefono = ${(providerInfo.phone !== null) ? providerInfo.phone : 'No asignado'}</p>
+                <p>Dirección = ${(providerInfo.address !== null) ? providerInfo.address : 'No asignado'}</p>
+                <p>Fecha de Creación = ${providerInfo.created_at}</p>
+            </div>`;
+}
+
+// --- NUEVAS FUNCIONES PARA EDICIÓN DE COMPRAS ---
+
+async function enableReceiptEditing() {
+    const modal = document.getElementById('transaction-info-modal');
+    modal.dataset.isEditing = 'true';
+    const originalReceiptInfo = modal.originalReceiptInfo;
+
+    document.getElementById('edit-receipt-btn').classList.add('hidden');
+    document.getElementById('product-list-btn').classList.add('hidden');
+    document.getElementById('edit-controls-container').classList.remove('hidden');
+
+    const listWrapper = document.getElementById('receipt-item-list-wrapper');
+    const itemRows = listWrapper.querySelectorAll('.receipt-item-row');
+
+    for (const row of itemRows){
+        const index = row.dataset.index;
+        const itemData = originalReceiptInfo.itemList[index];
+
+
+        const quantityCell = row.querySelector('.item-quantity');
+        const priceCell = row.querySelector('.item-price');
+        const totalCell = row.querySelector('.item-total');
+
+        quantityCell.innerHTML = `<input type="number" class="edit-quantity" value="${itemData.quantity}" min="1" xstyle="width: 70px; text-align: right; padding: 4px;">`;
+        priceCell.innerHTML = `<input type="number" class="edit-price" value="${itemData.unit_price}" min="0" step="0.01" style="width: 65px; text-align: right; padding: 4px;">$`;
+        totalCell.innerHTML = `<input type="text" class="edit-total" value="${itemData.total_price.toFixed(2)}" style="width: 80px; border:none; background: #eee; text-align: right; padding: 4px; height: fit-content;" readonly>$`;
+    }
+
+    const finalTotalContainer = document.getElementById('final-total-container');
+    finalTotalContainer.innerHTML = `<h2 style="margin-top:auto; margin-bottom: 20px; text-align: right">Precio Total = <input type="text" id="final-total-input" value="${originalReceiptInfo.totalAmount.toFixed(2)}" style="width: fit-content; border:none; background: #eee; text-align: right; font-weight: 900; color: var(--color-black);" readonly></h2>`;
+
+    modal.addEventListener('input', handleReceiptEdit);
+}
+
+function handleReceiptEdit(event) {
+    if (!event.target.classList.contains('edit-quantity') && !event.target.classList.contains('edit-price')) {
+        return;
+    }
+
+    const row = event.target.closest('.receipt-item-row');
+    if (!row) return;
+
+    const quantityInput = row.querySelector('.edit-quantity');
+    const priceInput = row.querySelector('.edit-price');
+    const totalInput = row.querySelector('.edit-total');
+
+    let newQuantity = parseInt(quantityInput.value) || 0;
+    const newPrice = parseFloat(priceInput.value) || 0;
+    const newRowTotal = newQuantity * newPrice;
+
+    totalInput.value = newRowTotal.toFixed(2);
+
+    let overallTotal = 0;
+    document.querySelectorAll('.edit-total').forEach(input => {
+        overallTotal += parseFloat(input.value) || 0;
+    });
+
+    document.getElementById('final-total-input').value = overallTotal.toFixed(2);
+
+    checkReceiptChanges();
+}
+
+function checkReceiptChanges() {
+    const modal = document.getElementById('transaction-info-modal');
+    const originalReceiptInfo = modal.originalReceiptInfo;
+    let hasChanged = false;
+
+    document.querySelectorAll('.receipt-item-row').forEach(row => {
+        const index = row.dataset.index;
+        const originalItem = originalReceiptInfo.itemList[index];
+
+        const currentQuantity = row.querySelector('.edit-quantity').value;
+        const currentPrice = row.querySelector('.edit-price').value;
+
+        if (parseFloat(currentQuantity) !== originalItem.quantity) {
+            hasChanged = true;
+        }
+        if (parseFloat(currentPrice) !== originalItem.unit_price) {
+            hasChanged = true;
+        }
+    });
+
+    document.getElementById('save-receipt-btn').disabled = !hasChanged;
+}
+
+async function handleSaveReceipt() {
+    const modal = document.getElementById('transaction-info-modal');
+    const originalReceiptInfo = modal.originalReceiptInfo;
+
+    const updatedReceiptData = {
+        sale_id: originalReceiptInfo.id,
+        items: [],
+        newTotal: document.getElementById('final-total-input').value
+    };
+    document.querySelectorAll('.receipt-item-row').forEach(row => {
+        const index = row.dataset.index;
+        const originalItem = originalReceiptInfo.itemList[index];
+
+        updatedReceiptData.items.push({
+            receipt_item_id: originalItem.receipt_id,
+            product_id: originalItem.item_id,
+            inventory_id: originalItem.inventory_id,
+            product_name: originalItem.product_name,
+            original_quantity: originalItem.quantity,
+            new_quantity: row.querySelector('.edit-quantity').value,
+            original_unit_price: originalItem.unit_price,
+            new_unit_price: row.querySelector('.edit-price').value,
+            new_total_price: row.querySelector('.edit-total').value
+        });
+    });
+
+    console.log("Datos de Compra Modificados (listos para enviar al backend):", updatedReceiptData);
+
+    const response = await api.updateReceiptList(updatedRececiptData);
+    if (response.success){alert("Se han guardados los cambios. Será redirigido."); window.location.reload();}
+    else{alert("Ha ocurrido un error. No se pudieron guardar los cambios");console.log(response.error);}
+
+    handleCancelReceipt();
+}
+function handleCancelReceipt() {
+    const modal = document.getElementById('transaction-info-modal');
+    const originalReceiptInfo = modal.originalReceiptInfo;
+
+    modal.removeEventListener('input', handleReceiptEdit);
+
+    showReceiptModal(originalReceiptInfo);
 }
 
 function setupOrderBy(){
