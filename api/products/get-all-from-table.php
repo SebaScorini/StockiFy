@@ -26,9 +26,16 @@ try {
     $productsStmt->execute();
     $products = $productsStmt->fetchAll();
 
+    $tableStmt = $pdo->prepare("SELECT name FROM inventories WHERE id = ?");
+    $tableStmt->execute([$inventoryID]);
+    $tableName = $tableStmt->fetch(PDO::FETCH_COLUMN);
+
     foreach ($products as $product) {
+        if ($product['name'] === null){$product['name'] = 'Producto sin nombre';}
+
         $productList[] = ['pID' => $product['id'], 'tID' => $inventoryID, 'stock' => $product['stock'],
-            'name' => $product['name'], 'salePrice' => $product['sale_price'], 'receiptPrice' => $product['receipt_price']];
+            'name' => $product['name'], 'salePrice' => $product['sale_price'], 'receiptPrice' => $product['receipt_price'],
+        'tableName'=> $tableName];
     }
 
     $response = ['productList' => $productList, 'success' => true];
