@@ -18,7 +18,7 @@
 <!--          FONDO GRIS Y MODALES DE TRANSACCIONES            -->
 
 <div id="grey-background" class="hidden">
-    <div id="new-transaction-container">
+    <div id="new-transaction-container" class="hidden">
         <div id="return-btn" class="return-btn" style="top: 0; left: 0">Volver</div>
         <div id="transaction-form-container">
         </div>
@@ -51,6 +51,8 @@
         <h2 style="color: var(--accent-green)" class="flex-row all-center">¡Exito!</h2>
         <div id="success-modal-body">
         </div>
+    </div>
+    <div id="transaction-info-modal" class="hidden">
     </div>
 </div>
 <!--                      FIN DE CODIGO                        -->
@@ -422,7 +424,6 @@
                                 <p data-order="receipts-table-price" class="order-btn">Precio</p>
                             </div>
                         </div>
-                        <input type="text" id="receipt-input" placeholder="Buscar una compra...">
                         <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="receipt">+ Crear una Compra</button>
                     </div>
                 </div>
@@ -474,7 +475,6 @@
                                 <p data-order="customers-table-dni" class="order-btn">DNI</p>
                             </div>
                         </div>
-                        <input type="text" id="customers-input" placeholder="Buscar un cliente...">
                         <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="customer">+ Crear Cliente</button>
                     </div>
                 </div>
@@ -533,41 +533,30 @@
                                 <p data-order="providers-table-phone" class="order-btn">Teléfono</p>
                             </div>
                         </div>
-                        <input type="text" id="providers-input" placeholder="Buscar un proveedor...">
                         <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="provider">+ Crear Proveedor</button>
                     </div>
                 </div>
                 <div class="table-wrapper">
                     <div id="customers-table-container">
                         <div id="providers-table-email-descending" class="transaction-view hidden provider-view">
-                            <p>Proveedores Ordenados por Email descendiente</p>
                         </div>
                         <div id="providers-table-email-ascending" class="transaction-view hidden provider-view">
-                            <p>Proveedores Ordenadas por Email cresciente</p>
                         </div>
                         <div id="providers-table-name-descending" class="transaction-view hidden provider-view">
-                            <p>Proveedores Ordenadas por Nombre descendiente (Alfabeticamente)</p>
                         </div>
                         <div id="providers-table-name-ascending" class="transaction-view hidden provider-view">
-                            <p>Proveedores Ordenadas por Nombre cresciente (Alfabeticamente)</p>
                         </div>
                         <div id="providers-table-date-descending" class="transaction-view provider-view">
-                            <p>Proveedores Ordenadas por Fecha descendente</p>
                         </div>
                         <div id="providers-table-date-ascending" class="transaction-view hidden provider-view">
-                            <p>Proveedores Ordenadas por Fecha ascendente</p>
                         </div>
                         <div id="providers-table-phone-descending" class="transaction-view hidden provider-view">
-                            <p>Proveedores Ordenados por Telefono descendiente</p>
                         </div>
                         <div id="providers-table-phone-ascending" class="transaction-view hidden provider-view">
-                            <p>Proveedores Ordenadas por Telefono cresciente</p>
                         </div>
                         <div id="providers-table-address-descending" class="transaction-view hidden provider-view">
-                            <p>Proveedores Ordenadas por Dirección descendiente (Alfabeticamente)</p>
                         </div>
                         <div id="providers-table-address-ascending" class="transaction-view hidden provider-view">
-                            <p>Proveedores Ordenadas por Dirección cresciente (Alfabeticamente)</p>
                         </div>
                     </div>
                 </div>
@@ -629,9 +618,6 @@
             <button id="confirm-delete-btn" class="btn btn-primary" disabled>Eliminar Permanentemente</button>
         </div>
     </div>
-</div>
-
-<div id="transaction-info-modal" class="hidden">
 </div>
 
 <script type="module" src="assets/js/import.js"></script>

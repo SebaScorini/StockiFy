@@ -446,7 +446,7 @@
     padding: 2rem;
 }
 
-.sale-row{
+.sale-row, .receipt-row{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -457,7 +457,7 @@
     transition: all var(--transition-speed) ease;
 }
 
-.sale-row:hover{
+.sale-row:hover, .receipt-row:hover{
     color: var(--color-white);
     background-color: var(--accent-color);
     box-shadow: 4px 4px 0 var(--color-black);
@@ -465,7 +465,7 @@
     cursor: pointer;
 }
 
-.customer-name{
+.customer-name, .provider-name{
     font-weight: 600;
     font-size: 18px;
     transition: all var(--transition-speed) ease;
@@ -490,20 +490,20 @@
     gap: 1rem;
 }
 
-#product-list-dropdown, #customer-info-dropdown{
+#product-list-dropdown, #customer-info-dropdown, #provider-info-dropdown{
     max-height: 0;
     transition: all var(--transition-speed) ease-in-out;
     overflow: hidden;
 }
 
-.product-list-container, .client-info-container{
+.product-list-container, .client-info-container, .provider-info-container{
     padding: 0.8rem;
     border: var(--border-strong);
     border-radius: var(--border-radius);
     background-color: var(--color-white);
 }
 
-#product-list-dropdown.visible, #customer-info-dropdown.visible{
+#product-list-dropdown.visible, #customer-info-dropdown.visible, #provider-info-dropdown.visible{
     max-height: 300px;
 }
 
@@ -526,7 +526,7 @@
     font-size: 14px;
 }
 
-.sale-row:active{
+.sale-row:active, .receipt-row:active{
     transform: translate(2px, 2px);
 }
 
