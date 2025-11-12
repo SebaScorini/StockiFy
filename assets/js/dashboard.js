@@ -1660,7 +1660,7 @@ function configTransactionModalsReturn(){
     const itemPickerHeader = document.getElementById('item-picker-header');
 
     returnBtn.addEventListener('click', () => {
-        itemPickerHeader.classList.add('hidden');
+        itemPickerHeader.classList.remove('visible');
         hideTransactionModal();
     })
 }
@@ -2190,7 +2190,7 @@ function configureTablePickerDropdown(){
     const itemPickerHeader = document.getElementById('item-picker-header');
 
     inventoryPickerName.addEventListener('click', () => {
-        itemPickerHeader.classList.toggle('hidden');
+        itemPickerHeader.classList.toggle('visible');
     })
 }
 
@@ -2203,7 +2203,7 @@ function configureTablePickers(){
             const itemPickerHeader = document.getElementById('item-picker-header');
             const inventoryPickerName = document.getElementById('inventory-picker-name');
 
-            itemPickerHeader.classList.add('hidden');
+            itemPickerHeader.classList.remove('visble');
             inventoryPickerName.innerHTML = table.innerHTML;
             showProductList(tableID);
         })
@@ -2508,40 +2508,139 @@ function populateProviderModal(providers){
     const providerAddressAscending = document.getElementById('providers-table-address-ascending');
 
     providersByNameDesc.forEach(provider =>{
-        providerNameDescending.innerHTML += createProviderRow(provider);
+        providerNameDescending.appendChild(createProviderRow(provider));
     })
     providersByNameAsc.forEach(provider =>{
-        providerNameAscending.innerHTML += createProviderRow(provider);
+        providerNameAscending.appendChild(createProviderRow(provider));
     })
     providersByEmailDesc.forEach(provider=>{
-        providerEmailDescending.innerHTML += createProviderRow(provider);
+        providerEmailDescending.appendChild(createProviderRow(provider));
     })
     providersByEmailAsc.forEach(provider =>{
-        providerEmailAscending.innerHTML += createProviderRow(provider);
+        providerEmailAscending.appendChild(createProviderRow(provider));
     })
     providersByDateDesc.forEach(provider =>{
-        providerDateDescending.innerHTML += createProviderRow(provider);
+        providerDateDescending.appendChild(createProviderRow(provider));
     })
     providersByDateAsc.forEach(provider =>{
-        providerDateAscending.innerHTML += createProviderRow(provider);
+        providerDateAscending.appendChild(createProviderRow(provider));
     })
     providersByPhoneDesc.forEach(provider =>{
-        providerPhoneDescending.innerHTML += createProviderRow(provider);
+        providerPhoneDescending.appendChild(createProviderRow(provider));
     })
     providersByPhoneAsc.forEach(provider =>{
-        providerPhoneAscending.innerHTML += createProviderRow(provider);
+        providerPhoneAscending.appendChild(createProviderRow(provider));
     })
     providersByAddressDesc.forEach(provider =>{
-        providerAddressDescending.innerHTML += createProviderRow(provider);
+        providerAddressDescending.appendChild(createProviderRow(provider));
     })
     providersByAddressAsc.forEach(provider =>{
-        providerAddressAscending.innerHTML += createProviderRow(provider);
+        providerAddressAscending.appendChild(createProviderRow(provider));
     })
 }
 
 function createProviderRow (provider){
-    const text = 'Nombre : ' + provider.full_name;
-    return text;
+    const providerDiv = document.createElement('div');
+    providerDiv.classList.add('provider-row');
+    providerDiv.innerHTML = `<div>
+                                <h3>${provider.full_name}</h3>
+                            </div>
+                            <div><p style="font-size: 15px">${provider.created_at}</p></div>`
+
+    providerDiv.addEventListener('click', () => {
+        showProviderInfoModal(provider);
+    })
+    return providerDiv;
+}
+
+function showProviderInfoModal(provider){
+    const modal = document.getElementById('transaction-info-modal');
+
+    const providerEmail = (provider.email === null) ? '' : provider.email;
+    const providerPhone = (provider.phone === null) ? '' : provider.phone;
+    const providerAddress = (provider.address === null) ? '' : provider.address;
+
+    modal.innerHTML = `<form class="flex-column" method="get" action="/StockiFy/dashboard.php" id="provider-info-form">
+                                <h4 class="transaction-error-message hidden" style="color: var(--accent-red)"></h4>
+                                <label for="provider-name"><h2>Nombre</h2></label>
+                                <input type="text" name="name" id="provider-name" placeholder="No asignado." value="${provider.full_name}" required>
+                                <hr>
+                                <label for="provider-email" class="flex-row" style="gap: 5px"><h2>Email</h2><p>(Opcional)</p></label>
+                                <input type="email" name="email" id="provider-email" placeholder="No asignado." value="${providerEmail}">
+                                <label for="provider-phone" class="flex-row" style="gap: 5px"><h2>Telefono </h2><p>(Opcional)</p></label>
+                                <input type="text" name="phone" id="provider-phone" placeholder="No asignado." 
+                                value="${providerPhone}" minlength="8" pattern="[0-9]+">
+                                <label for="client-address" class="flex-row" style="gap: 5px"><h2>Dirección </h2><p>(Opcional)</p></label>
+                                <input type="text" name="address" id="provider-address" placeholder="No asignado." value="${providerAddress}">
+                                <button class="btn btn-primary" id="save-provider-btn" disabled>Guardar Cambios</button>
+                                </form>`;
+
+    const saveBtn = document.getElementById('save-provider-btn');
+
+    const form = document.getElementById('provider-info-form');
+    let formInitialState = {};
+
+    const formInputs = form.querySelectorAll('input');
+
+    formInputs.forEach(input => {
+        formInitialState[input.name] = input.value;
+    })
+
+    form.addEventListener('input', () => {
+        const currentInputs = form.querySelectorAll('input');
+
+        const modified = Array.from(currentInputs).some(input => {
+            return formInitialState[input.name] !== input.value;
+        });
+
+        saveBtn.disabled = !modified;
+    })
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        await saveProviderChanges(provider.id);
+    })
+
+    showTransactionInfoModal();
+}
+
+async function saveProviderChanges(providerID){
+
+    const providerName = document.getElementById('provider-name').value;
+
+    if (providerName === ''){showTransactionError('Es obligatorio asignarle un nombre al proveedor.'); return;}
+
+    var providerEmail = document.getElementById('provider-email').value;
+    var providerPhone = document.getElementById('provider-phone').value;
+    var providerAddress = document.getElementById('provider-address').value;
+
+    const providerList = await api.getAllProviders();
+
+    if (!providerList.success){
+        {showTransactionError('Ha ocurrido un error interno.' + providerList.error); return;}
+    }
+
+    if (providerList.providerList.find(provider => provider.email === providerEmail && provider.id !== providerID) && providerEmail !== ''){
+        showTransactionError('Ya existe un proveedor registrado con ese email.'); return;
+    }
+    if (providerList.providerList.find(provider => parseInt(provider.phone,10) === parseInt(providerPhone,10) && provider.id !== providerID)
+        && providerPhone !== ''){
+        showTransactionError('Ya existe un proveedor registrado con ese telefono.'); return;
+    }
+
+    providerEmail = (providerEmail === '') ? null : providerEmail;
+    providerPhone = (providerPhone === '') ? null : providerPhone;
+    providerAddress = (providerAddress === '') ? null : providerAddress;
+
+    const providerData = {'name' : providerName, 'email' : providerEmail, 'phone' : providerPhone, 'address' : providerAddress, 'id' : providerID};
+
+    const response = await api.updateProvider(providerData);
+
+    if (!response.success){{showTransactionError('Ha ocurrido un error interno. No se pudo actualizar el proveedor');
+        console.log(response.error);
+        return;}}
+    alert('Proveedor actualizado con exito. Será redirigido');
+    window.location.href = '/StockiFy/dashboard.php?location=customers';
 }
 
 async function setupClients(){
@@ -2594,50 +2693,151 @@ function populateClientModal(clients){
     const customerDniAscending = document.getElementById('customers-table-dni-ascending');
 
     clientsByNameDesc.forEach(client =>{
-        customerNameDescending.innerHTML += createClientRow(client);
+        customerNameDescending.appendChild(createClientRow(client));
     })
     clientsByNameAsc.forEach(client =>{
-        customerNameAscending.innerHTML += createClientRow(client);
+        customerNameAscending.appendChild(createClientRow(client));
     })
     clientsByEmailDesc.forEach(client =>{
-        customerEmailDescending.innerHTML += createClientRow(client);
+        customerEmailDescending.appendChild(createClientRow(client));
     })
     clientsByEmailAsc.forEach(client =>{
-        customerEmailAscending.innerHTML += createClientRow(client);
+        customerEmailAscending.appendChild(createClientRow(client));
     })
     clientsByDateDesc.forEach(client =>{
-        customerDateDescending.innerHTML += createClientRow(client);
+        customerDateDescending.appendChild(createClientRow(client));
     })
     clientsByDateAsc.forEach(client =>{
-        customerDateAscending.innerHTML += createClientRow(client);
+        customerDateAscending.appendChild(createClientRow(client));
     })
     clientsByPhoneDesc.forEach(client =>{
-        customerPhoneDescending.innerHTML += createClientRow(client);
+        customerPhoneDescending.appendChild(createClientRow(client));
     })
     clientsByPhoneAsc.forEach(client =>{
-        customerPhoneAscending.innerHTML += createClientRow(client);
+        customerPhoneAscending.appendChild(createClientRow(client));
     })
     clientsByAddressDesc.forEach(client =>{
-        customerAddressDescending.innerHTML += createClientRow(client);
+        customerAddressDescending.appendChild(createClientRow(client));
     })
     clientsByAddressAsc.forEach(client =>{
-        customerAddressAscending.innerHTML += createClientRow(client);
+        customerAddressAscending.appendChild(createClientRow(client));
     })
     clientsByDniDesc.forEach(client =>{
-        customerDniDescending.innerHTML += createClientRow(client);
+        customerDniDescending.appendChild(createClientRow(client));
     })
     clientsByDniAsc.forEach(client =>{
-        customerDniAscending.innerHTML += createClientRow(client);
+        customerDniAscending.appendChild(createClientRow(client));
     })
 }
 
 function createClientRow (client){
-    const text = `<div class="client-row">
-                            <div style="height: 100%" class="flex-row">
-                                <h3></h3>
+    const clientDiv = document.createElement('div');
+    clientDiv.classList.add('client-row');
+    clientDiv.innerHTML = `<div>
+                                <h3>${client.full_name}</h3>
                             </div>
-                        <div>`
-    return text;
+                            <div><p style="font-size: 15px">${client.created_at}</p></div>`
+
+    clientDiv.addEventListener('click', () => {
+        showClientInfoModal(client);
+    })
+    return clientDiv;
+}
+
+function showClientInfoModal(client){
+    const modal = document.getElementById('transaction-info-modal');
+
+    const clientEmail = (client.email === null) ? '' : client.email;
+    const clientPhone = (client.phone === null) ? '' : client.phone;
+    const clientAddress = (client.address === null) ? '' : client.address;
+    const clientDNI = (client.tax_id === null) ? '' : client.tax_id;
+
+    modal.innerHTML = `<form class="flex-column" method="get" action="/StockiFy/dashboard.php" id="customer-info-form">
+                                <h4 class="transaction-error-message hidden" style="color: var(--accent-red)"></h4>
+                                <label for="client-name"><h2>Nombre</h2></label>
+                                <input type="text" name="name" id="client-name" placeholder="No asignado." value="${client.full_name}" required>
+                                <hr>
+                                <label for="client-email" class="flex-row" style="gap: 5px"><h2>Email</h2><p>(Opcional)</p></label>
+                                <input type="email" name="email" id="client-email" placeholder="No asignado." value="${clientEmail}">
+                                <label for="client-phone" class="flex-row" style="gap: 5px"><h2>Telefono </h2><p>(Opcional)</p></label>
+                                <input type="text" name="phone" id="client-phone" placeholder="No asignado." 
+                                value="${clientPhone}" minlength="8" pattern="[0-9]+">
+                                <label for="client-address" class="flex-row" style="gap: 5px"><h2>Dirección </h2><p>(Opcional)</p></label>
+                                <input type="text" name="address" id="client-address" placeholder="No asignado." value="${clientAddress}">
+                                <label for="client-dni" class="flex-row" style="gap: 5px"><h2>D.N.I </h2><p>(Opcional)</p></label>
+                                <input type="text" name="tax-id" id="client-dni" placeholder="No asignado." value="${clientDNI}" 
+                                pattern="\\d{1,2}\\.\\d{3}\\.\\d{3}">           
+                                <button class="btn btn-primary" id="save-customer-btn" disabled>Guardar Cambios</button>
+                                </form>`;
+
+    const saveBtn = document.getElementById('save-customer-btn');
+
+    const form = document.getElementById('customer-info-form');
+    let formInitialState = {};
+
+    const formInputs = form.querySelectorAll('input');
+
+    formInputs.forEach(input => {
+        formInitialState[input.name] = input.value;
+    })
+
+    form.addEventListener('input', () => {
+        const currentInputs = form.querySelectorAll('input');
+
+        const modified = Array.from(currentInputs).some(input => {
+            return formInitialState[input.name] !== input.value;
+        });
+
+        saveBtn.disabled = !modified;
+    })
+
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        await saveCustomerChanges(client.id);
+    })
+
+    showTransactionInfoModal();
+}
+
+async function saveCustomerChanges(customerID){
+
+    const customerName = document.getElementById('client-name').value;
+
+    if (customerName === ''){showTransactionError('Es obligatorio asignarle un nombre al cliente.'); return;}
+
+    var customerEmail = document.getElementById('client-email').value;
+    var customerPhone = document.getElementById('client-phone').value;
+    var customerAddress = document.getElementById('client-address').value;
+    var customerDNI = document.getElementById('client-dni').value;
+
+    const customerList = await api.getAllClients();
+
+    if (!customerList.success){
+        {showTransactionError('Ha ocurrido un error interno.' + customerList.error); return;}
+    }
+
+    if (customerList.clientList.find(client => client.email === customerEmail && client.id !== customerID) && customerEmail !== ''){
+        showTransactionError('Ya existe un cliente registrado con ese email.'); return;
+    }
+    if (customerList.clientList.find(client => parseInt(client.phone,10) === parseInt(customerPhone,10) && client.id !== customerID)
+        && customerPhone !== ''){
+        showTransactionError('Ya existe un cliente registrado con ese telefono.'); return;
+    }
+
+    customerEmail = (customerEmail === '') ? null : customerEmail;
+    customerPhone = (customerPhone === '') ? null : customerPhone;
+    customerAddress = (customerAddress === '') ? null : customerAddress;
+    customerDNI = (customerDNI === '') ? null : customerDNI;
+
+    const customerData = {'name' : customerName, 'email' : customerEmail, 'phone' : customerPhone, 'address' : customerAddress, 'tax_id' : customerDNI,'id' : customerID};
+
+    const response = await api.updateCustomer(customerData);
+
+    if (!response.success){{showTransactionError('Ha ocurrido un error interno. No se pudo actualizar el cliente');
+        console.log(response.error);
+        return;}}
+    alert('Cliente actualizado con exito. Será redirigido');
+    window.location.href = '/StockiFy/dashboard.php?location=customers';
 }
 
 async function completeProvider(){
