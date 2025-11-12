@@ -27,18 +27,24 @@
         <div class="flex-row" style="justify-content: space-between; align-items: center; padding: 0.5rem;">
             <div id="modal-return-btn" class="return-btn" style="top: 0; left: 0">Volver</div>
             <div class="flex-row" style="padding: 0.5rem; align-items: center; justify-content: right;">
-                <div class="flex-column">
+                <div class="flex-column" id="inventory-picker-container">
                     <div id="inventory-picker-name" class="btn"><p>Todos los Inventarios</p></div>
                     <div id="item-picker-header" class="flex-row hidden"></div>
                 </div>
             </div>
         </div>
+        <hr>
         <div id="item-picker-modal" class="picker-modal flex-column">
-            <div id="item-list" class="flex-column"></div>
+            <div id="item-list" class="flex-column picker-list"></div>
+            <button class="btn btn-primary picker-confirm-btn" data-type="item" disabled>Selecccionar</button>
         </div>
         <div id="client-picker-modal" class="picker-modal">
+            <div id="client-list" class="flex-column picker-list"></div>
+            <button class="btn btn-primary picker-confirm-btn" data-type="client" disabled>Selecccionar</button>
         </div>
         <div id="provider-picker-modal" class="picker-modal">
+            <div id="provider-list" class="flex-column picker-list"></div>
+            <button class="btn btn-primary picker-confirm-btn" data-type="provider" disabled>Selecccionar</button>
         </div>
     </div>
     <div id="transaction-success-modal" class="flex-column hidden">
@@ -362,35 +368,26 @@
                                 <p data-order="sales-table-price" class="order-btn">Precio</p>
                             </div>
                         </div>
-                        <input type="text" id="sale-input" placeholder="Buscar una venta...">
                         <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem;" data-transaction="sale">+ Crear una Venta</button>
                     </div>
                 </div>
                 <div class="table-wrapper">
                     <div id="sales-table-container">
                         <div id="sales-table-id-descending" class="transaction-view hidden">
-                            <p>Ventas Ordenadas por ID descendiente</p>
                         </div>
                         <div id="sales-table-id-ascending" class="transaction-view hidden">
-                            <p>Ventas Ordenadas por ID cresciente</p>
                         </div>
                         <div id="sales-table-client-descending" class="transaction-view hidden">
-                            <p>Ventas Ordenadas por Cliente descendiente (Alfabeticamente)</p>
                         </div>
                         <div id="sales-table-client-ascending" class="transaction-view hidden">
-                            <p>Ventas Ordenadas por Cliente cresciente (Alfabeticamente)</p>
                         </div>
                         <div id="sales-table-price-ascending" class="transaction-view hidden">
-                            <p>Ventas Ordenadas por Precio cresciente</p>
                         </div>
                         <div id="sales-table-price-descending" class="transaction-view hidden">
-                            <p>Ventas Ordenadas por Precio descendente</p>
                         </div>
                         <div id="sales-table-date-ascending" class="transaction-view hidden">
-                            <p>Ventas Ordenadas por Fecha cresciente</p>
                         </div>
                         <div id="sales-table-date-descending" class="transaction-view">
-                            <p>Ventas Ordenadas por Fecha descendente</p>
                         </div>
                     </div>
                 </div>
@@ -432,28 +429,20 @@
                 <div class="table-wrapper">
                     <div id="receipts-table-container">
                         <div id="receipts-table-id-descending" class="transaction-view hidden">
-                            <p>Compras Ordenadas por ID descendiente</p>
                         </div>
                         <div id="receipts-table-id-ascending" class="transaction-view hidden">
-                            <p>Compras Ordenadas por ID cresciente</p>
                         </div>
                         <div id="receipts-table-provider-descending" class="transaction-view hidden">
-                            <p>Compras Ordenadas por Proveedor descendiente (Alfabeticamente)</p>
                         </div>
                         <div id="receipts-table-provider-ascending" class="transaction-view hidden">
-                            <p>Compras Ordenadas por Proveedor cresciente (Alfabeticamente)</p>
                         </div>
                         <div id="receipts-table-price-ascending" class="transaction-view hidden">
-                            <p>Compras Ordenadas por Precio cresciente</p>
                         </div>
                         <div id="receipts-table-price-descending" class="transaction-view hidden">
-                            <p>Compras Ordenadas por Precio descendente</p>
                         </div>
                         <div id="receipts-table-date-descending" class="transaction-view">
-                            <p>Compras Ordenadas por Fecha descendente</p>
                         </div>
                         <div id="receipts-table-date-ascending" class="transaction-view hidden">
-                            <p>Compras Ordenadas por Fecha ascendente</p>
                         </div>
                     </div>
                 </div>
@@ -640,6 +629,9 @@
             <button id="confirm-delete-btn" class="btn btn-primary" disabled>Eliminar Permanentemente</button>
         </div>
     </div>
+</div>
+
+<div id="transaction-info-modal" class="hidden">
 </div>
 
 <script type="module" src="assets/js/import.js"></script>

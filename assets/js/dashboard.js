@@ -3,7 +3,7 @@
 import * as api from './api.js';
 import * as setup from './setupMiCuentaDropdown.js';
 import { openImportModal, initializeImportModal, setStockifyColumns } from './import.js';
-import {getCustomerById} from "./api.js";
+import {getCustomerById, getProductData} from "./api.js";
 
 let allData = [];
 let currentTableColumns = [];
@@ -766,8 +766,8 @@ async function populateSaleView(saleList) {
 
 
     for (const sale of dateDescendingList) {
-        const text = await createSaleRow(sale);
-        dateDescendingContainer.innerHTML += text;
+        const saleDiv = await createSaleRow(sale);
+        dateDescendingContainer.appendChild(saleDiv);
     }
 }
 
@@ -781,8 +781,279 @@ async function createSaleRow(sale){
         customerName = customer.full_name;
     }
 
-    const text = "ID = " + sale.id + ". Fecha = " + sale.sale_date + ". Cliente = " + customerName + ". Precio = " + sale.total_amount +  ".";
-    return text;
+    const saleDiv = document.createElement('div');
+    saleDiv.classList.add('sale-row');
+    saleDiv.dataset.saleId = sale.id;
+    saleDiv.innerHTML = `<div class="flex-column" style="width: fit-content; justify-content: space-between">
+                            <h3>Número = ${sale.id}</h3>
+                            <h2>$${sale.total_amount}</h2>   
+                        </div>
+                        <div class="flex-column" style="width: fit-content; text-align: right">
+                            <p>${sale.sale_date}</p>
+                            <p class="customer-name">Cliente = ${customerName}</p>   
+                        </div>`;
+    saleDiv.addEventListener('click', async () => {
+        const saleInfo = await api.getFullSaleInfo(sale.id);
+        showSaleModal(saleInfo);
+    });
+    return saleDiv;
+}
+
+function showSaleModal(saleInfo){
+    const modal = document.getElementById('transaction-info-modal');
+
+    modal.originalSaleInfo = JSON.parse(JSON.stringify(saleInfo));
+
+    const itemList = saleInfo.itemList;
+    let customerInfo;
+    if (!saleInfo.customerInfo){
+        customerInfo = `<div class="flex-row justify-between">
+                                    <p>Cliente</p>
+                                    <p>'No asignado'</p>
+                                </div>`;
+    }
+    else{customerInfo = newCustomerInfo(saleInfo.customerInfo);}
+
+    const saleList = itemList.map((item, index) => {
+        const name = item.product_name;
+        const amount = item.quantity;
+        const price = item.unit_price;
+        const totalPrice = item.total_price;
+
+        return `<div class="flex-row sale-item-row" style="gap: 15px;" data-index="${index}">
+                    <p style="width: 100px;overflow: hidden; text-wrap: nowrap; text-overflow: ellipsis">${name}</p>
+                    <p style="width: 70px;" class="item-quantity">${amount}</p>
+                    <p style="width: 65px;" class="item-price">${price}$</p>
+                    <p style="width: 80px;" class="item-total">${totalPrice}$</p>
+                 </div>`;
+    }).join('');
+
+    const saleTicket = `<div class="flex-column" style="gap: 15px; margin-top:10px">    
+         <div class="flex-row" style="gap: 15px;"><h4 style="width: 100px">Nombre</h4>
+         <h4 style="width: 70px">Cantidad</h4><h4 style="width: 65px">Precio de Venta</h4><h4 style="width: 80px">Precio Total</h4></div>
+         <div id="sale-item-list-wrapper" class="flex-column" style="max-height: 200px; overflow-y: auto;">${saleList}</div>
+         <hr>
+    </div>`;
+
+    modal.innerHTML = `<div class="flex-row">N°${saleInfo.id}</div>
+                       <div class="product-list-container">
+                       <div class="flex-row" style="justify-content: space-between; align-items: center">
+                        <h3>Lista de Productos</h3>
+                        <div class="flex-row all-center" style="gap: 10px;">
+                            <div id="edit-controls-container" class="flex-row hidden" style="gap: 10px;">
+                                <button id="save-sale-btn" class="btn btn-primary" style="padding: 5px 10px; font-size: 0.8rem; margin-top: 0;" disabled>Guardar</button>
+                                <button id="cancel-sale-btn" class="btn btn-secondary" style="padding: 5px 10px; font-size: 0.8rem; margin-top: 0;">Cancelar</button>
+                            </div>
+                            <button id="edit-sale-btn" class="btn btn-secondary hidden" style="padding: 5px 10px; font-size: 0.8rem; margin-top: 0;">Editar</button>
+                            <img src="./assets/img/arrow-pointing-down.png" alt="Flecha" height="30px" id="product-list-btn" class="dropdown-arrow"/>
+                        </div>
+                        </div>
+                        <div id="product-list-dropdown">${saleTicket}</div>
+                        </div>
+                        <div class="client-info-container">${customerInfo}</div>
+                        <div id="final-total-container">
+                            <h2 style="margin-top:auto; margin-bottom: 20px; text-align: right">Precio Total = $<span id="final-total-amount">${saleInfo.totalAmount}</span></h2>
+                        </div>
+                        `;
+
+    modal.dataset.isEditing = 'false';
+
+    const productListBtn = document.getElementById('product-list-btn');
+    const listDropdown = document.getElementById('product-list-dropdown');
+    const editBtn = document.getElementById('edit-sale-btn');
+
+    productListBtn.addEventListener('click', () => {
+        if (modal.dataset.isEditing === 'true') return;
+
+        listDropdown.classList.toggle('visible');
+        productListBtn.classList.toggle('rotated');
+
+        if (listDropdown.classList.contains('visible')) {
+            editBtn.classList.remove('hidden');
+        } else {
+            editBtn.classList.add('hidden');
+        }
+    })
+
+    const customerInfoBtn = document.getElementById('customer-info-btn');
+
+    if (customerInfoBtn){
+        customerInfoBtn.addEventListener('click', () => {
+            if (modal.dataset.isEditing === 'true') return;
+
+            const infoDropdown = document.getElementById('customer-info-dropdown');
+            infoDropdown.classList.toggle('visible');
+            customerInfoBtn.classList.toggle('rotated');
+        })
+    }
+
+    document.getElementById('edit-sale-btn').addEventListener('click', enableSaleEditing);
+    document.getElementById('cancel-sale-btn').addEventListener('click', handleCancelSale);
+    document.getElementById('save-sale-btn').addEventListener('click', handleSaveSale);
+
+    modal.classList.remove('hidden');
+}
+
+function newCustomerInfo(clientInfo) {
+    return `<div class="flex-row justify-between" style="align-items: center">     
+                <div class="flex-row all-center" style="width: fit-content; gap: 10px">
+                    <h3>Cliente: </h3>
+                    <p style="font-weight: 600">${clientInfo.full_name}</p>
+                </div>    
+                <img src="./assets/img/arrow-pointing-down.png" alt="Flecha" height="30px" id="customer-info-btn" class="dropdown-arrow"/> 
+            </div>
+            <div class="flex-column" id="customer-info-dropdown">  
+                <p>Email = ${(clientInfo.email !== null) ? clientInfo.email : 'No asignado'}</p>
+                <p>Telefono = ${(clientInfo.phone !== null) ? clientInfo.phone : 'No asignado'}</p>
+                <p>Dirección = ${(clientInfo.address !== null) ? clientInfo.address : 'No asignado'}</p>
+                <p>DNI = ${(clientInfo.tax_id !== null) ? clientInfo.tax_id : 'No asignado'}</p>
+                <p>Fecha de Creación = ${clientInfo.created_at}</p>
+            </div>`;
+}
+
+// --- NUEVAS FUNCIONES PARA EDICIÓN DE VENTAS ---
+
+async function enableSaleEditing() {
+    const modal = document.getElementById('transaction-info-modal');
+    modal.dataset.isEditing = 'true';
+    const originalSaleInfo = modal.originalSaleInfo;
+
+    document.getElementById('edit-sale-btn').classList.add('hidden');
+    document.getElementById('product-list-btn').classList.add('hidden');
+    document.getElementById('edit-controls-container').classList.remove('hidden');
+
+    const listWrapper = document.getElementById('sale-item-list-wrapper');
+    const itemRows = listWrapper.querySelectorAll('.sale-item-row');
+
+    for (const row of itemRows){
+        const index = row.dataset.index;
+        const itemData = originalSaleInfo.itemList[index];
+
+        const response = await getProductData(itemData.item_id,itemData.inventory_id);
+        if (!response.success) return;
+
+        const productInfo = response.productInfo;
+
+        const quantityCell = row.querySelector('.item-quantity');
+        const priceCell = row.querySelector('.item-price');
+        const totalCell = row.querySelector('.item-total');
+
+        const itemMax = itemData.quantity + productInfo.stock;
+
+        quantityCell.innerHTML = `<input type="number" class="edit-quantity" value="${itemData.quantity}" min="1" max="${itemMax}" xstyle="width: 70px; text-align: right; padding: 4px;">`;
+        priceCell.innerHTML = `<input type="number" class="edit-price" value="${itemData.unit_price}" min="0" step="0.01" style="width: 65px; text-align: right; padding: 4px;">$`;
+        totalCell.innerHTML = `<input type="text" class="edit-total" value="${itemData.total_price.toFixed(2)}" style="width: 80px; border:none; background: #eee; text-align: right; padding: 4px;" readonly>$`;
+    }
+
+    const finalTotalContainer = document.getElementById('final-total-container');
+    finalTotalContainer.innerHTML = `<h2 style="margin-top:auto; margin-bottom: 20px; text-align: right">Precio Total = $<input type="text" id="final-total-input" value="${originalSaleInfo.totalAmount.toFixed(2)}" style="width: 100px; border:none; background: #eee; text-align: right; font-size: 1.5rem; font-weight: 900; color: var(--color-black);" readonly></h2>`;
+
+    modal.addEventListener('input', handleSaleEdit);
+}
+
+function handleSaleEdit(event) {
+    if (!event.target.classList.contains('edit-quantity') && !event.target.classList.contains('edit-price')) {
+        return;
+    }
+
+    const row = event.target.closest('.sale-item-row');
+    if (!row) return;
+
+    const quantityInput = row.querySelector('.edit-quantity');
+    const priceInput = row.querySelector('.edit-price');
+    const totalInput = row.querySelector('.edit-total');
+
+    let newQuantity = parseInt(quantityInput.value) || 0;
+
+
+    if (event.target.classList.contains('edit-quantity')) {
+        const maxStock = parseInt(quantityInput.max, 10);
+
+        if (!isNaN(maxStock) && newQuantity > maxStock) {
+
+            newQuantity = maxStock;
+            quantityInput.value = maxStock;
+        }
+    }
+    const newPrice = parseFloat(priceInput.value) || 0;
+    const newRowTotal = newQuantity * newPrice;
+
+    totalInput.value = newRowTotal.toFixed(2);
+
+    let overallTotal = 0;
+    document.querySelectorAll('.edit-total').forEach(input => {
+        overallTotal += parseFloat(input.value) || 0;
+    });
+
+    document.getElementById('final-total-input').value = overallTotal.toFixed(2);
+
+    checkSaleChanges();
+}
+
+function checkSaleChanges() {
+    const modal = document.getElementById('transaction-info-modal');
+    const originalSaleInfo = modal.originalSaleInfo;
+    let hasChanged = false;
+
+    document.querySelectorAll('.sale-item-row').forEach(row => {
+        const index = row.dataset.index;
+        const originalItem = originalSaleInfo.itemList[index];
+
+        const currentQuantity = row.querySelector('.edit-quantity').value;
+        const currentPrice = row.querySelector('.edit-price').value;
+
+        if (parseFloat(currentQuantity) !== originalItem.quantity) {
+            hasChanged = true;
+        }
+        if (parseFloat(currentPrice) !== originalItem.unit_price) {
+            hasChanged = true;
+        }
+    });
+
+    document.getElementById('save-sale-btn').disabled = !hasChanged;
+}
+
+async function handleSaveSale() {
+    const modal = document.getElementById('transaction-info-modal');
+    const originalSaleInfo = modal.originalSaleInfo;
+
+    const updatedSaleData = {
+        sale_id: originalSaleInfo.id,
+        items: [],
+        newTotal: document.getElementById('final-total-input').value
+    };
+    document.querySelectorAll('.sale-item-row').forEach(row => {
+        const index = row.dataset.index;
+        const originalItem = originalSaleInfo.itemList[index];
+
+        updatedSaleData.items.push({
+            sale_item_id: originalItem.sale_id,
+            product_id: originalItem.item_id,
+            inventory_id: originalItem.inventory_id,
+            product_name: originalItem.product_name,
+            original_quantity: originalItem.quantity,
+            new_quantity: row.querySelector('.edit-quantity').value,
+            original_unit_price: originalItem.unit_price,
+            new_unit_price: row.querySelector('.edit-price').value,
+            new_total_price: row.querySelector('.edit-total').value
+        });
+    });
+
+    console.log("Datos de Venta Modificados (listos para enviar al backend):", updatedSaleData);
+
+    const response = await api.updateSaleList(updatedSaleData);
+    if (response.success){alert("Cambios guardados en la consola. Recargue la página para verlos");}
+    else{alert("Ha ocurrido un error. No se pudieron guardar los cambios");console.log(response.error);}
+
+    handleCancelSale();
+}
+function handleCancelSale() {
+    const modal = document.getElementById('transaction-info-modal');
+    const originalSaleInfo = modal.originalSaleInfo;
+
+    modal.removeEventListener('input', handleSaleEdit);
+
+    showSaleModal(originalSaleInfo);
 }
 
 
@@ -889,10 +1160,12 @@ function showTransactionView(viewOrder, viewDirection,menuContainer) {
 //PREPARO EL FONDO GRIS PARA LOS MODALES
 function setupGreyBg(){
     const greyBg = document.getElementById('grey-background');
-    const transactionPickerModals = document.getElementById('transaction-picker-modal');
+    const transactionModal = document.getElementById('transaction-picker-modal');
     greyBg.addEventListener('click', (event) =>{
         if (event.target === greyBg) {
-            if (!transactionPickerModals.classList.contains('hidden')) {transactionPickerModals.classList.add('hidden');}
+            if (!transactionModal.classList.contains('hidden')) {
+                hideTransactionModal();
+            }
             else{greyBg.classList.add('hidden'); hideTransactionSuccess();}
         }
     })
@@ -902,11 +1175,11 @@ function setupGreyBg(){
 function setupReturnBtn(){
     const returnBtn = document.getElementById('return-btn');
     const greyBg = document.getElementById('grey-background');
-    const transactionSuccessModal = document.getElementById('transaction-success-modal');
 
     returnBtn.addEventListener('click', () => {
         greyBg.classList.add('hidden');
         hideTransactionSuccess();
+        hideTransactionModal();
     })
 }
 
@@ -939,7 +1212,7 @@ async function populateTransactionContainer(transactionType){
 
     if (transactionType === 'sale' || transactionType ===  'receipt'){
             //Prepara el selector de productos
-            await populateProductPicker(itemList,transactionType);
+            await populateProductPicker(transactionType);
             //Prepara el selector de clientes
             await populateTransactionClientList();
             //Prepara el selector de provedores
@@ -947,7 +1220,7 @@ async function populateTransactionContainer(transactionType){
             //Prepara los botones para subir/bajar la cantidad de productos
             setupQuantityBtns(transactionType,itemList);
             //Prepara los botones para eliminar items de la lista
-            configRemoveProduct(itemList);
+            configRemoveProduct(itemList,transactionType);
             //Prepara los botones que abren los modales de productos/clientes/proveedores
             configurePickerBtns();
             //Renderiza la lista de productos
@@ -957,19 +1230,19 @@ async function populateTransactionContainer(transactionType){
     else if (transactionType === 'customer') {configCreateClientBtn(); }
     else {configCreateProviderBtn(); }
 
+    setupPickerConfirmBtns(itemList,transactionType);
+
     //Prepara los botones que completan las transacciones de compra/venta
     setupCompleteTransactionBtn(itemList);
-
 }
 
 function configTransactionModalsReturn(){
     const returnBtn = document.getElementById('modal-return-btn');
-    const transactionPickerModals = document.getElementById('transaction-picker-modal');
     const itemPickerHeader = document.getElementById('item-picker-header');
 
     returnBtn.addEventListener('click', () => {
-        transactionPickerModals.classList.add('hidden');
         itemPickerHeader.classList.add('hidden');
+        hideTransactionModal();
     })
 }
 
@@ -1056,33 +1329,37 @@ function createNewSaleRow (selectedProduct) {
     const newSaleRow = document.createElement('div');
 
     newSaleRow.className = 'flex-row';
+    newSaleRow.style.borderWidth = '1px 0';
+    newSaleRow.style.borderStyle = 'solid';
+    newSaleRow.style.borderColor = 'black';
+    newSaleRow.style.padding = '5px 0';
 
     newSaleRow.innerHTML = `<div class="flex-column">
-        <h3>Nombre</h3>
-        <h4>${selectedProduct.name}</h4>
+        <p style="font-weight: 600">Nombre</p>
+        <p style="font-weight: 400; text-wrap: nowrap; text-overflow: ellipsis; overflow: hidden">${selectedProduct.name}</p>
     </div>
     <div class="flex-column">
-        <h3>Stock Disponible</h3>
-        <h4>${selectedProduct.stock}</h4>
+        <p style="font-weight: 600">Stock Disponible</p>
+        <p style="font-weight: 400">${selectedProduct.stock}</p>
     </div>
     <div class="flex-column">
-        <h3>Cantidad</h3>
-        <h4 class="flex-row">
+        <p style="font-weight: 600">Cantidad</p>
+        <div style="font-weight: 400; gap: 10px" class="flex-row">
             <div class="modify-quantity-btn ph ph-minus-square" data-pID=${selectedProduct.pID} data-tID=${selectedProduct.tID} data-type="subtract"></div>
-            ${selectedProduct.amount}
+            <p style="width: fit-content">${selectedProduct.amount}</p>
             <div class="modify-quantity-btn ph ph-plus-square" data-pID=${selectedProduct.pID} data-tID=${selectedProduct.tID} data-type="add"></div>
-        </h4>
+        </div>
     </div>
     <div class="flex-column">
-        <h3>Precio de Venta</h3>
-        <h4>${selectedProduct.salePrice}</h4>
+        <p style="font-weight: 600">Precio de Venta</p>
+        <p style="font-weight: 400">${selectedProduct.salePrice}</p>
     </div>
     <div class="flex-column">
-        <h3>Precio Total</h3>
-        <h4>${selectedProduct.totalPrice}</h4>
+        <p style="font-weight: 600; width: 50px;">Precio Total</p>
+        <p style="font-weight: 400; width: 50px;">${selectedProduct.totalPrice}</p>
     </div>
     <button type="button" class="btn delete-product-btn" data-type="sale" data-pID=${selectedProduct.pID} data-tID=${selectedProduct.tID}>
-        Eliminar
+        X
     </button>`
 
     return newSaleRow;
@@ -1092,34 +1369,39 @@ function createNewReceiptRow (selectedProduct) {
     const newReceiptRow = document.createElement('div');
 
     newReceiptRow.className = 'flex-row';
+    newReceiptRow.style.borderWidth = '1px 0';
+    newReceiptRow.style.borderStyle = 'solid';
+    newReceiptRow.style.borderColor = 'black';
+    newReceiptRow.style.padding = '5px 0';
 
     newReceiptRow.innerHTML = `<div class="flex-column">
-        <h3>Nombre</h3>
-        <h4>${selectedProduct.name}</h4>
+        <p style="font-weight: 600">Nombre</p>
+        <p style="font-weight: 400; text-wrap: nowrap; text-overflow: ellipsis; overflow: hidden">${selectedProduct.name}</p>
     </div>
     <div class="flex-column">
-        <h3>Stock Disponible</h3>
-        <h4>${selectedProduct.stock}</h4>
+        <p style="font-weight: 600">Stock Disponible</p>
+        <p style="font-weight: 400">${selectedProduct.stock}</p>
     </div>
     <div class="flex-column">
-        <h3>Cantidad</h3>
-        <h4 class="flex-row">
+        <p style="font-weight: 600">Cantidad</p>
+        <div style="font-weight: 400; gap: 10px" class="flex-row">
             <div class="modify-quantity-btn ph ph-minus-square" data-pID=${selectedProduct.pID} data-tID=${selectedProduct.tID} data-type="subtract"></div>
-            ${selectedProduct.amount}
+            <p style="width: fit-content">${selectedProduct.amount}</p>
             <div class="modify-quantity-btn ph ph-plus-square" data-pID=${selectedProduct.pID} data-tID=${selectedProduct.tID} data-type="add"></div>
-        </h4>
+        </div>
     </div>
     <div class="flex-column">
-        <h3>Precio de Compra</h3>
-        <h4>${selectedProduct.receiptPrice}</h4>
+        <p style="font-weight: 600">Precio de Compra</p>
+        <p style="font-weight: 400">${selectedProduct.receiptPrice}</p>
     </div>
     <div class="flex-column">
-        <h3>Precio Total</h3>
-        <h4>${selectedProduct.totalPrice}</h4>
+        <p style="font-weight: 600; width: 50px;">Precio Total</p>
+        <p style="font-weight: 400; width: 50px;">${selectedProduct.totalPrice}</p>
     </div>
     <button type="button" class="btn delete-product-btn" data-type="receipt" data-pID=${selectedProduct.pID} data-tID=${selectedProduct.tID}>
-        Eliminar
+        X
     </button>`
+
 
     return newReceiptRow;
 }
@@ -1161,22 +1443,16 @@ async function populateTransactionClientList(){
     const response = await api.getAllClients();
     const clientes = response.clientList;
 
-    const clientModal = document.getElementById('client-picker-modal');
+    const clientModal = document.getElementById('client-list');
 
     clientModal.innerHTML = '';
 
-    const noneSelected = document.createElement('div');
-    noneSelected.dataset.clientID = null;
-    noneSelected.innerHTML = 'Ninguno';
-    noneSelected.className = 'client-picker-item';
+    const none = {full_name: 'No Asignado', id: null};
+    const noneSelected = createPersonItem(none,'sale');
     clientModal.appendChild(noneSelected);
 
     clientes.forEach(client => {
-        const newClientItem = document.createElement('div');
-        newClientItem.dataset.clientID = client.id;
-        newClientItem.dataset.clientName = client.full_name;
-        newClientItem.innerHTML = client.full_name;
-        newClientItem.className = 'client-picker-item';
+        const newClientItem = createPersonItem(client,'sale');
         clientModal.appendChild(newClientItem);
     })
 
@@ -1187,9 +1463,19 @@ function configureClientSelection(){
     const clientPickers = document.querySelectorAll('.client-picker-item');
     clientPickers.forEach(client => {
         client.addEventListener('click', () => {
-            const clientID = parseInt(client.dataset.clientID);
-            const clientName = client.dataset.clientName;
-            selectClient(clientID,clientName);
+            const clientID = parseInt(client.dataset.id);
+            const clientName = client.dataset.name;
+
+            const modalBody = client.closest('.picker-modal');
+            if (!modalBody) return;
+
+            modalBody.querySelectorAll('.client-picker-item').forEach(item => item.classList.remove('selected'));
+            client.classList.add('selected');
+
+            const confirmBtn = modalBody.querySelector('.picker-confirm-btn');
+
+            confirmBtn.dataset.data = JSON.stringify({id: clientID, name: clientName});
+            confirmBtn.disabled = false;
         })
     })
 }
@@ -1204,27 +1490,61 @@ function selectClient(clientID, clientName){
     hideTransactionModal();
 }
 
+function setupPickerConfirmBtns(itemList, transactionType){
+    const allBtns = document.querySelectorAll('.picker-confirm-btn');
+
+    allBtns.forEach(btn => {
+        btn.onclick = () => {
+            if (btn.disabled) return;
+
+            const confirmType = btn.dataset.type;
+            const selectedData = JSON.parse(btn.dataset.data);
+
+            switch (confirmType) {
+                case 'item':
+                    const selectedProduct = selectedData;
+                    selectedProduct.amount = 1;
+                    Object.defineProperty(selectedProduct, 'totalPrice', {
+                        get() {
+                            if (transactionType === "sale") { return this.salePrice * this.amount }
+                            else { return this.receiptPrice * this.amount }
+                        }
+                    });
+                    addProduct(selectedProduct, itemList, transactionType);
+                    break;
+
+                case 'client':
+                    selectClient(selectedData.id, selectedData.name);
+                    break;
+
+                case 'provider':
+                    selectProvider(selectedData.id, selectedData.name);
+                    break;
+            }
+
+            hideTransactionModal();
+            btn.disabled = true;
+            delete btn.dataset.item;
+            document.querySelectorAll('.product-item.selected, .client-picker-item.selected, .provider-picker-item.selected').forEach(i => i.classList.remove('selected'));
+        };
+    })
+}
+
 async function populateTransactionProviderList(){
 
     const response = await api.getAllProviders();
     const providers = response.providerList;
 
-    const providerModal = document.getElementById('provider-picker-modal');
+    const providerModal = document.getElementById('provider-list');
 
     providerModal.innerHTML = '';
 
-    const noneSelected = document.createElement('div');
-    noneSelected.dataset.providerID = null;
-    noneSelected.innerHTML = 'Ninguno';
-    noneSelected.className = 'provider-picker-item';
+    const none = {full_name: 'Ninguno', id: null};
+    const noneSelected = createPersonItem(none,'receipt')
     providerModal.appendChild(noneSelected);
 
     providers.forEach(provider => {
-        const newProviderItem = document.createElement('div');
-        newProviderItem.dataset.providerID = provider.id;
-        newProviderItem.dataset.providerName = provider.full_name;
-        newProviderItem.innerHTML = provider.full_name;
-        newProviderItem.className = 'provider-picker-item';
+        const newProviderItem = createPersonItem(provider,'receipt')
         providerModal.appendChild(newProviderItem);
     })
 
@@ -1235,9 +1555,19 @@ function configureProviderSelection(){
     const providerPickers = document.querySelectorAll('.provider-picker-item');
     providerPickers.forEach(provider => {
         provider.addEventListener('click', () => {
-            const providerID = parseInt(provider.dataset.providerID);
-            const providerName = provider.dataset.providerName;
-            selectProvider(providerID,providerName);
+            const providerID = parseInt(provider.dataset.id, 10);
+            const providerName = provider.dataset.name;
+
+            const modalBody = provider.closest('.picker-modal');
+            if (!modalBody) return;
+
+            modalBody.querySelectorAll('.provider-picker-item').forEach(i => i.classList.remove('selected'));
+            provider.classList.add('selected');
+
+            const confirmBtn = modalBody.querySelector('.picker-confirm-btn');
+
+            confirmBtn.dataset.data = JSON.stringify({ id: providerID, name: providerName });
+            confirmBtn.disabled = false;
         })
     })
 }
@@ -1266,7 +1596,7 @@ function addProduct(selectedProduct,itemList,transactionType) {
     hideTransactionModal();
 }
 
-async function populateProductPicker(itemList,transactionType){
+async function populateProductPicker(transactionType){
     const response = await api.getUserVerifiedTables();
     if (!response.success) {showTransactionError(response.error); return;}
 
@@ -1293,8 +1623,8 @@ async function populateProductPicker(itemList,transactionType){
         return;
     }
 
-    populateProductModal(products,tables);
-    configureProductSelection(products,itemList,transactionType);
+    populateProductModal(products,tables,transactionType);
+    configureProductSelection(products);
 }
 
 function populateTablePicker(tables){
@@ -1324,7 +1654,7 @@ function populateTablePicker(tables){
     itemPickerHeader.appendChild(inventoryPicker);
 }
 
-function populateProductModal(products, tables){
+function populateProductModal(products, tables, transactionType){
     const itemPickerBody = document.getElementById('item-list');
 
     itemPickerBody.innerHTML = '';
@@ -1337,11 +1667,7 @@ function populateProductModal(products, tables){
 
     products.forEach(product => {
         emptyList = false;
-        const item = document.createElement('div');
-        item.dataset.tID = product.tID;
-        item.dataset.pID = product.pID;
-        item.innerHTML = product.name;
-        item.className = 'product-item';
+        const item = createProductItem(product,transactionType);
         allProductsDiv.appendChild(item);
     })
 
@@ -1362,11 +1688,7 @@ function populateProductModal(products, tables){
         products.forEach(product => {
             if (product.tID !== table.id) return;
             emptyList = false;
-            const item = document.createElement('div');
-            item.dataset.tID = product.tID;
-            item.dataset.pID = product.pID;
-            item.innerHTML = product.name;
-            item.className = 'product-item';
+            const item = createProductItem(product,transactionType);
             tableProductsDiv.appendChild(item);
         })
         if (emptyList) {tableProductsDiv.innerHTML = '<h3>No hay productos en el inventario</h3>';}
@@ -1375,9 +1697,52 @@ function populateProductModal(products, tables){
     itemPickerBody.appendChild(productListWrapper);
 }
 
-function configureProductSelection(products,itemList,transactionType){
+function createProductItem(product,transactionType){
+    const item = document.createElement('div');
+    let price;
+    if (transactionType === 'sale'){price = product.salePrice;}
+    else {price = product.receiptPrice;}
+
+    item.innerHTML = `<div class="flex-column">
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-stock">Stock Disponible: <span>${product.stock}</span></div>
+                      </div>
+                      <div class="flex-colum" style="text-align: right; width: 100%;">
+                            <div class="product-inventory-name">${product.tableName}</div>
+                            <div class="product-price">$${price}</div>
+                      </div>`
+    ;
+    item.dataset.tID = product.tID;
+    item.dataset.pID = product.pID;
+    item.className = 'flex-row product-item';
+
+    if (product.stock === 0 && transactionType === 'sale') {item.classList.add('no-stock');}
+
+    return item;
+}
+
+function createPersonItem(person, transactionType){
+    const item = document.createElement('div');
+
+    item.innerHTML = `<div class="flex-column">
+                            <div class="person-name">${person.full_name}</div>
+                      </div>
+                      <div class="flex-colum" style="text-align: right; width: 100%;">
+                            <div class="person-id">${person.id || ''}</div>
+                      </div>`
+    ;
+    item.dataset.id = person.id;
+    item.dataset.name = person.full_name;
+    item.className = 'flex-row';
+    transactionType === 'sale' ? item.classList.add('client-picker-item') : item.classList.add('provider-picker-item');
+
+    return item;
+}
+
+function configureProductSelection(products){
     const productItem = document.querySelectorAll('.product-item');
     productItem.forEach(item => {
+        if (item.classList.contains('no-stock')) return;
         item.addEventListener('click', () => {
             const findProduct = products.find(product => product.pID === parseInt(item.dataset.pID,10) &&
                 product.tID === parseInt(item.dataset.tID,10));
@@ -1386,15 +1751,17 @@ function configureProductSelection(products,itemList,transactionType){
                 return;
             }
 
+            const modalBody = item.closest('.picker-modal');
+            if (!modalBody) return;
+
+            modalBody.querySelectorAll('.product-item').forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+
             const selectedProduct = { ... findProduct };
+            const confirmBtn = modalBody.querySelector('.picker-confirm-btn');
 
-            selectedProduct.amount = 1;
-            Object.defineProperty(selectedProduct, 'totalPrice', {get(){
-                    if (transactionType === "sale"){return this.salePrice * this.amount}
-                    else{return this.receiptPrice * this.amount}
-                }});
-
-            addProduct(selectedProduct,itemList,transactionType);
+            confirmBtn.disabled = false;
+            confirmBtn.dataset.data = JSON.stringify(selectedProduct);
         })
     })
 }
@@ -1474,20 +1841,22 @@ async function completeSale(itemList){
         const price = item.salePrice;
         const totalPrice = item.totalPrice;
 
-        return `<div class="flex-row" style="overflow-x: hidden; gap: 15px;">
-                    <p style="width: 100px; text-align: right">${name}</p>
-                    <p style="width: 70px; text-align: right">${amount}</p>
-                    <p style="width: 65px; text-align: right">${price}$</p>
-                    <p style="width: 80px; text-align: right"">${totalPrice}$</p>
-                 </div>`;
+        return `<div class="flex-row" style="gap: 15px;">
+                <p style="width: 100px; text-align: right; overflow: hidden; text-wrap: nowrap; text-overflow: ellipsis">${name}</p>
+                <p style="width: 70px; text-align: right">${amount}</p>
+                <p style="width: 65px; text-align: right">${price}$</p>
+                <p style="width: 80px; text-align: right">${totalPrice}$</p>
+             </div>`;
     }).join('');
 
     const saleTicket = `<div style="margin-top: 20px; padding: 5px; border: var(--border-strong); border-radius: var(--border-radius)">
-        <hr> <div class="flex-row"><p>Número de venta = ${saleID}</p><h2 style="text-align: right">Lista de Productos</h2></div>
-    <div class="flex-column" style="flex-wrap: wrap; gap: 15px; overflow: hidden; margin-top: 15px;"> 
+    <hr> <div class="flex-row" style="justify-content: space-between"><p>N° ${saleID}</p><h2 style="text-align: right">Lista de Productos</h2></div>
+    
+    <div class="flex-column" style="gap: 15px; margin-top: 15px;"> 
+         
          <div class="flex-row" style="text-align: right; gap: 15px;"><h4 style="width: 100px">Nombre</h4>
          <h4 style="width: 70px">Cantidad</h4><h4 style="width: 65px">Precio de Venta</h4><h4 style="width: 80px">Precio Total</h4></div>
-         <div class="flex-column">${saleList}</div>
+         <div class="flex-column" style="max-height: 200px; overflow-y: auto;">${saleList}</div>
          <hr>
          <div class="flex-column" style="text-align: right"><h4>Cliente</h4><p>${clientName}</p></div>
          <div class="flex-row" style="justify-content: right; gap:10px;"><h2>Precio Final =</h2><h1>${totalPrice}$</h1></div>
@@ -1552,20 +1921,22 @@ async function completeReceipt(itemList){
         const price = item.receiptPrice;
         const totalPrice = item.totalPrice;
 
-        return `<div class="flex-row" style="overflow-x: hidden; gap: 15px;">
-                    <p style="width: 100px; text-align: right">${name}</p>
-                    <p style="width: 70px; text-align: right">${amount}</p>
-                    <p style="width: 65px; text-align: right">${price}$</p>
-                    <p style="width: 80px; text-align: right"">${totalPrice}$</p>
-                 </div>`;
+        return `<div class="flex-row" style="gap: 15px;">
+                <p style="width: 100px; text-align: right; overflow: hidden; text-wrap: nowrap; text-overflow: ellipsis">${name}</p>
+                <p style="width: 70px; text-align: right">${amount}</p>
+                <p style="width: 65px; text-align: right">${price}$</p>
+                <p style="width: 80px; text-align: right">${totalPrice}$</p>
+             </div>`;
     }).join('');
 
     const receiptTicket = `<div style="margin-top: 20px; padding: 5px; border: var(--border-strong); border-radius: var(--border-radius)">
-        <hr> <div class="flex-row"><p>Número de Compra = ${receiptID}</p><h2 style="text-align: right">Lista de Productos</h2></div>
-    <div class="flex-column" style="flex-wrap: wrap; gap: 15px; overflow: hidden; margin-top: 15px;"> 
+    <hr> <div class="flex-row" style="justify-content: space-between"><p>N° ${receiptID}</p><h2 style="text-align: right">Lista de Productos</h2></div>
+    
+    <div class="flex-column" style="gap: 15px; margin-top: 15px;"> 
+         
          <div class="flex-row" style="text-align: right; gap: 15px;"><h4 style="width: 100px">Nombre</h4>
-         <h4 style="width: 70px">Cantidad</h4><h4 style="width: 65px">Precio de Compra</h4><h4 style="width: 80px">Precio Total</h4></div>
-         <div class="flex-column">${receiptList}</div>
+         <h4 style="width: 70px">Cantidad</h4><h4 style="width: 65px">Precio de Venta</h4><h4 style="width: 80px">Precio Total</h4></div>
+         <div class="flex-column" style="max-height: 200px; overflow-y: auto;">${receiptList}</div>
          <hr>
          <div class="flex-column" style="text-align: right"><h4>Proveedor</h4><p>${providerName}</p></div>
          <div class="flex-row" style="justify-content: right; gap:10px;"><h2>Precio Final =</h2><h1>${totalPrice}$</h1></div>
@@ -1997,22 +2368,24 @@ function getForm(transactionType){
 function getSaleForm() {
     return `<form class="flex-column" method="get" action="/StockiFy/dashboard.php">
                                 <h4 class="transaction-error-message hidden" style="color: var(--accent-red)"></h4>
-                                <div class="flex-row all-center">
-                                    <h2>Productos</h2>
-                                    <div class="product-picker-container">
+                                <hr>
+                                <div class="flex-row" style="gap: 50px; justify-content: space-between; align-items: center">
+                                    <h3>Productos</h3>
                                     <div class="btn picker-btn" data-modal-target="item-picker-modal" data-type="sale">
-                                    Agregar Producto</div>
+                                        Agregar Producto
                                     </div>
                                 </div>       
                                 <div class="flex-column" id="product-list-container"></div>
-                                <div class="flex-row all-center">
-                                    <h2>Cliente</h2>
-                                    <h4 id="sale-client-name">Ninguno</h4>
+                                <hr style="margin-top: 50px">
+                                <div class="flex-row" style="justify-content: space-between; align-items: center">
+                                    <div>
+                                    <h3>Cliente</h3>
+                                    <p id="sale-client-name">Ninguno</p>
+                                    </div>
                                     <div class="btn picker-btn" data-modal-target="client-picker-modal">Cambiar</div>
                                 </div>
-                                </div>
-                                <div class="flex-row all-center">
-                                <h2>Total = $<span id="price-text">0</h2>
+                                <div class="flex-row" style="justify-content: space-between; align-items: center">
+                                <h2 style="margin-top: 50px">Total = $<span id="price-text">0</h2>
                                 </div>
                                 <input name="price" id="price-input" value="0" hidden>
                                 <input name="product-list" id="product-list" hidden>
@@ -2025,27 +2398,29 @@ function getSaleForm() {
 function getReceiptForm() {
     return `<form class="flex-column" method="get" action="/StockiFy/dashboard.php">
                                 <h4 class="transaction-error-message hidden" style="color: var(--accent-red)"></h4>
-                                <div class="flex-row all-center">
-                                    <h2>Productos</h2>
-                                    <div class="product-picker-container">
+                                <hr>
+                                <div class="flex-row" style="gap: 50px; justify-content: space-between; align-items: center">
+                                    <h3>Productos</h3>
                                     <div class="btn picker-btn" data-modal-target="item-picker-modal" data-type="receipt">
-                                    Agregar Producto</div>
+                                        Agregar Producto
                                     </div>
                                 </div>       
                                 <div class="flex-column" id="product-list-container"></div>
-                                <div class="flex-row all-center">
-                                    <h2>Proveedor</h2>
-                                    <h4 id="receipt-provider-name">Ninguno</h4>
+                                <hr style="margin-top: 50px">
+                                <div class="flex-row" style="justify-content: space-between; align-items: center">
+                                    <div>
+                                    <h3>Proveedor</h3>
+                                    <p id="receipt-provider-name">Ninguno</p>
+                                    </div>
                                     <div class="btn picker-btn" data-modal-target="provider-picker-modal">Cambiar</div>
                                 </div>
-                                </div>
-                                <div class="flex-row all-center">
-                                <h2>Total = $<span id="price-text">0</h2>
+                                <div class="flex-row" style="justify-content: space-between; align-items: center">
+                                <h2 style="margin-top: 50px">Total = $<span id="price-text">0</h2>
                                 </div>
                                 <input name="price" id="price-input" value="0" hidden>
                                 <input name="product-list" id="product-list" hidden>
                                 <input name="provider-id" id="provider-id-input" hidden>
-                                <input name="price" id="price-input" value="0" hidden>            
+                                <input name="price" id="price-input" value="0" hidden>          
                                 <div class="btn btn-primary complete-transaction-btn" data-type="receipt">Confirmar Compra</div>
                                 </form>`;
 }
@@ -2099,10 +2474,27 @@ function showTransactionError(message){
 //'Picker modal' Son los container para seleccionar productos y clientes/proveedores para agregar a la transaccion.
 function showPickerModal(pickerModalID){
     document.querySelectorAll('.picker-modal').forEach(modal => modal.classList.add('hidden'));
+    const allBtns = document.querySelectorAll('.picker-confirm-btn');
+
+    allBtns.forEach(btn => btn.disabled = true);
 
     const pickerToShow = document.getElementById(pickerModalID);
     const transactionModal = document.getElementById('transaction-picker-modal');
+    const transactionContainer = document.getElementById('new-transaction-container');
 
+    if (pickerModalID !== 'item-picker-modal'){
+        const inventoryPickerContainer = document.getElementById('inventory-picker-container');
+        inventoryPickerContainer.classList.add('hidden');
+    }
+    else{
+        const inventoryPickerContainer = document.getElementById('inventory-picker-container');
+        inventoryPickerContainer.classList.remove('hidden');
+    }
+
+    const productItems = document.querySelectorAll('.product-item');
+    productItems.forEach(item => item.classList.remove('selected'));
+
+    transactionContainer.classList.add('hidden');
     pickerToShow.classList.remove('hidden');
     transactionModal.classList.remove('hidden');
 }
@@ -2127,11 +2519,14 @@ function hideTransactionError(){
 function hideTransactionModal(){
     const transactionModal = document.getElementById('transaction-picker-modal');
     transactionModal.classList.add('hidden');
+    const transactionContainer = document.getElementById('new-transaction-container');
+    transactionContainer.classList.remove('hidden');
 }
 
 function hideTransactionSuccess(){
     const modalContainer = document.getElementById('transaction-success-modal');
     const greyBg = document.getElementById('grey-background');
+
     modalContainer.classList.add('hidden');
     greyBg.classList.add('hidden');
 }
