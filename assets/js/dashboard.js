@@ -871,7 +871,7 @@ function showSaleModal(saleInfo){
          <hr>
     </div>`;
 
-    modal.innerHTML = `<div class="flex-row justify-between"><p></p><div>X</div></div>
+    modal.innerHTML = `<div class="flex-row justify-between"><p></p><div class="return-btn" style="top: 0; left: 0" id="close-info-modal">Volver</div></div>
                        <div class="product-list-container">
                        <div class="flex-row" style="justify-content: space-between; align-items: center">
                         <h3>Lista de Productos</h3>
@@ -913,6 +913,10 @@ function showSaleModal(saleInfo){
         }
     })
 
+    const closeBtn = document.getElementById('close-info-modal');
+
+    closeBtn.addEventListener('click', closeTransactionInfoModal );
+
     const customerInfoBtn = document.getElementById('customer-info-btn');
 
     if (customerInfoBtn){
@@ -929,7 +933,7 @@ function showSaleModal(saleInfo){
     document.getElementById('cancel-sale-btn').addEventListener('click', handleCancelSale);
     document.getElementById('save-sale-btn').addEventListener('click', handleSaveSale);
 
-    modal.classList.remove('hidden');
+    showTransactionInfoModal();
 }
 
 function newCustomerInfo(clientInfo) {
@@ -1225,7 +1229,7 @@ function showReceiptModal(receiptInfo){
 
     const receiptTicket = `<div class="flex-column" style="gap: 15px; margin-top:10px">    
          <div class="flex-row" style="gap: 15px;"><h4 style="width: 100px">Nombre</h4>
-         <h4 style="width: 70px">Cantidad</h4><h4 style="width: 65px">Precio de Venta</h4><h4 style="width: 80px">Precio Total</h4></div>
+         <h4 style="width: 70px">Cantidad</h4><h4 style="width: 65px">Precio de Compra</h4><h4 style="width: 80px">Precio Total</h4></div>
          <div id="receipt-item-list-wrapper" class="flex-column" style="max-height: 200px; overflow-y: auto;">${receiptList}</div>
          <hr>
     </div>`;
