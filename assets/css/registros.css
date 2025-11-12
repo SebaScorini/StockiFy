@@ -1,0 +1,86 @@
+/* Estilos para la página de Registros */
+
+body { 
+    background: var(--background-color); 
+}
+
+.registros-container { 
+    max-width: 1400px; 
+    margin: 2rem auto; 
+    background: var(--card-background); 
+    border-radius: var(--border-radius); 
+    box-shadow: var(--box-shadow); 
+    padding: 2rem; 
+}
+
+.registros-header { 
+    display: flex; 
+    align-items: center; 
+    gap: 1rem; 
+    margin-bottom: 1.5rem; 
+    flex-wrap: wrap; 
+}
+
+.registros-header label { 
+    font-weight: bold; 
+    color: var(--text-color); 
+}
+
+.registros-header select { 
+    padding: 0.5rem; 
+    border-radius: 4px; 
+    border: var(--border); 
+    background: var(--input-background); 
+    color: var(--text-color); 
+}
+
+.tabla-wrapper { 
+    overflow-x: auto; 
+    margin-top: 1rem; 
+}
+
+#tabla-registros { 
+    width: 100%; 
+    border-collapse: collapse; 
+    font-size: 0.9rem; 
+}
+
+#tabla-registros th, 
+#tabla-registros td { 
+    border: 1px solid var(--border-color); 
+    padding: 0.6rem 0.4rem; 
+    text-align: left; 
+}
+
+#tabla-registros th { 
+    background: var(--accent-color-medium-opacity); 
+    font-weight: 600; 
+    position: sticky; 
+    top: 0; 
+}
+
+#tabla-registros tbody tr:hover { 
+    background: var(--hover-background); 
+}
+
+#error-msg { 
+    color: var(--error-color); 
+    margin-top: 1rem; 
+    padding: 0.8rem; 
+    background: #fee; 
+    border-radius: 4px; 
+}
+
+.back-btn { 
+    display: inline-block; 
+    margin-bottom: 1rem; 
+    padding: 0.5rem 1rem; 
+    background: var(--accent-color); 
+    color: #fff; 
+    text-decoration: none; 
+    border-radius: 4px; 
+}
+
+.back-btn:hover { 
+    opacity: 0.9; 
+}

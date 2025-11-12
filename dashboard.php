@@ -90,6 +90,7 @@
             <ul>
                 <li><button class="menu-btn" data-target-view="analysis"><i class="ph ph-chart-line"></i> Estadísticas Diarias 🔴</button></li>
                 <li><button class="menu-btn" data-target-view="notifications"><i class="ph ph-bell"></i> Notificaciones</button></li>
+                <li><a href="registros.php" class="menu-link"><i class="ph ph-list-checks"></i> Registro de Modificaciones</a></li>
             </ul>
             <!--                          FIN DE CODIGO                        -->
 
