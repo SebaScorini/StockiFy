@@ -39,13 +39,16 @@ try {
             ':quantity' => $item['amount'],
             ':unit_price' => $item['salePrice'],
             ':total_price' => $totalPrice]);
-
-        $databaseStmt = $pdo->prepare("SELECT table_name FROM user_tables WHERE inventory_id = ?");
-        $databaseStmt->execute([$item['tID']]);
-        $databaseName = $databaseStmt->fetch(PDO::FETCH_COLUMN);
-
-        $stockStmt = $pdo->prepare("UPDATE `$databaseName` SET stock = (stock - ?) WHERE id = ?");
-        $stockStmt ->execute([$item['amount'], $item['pID']]);
+        
+        //Resta el stock del item de la venta (Franco)
+        $tableName = $pdo->prepare("SELECT table_name FROM user_tables WHERE inventory_id = :inventory_id");
+        $tableName->execute([':inventory_id' => $item['tID']]);
+        $tableName = $tableName->fetch();
+        $updateStock = $pdo->prepare("UPDATE " . $tableName['table_name'] . " SET stock = stock - :quantity WHERE id = :item_id");
+        $updateStock->execute([
+            ':quantity' => $item['amount'],
+            ':item_id' => $item['pID']
+        ]);
     }
     $response = ['success' => true, 'saleId' => $saleId];
 } catch (Exception $e) {
