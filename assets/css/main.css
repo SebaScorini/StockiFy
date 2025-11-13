@@ -230,6 +230,22 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
     transition: box-shadow var(--transition-speed) ease;
 }
 
+#inventory-info-modal{
+    background-color: var(--color-white);
+    min-width: 100px;
+    height: fit-content;
+    max-width: 300px;
+    z-index: 300;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: var(--border-strong);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    box-shadow: 5px 5px 0 var(--color-black);
+}
+
 #options-config-container{
     display: flex;
     flex-direction: column;

@@ -15,6 +15,14 @@
 <body id="page-index" data-user-id="">
 <div id="grey-background" class="hidden">
     <p id="msj-bubble" class="view-container"></p>
+    <div id="inventory-info-modal" class="hidden">
+        Solo se permite seleccionar los inventarios (y productos) que tienen activadas las columnas recomendadas de "Precio de Compra" y "Precio de Venta".
+        <br>
+        <br>
+        ¡Activalas en la seccion de "Configurar Tabla"!
+        <br>
+        <button class="btn btn-primary" id="close-inventory-info-modal">Cerrar</button>
+    </div>
 </div>
 <header>
     <a href="/StockiFy/index.php" id="header-logo">
@@ -74,6 +82,7 @@
             <h4>(Todas las ventas realizadas sobre el inventario seleccionado)</h4>
             <div class="stat-grid">
                 <div class="flex-column" id="select-tabla-container">
+                    <p style="font-size: 13px; text-align: right;" class="inventory-info-btn">¿Donde están mis inventarios?</p>
                     <div class="btn btn-primary" id="selected-table"></div>
                     <div id="table-list" class="flex-column hidden"></div>
                 </div>

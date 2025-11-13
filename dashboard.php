@@ -30,7 +30,7 @@
             <div class="flex-row" style="padding: 0.5rem; align-items: center; justify-content: right;">
                 <div class="flex-column" id="inventory-picker-container">
                     <div id="inventory-picker-name" class="btn"><p>Todos los Inventarios</p></div>
-                    <p style="position: absolute; bottom: 100%; right: 0; font-size: 11px" class="inventory-info-btn">¿Donde están mis inventarios?</p>
+                    <p style="position: absolute; bottom: 90%; right: 0; font-size: 11px; min-width: 100px" class="inventory-info-btn">¿Donde están mis inventarios?</p>
                     <div id="item-picker-header" class="flex-row"></div>
                 </div>
             </div>

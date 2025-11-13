@@ -3787,7 +3787,10 @@ function groupHourlyData(hourlyData) {
 async function setupInventoryPicker() {
     const user = await api.getUserProfile();
     if (user){
-        const inventories = user['databases'];
+        const response = await api.getUserVerifiedTables();
+        if (!response.success){console.log(response.message); return;}
+
+        const inventories = response.verifiedInventories;
 
         const inventoriesDropdown = document.getElementById('inventories-dropdown');
 

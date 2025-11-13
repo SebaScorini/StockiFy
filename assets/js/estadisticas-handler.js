@@ -26,15 +26,22 @@ function getEstadisticas(){
     actualizarEstadisticas();
 }
 
-function populateTableSelect(){
+async function populateTableSelect(){
 
     try{
-        const tableData = user['databases'];
-        const currentTable = user['activeInventoryId'];
+        const response = await api.getUserVerifiedTables();
 
+        if (!response.success){return;}
+
+        const tableData = response.verifiedInventories;
         const selectedTable = document.getElementById("selected-table");
 
-        selectedTable.textContent = tableData.find(table => table.id === parseInt(currentTable,10)).name;
+        if (tableData.length === 0){
+            selectedTable.textContent = 'Ninguna';
+            return;
+        }
+
+        selectedTable.textContent = tableData[0].name;
         const selectContainer = document.getElementById('table-list');
 
         selectedTable.addEventListener('click', () => {
@@ -288,6 +295,24 @@ function showPicker(fechaInput){
     }, 0)
 }
 
+function setupInventoryInfoBtn(){
+    const btns = document.querySelectorAll('.inventory-info-btn');
+    const closeBtn = document.getElementById('close-inventory-info-modal');
+
+    btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = document.getElementById('inventory-info-modal');
+            const greyBg = document.getElementById('grey-background');
+            modal.classList.remove('hidden');
+            greyBg.classList.remove('hidden');
+        })
+    })
+    closeBtn.addEventListener('click', () => {
+        const modal = document.getElementById('inventory-info-modal');
+        modal.classList.add('hidden');
+    })
+}
+
 async function setupHeader(){
     const nav = document.getElementById('header-nav');
 
@@ -324,6 +349,7 @@ async function init(){
             const value = user['user']['created_at'];
             tablaID = user['activeInventoryId'];
 
+            setupInventoryInfoBtn();
             createGraph();
             getInitialDates(value);
             getEstadisticas();
