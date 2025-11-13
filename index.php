@@ -28,7 +28,6 @@ endif
     <title>StockiFy</title>
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/cycling-text.js"></script>
-    <script src="assets/js/index/index.js"></script>
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/about-section.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
@@ -139,7 +138,7 @@ endif
                             Toma el control total. Desde la gestión de <span style="color: var(--accent-color); font-weight: 600">clientes</span>
                             y <span style="color: var(--accent-color); font-weight: 600">proveedores</span>  hasta la creación de
                             <span style="color: var(--accent-color); font-weight: 600">múltiples inventarios</span> para
-                            diferentes sucursales, todo está centralizado.<br>Recibe alertas de stock bajo, revisa el historial
+                            diferentes sucursales, todo está centralizado.<br>Genera clientes y proveedores, revisa el historial
                             de tus compras y ventas, y obtén una <span style="color: var(--accent-color); font-weight: 600">visión de 360°</span>
                             de tu operación.
                         </p>
@@ -205,6 +204,7 @@ endif
         <p>StockiFy &copy; 2025</p>
     </footer>
 <script type="module" src="assets/js/main.js"></script>
+<script type='module' src="assets/js/index/index.js"></script>
 </body>
 </html>
 

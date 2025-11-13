@@ -1,3 +1,6 @@
+import * as api from '../api.js';
+import {registerContactForm} from "../api.js";
+
 function showContentView (content_id){
     const contentViews = document.querySelectorAll('.content-panel');
 
@@ -41,9 +44,37 @@ function setupOtherInfoSection(){
     });
 }
 
+function setupContactForm(){
+    const contactForm = document.getElementById('contact-form');
+
+    contactForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(contactForm);
+
+        const full_name = formData.get('name');
+        const email = formData.get('email');
+        const phone = formData.get('phone');
+        const subject = formData.get('subject');
+        const message = formData.get('message');
+
+        const contactData = {'full_name' : full_name,
+            'email': email,
+            'phone': phone === '' ? null : phone,
+            'subject' : subject === '' ? null : subject,
+            'message' :message
+        };
+
+        const response = await api.registerContactForm(contactData);
+
+        if (!response.success){alert('Ha ocurrido un error : ' + response.error);}
+        else{alert('Contacto recibido!'); window.location.reload();}
+    });
+}
+
 function innit(){
     setupAboutSection();
     setupOtherInfoSection();
+    setupContactForm();
 }
 
 document.addEventListener('DOMContentLoaded', innit);

@@ -452,4 +452,30 @@ export async function verifyEmail(email){
     })
     return handleResponse(response);
 }
+
+export async function checkUserAdmin(){
+    const response = await fetch('/StockiFy/api/auth/check-admin.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    })
+    return handleResponse(response);
+}
+
+export async function registerContactForm(contactData){
+    const response = await fetch('/StockiFy/api/contact/register-contact-email.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contactData),
+    })
+    return handleResponse(response);
+}
+
+export async function checkDbName(dbName){
+    const response = await fetch('/StockiFy/api/database/check-name.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dbName),
+    })
+    return handleResponse(response);
+}
 /* ---------------------- FIN DE FUNCIONES DE NANO  ---------------------- */

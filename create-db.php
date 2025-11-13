@@ -46,20 +46,20 @@
                         <input style="width: 180px;" class="default-value-input" type="text" id="min-stock-default-input" name="min-stock-default" placeholder="Valor por Defecto (0)">
                     </div>
                     <div class="form-group flex-column recomended-column-group">
-                        <input type="checkbox" class="hidden-checkbox" id="sale-price-input" name="sale-price" value="0">
-                        <label for="sale-price-input" class="btn btn-secondary btn-checkbox-toggle" style="font-size: 13px;">
-                            Precio de Venta
+                        <input type="checkbox" class="hidden-checkbox" id="receipt-price-input" name="receipt-price" value="0">
+                        <label for="receipt-price-input" class="btn btn-secondary btn-checkbox-toggle" style="font-size: 13px;">
+                            Precio de Compra
                         </label>
-                        <input style="width: 180px;" class="default-value-input" type="text" id="sale-price-default-input" name="sale-price-default" placeholder="Valor por Defecto (0)">
+                        <input style="width: 180px;" class="default-value-input" type="text" id="receipt-price-default-input" name="receipt-price-default" placeholder="Valor por Defecto (0)">
                     </div>
                     <div class="form-group flex-column recomended-column-group">
                         <div class="flex-column all-center" style="gap: 10px">
-                            <input type="checkbox" class="hidden-checkbox" id="receipt-price-input" name="receipt-price" value="0">
-                            <label for="receipt-price-input" class="btn btn-secondary btn-checkbox-toggle" style="font-size: 13px;">
-                                Precio de Compra
+                            <input type="checkbox" class="hidden-checkbox" id="sale-price-input" name="sale-price" value="0">
+                            <label for="sale-price-input" class="btn btn-secondary btn-checkbox-toggle" style="font-size: 13px;">
+                                Precio de Venta
                             </label>
                         </div>
-                        <input style="width: 180px;" class="default-value-input" type="text" id="receipt-price-default-input" name="receipt-price-default" placeholder="Valor por Defecto (0)">
+                        <input style="width: 180px;" class="default-value-input" type="text" id="sale-price-default-input" name="sale-price-default" placeholder="Valor por Defecto (0)">
                         <div class="flex-column" style="position: relative; z-index: 10;">
                             <input type="checkbox" class="hidden-checkbox" id="auto-price-input" name="auto-price" value="0">
                             <label for="auto-price-input" id="auto-price-checkbox" class="btn btn-secondary btn-checkbox-toggle" style="font-size: 11px;">
@@ -68,15 +68,15 @@
                             <div class="form-group flex-column" id="auto-price-type-container" style="align-items: start;">
                                 <div class="flex-row">
                                     <input type="radio" id="auto-iva-input" name="price-type" value="iva">
-                                    <p>Precio de Venta + IVA 21%</p>
+                                    <p>Precio de Compra + IVA 21%</p>
                                 </div>
                                 <div class="flex-row">
                                     <input type="radio" id="auto-gain-input" name="price-type" value="gain">
-                                    <p>Precio de Venta + Margen de Ganancia</p>
+                                    <p>Precio de Compra + Margen de Ganancia</p>
                                 </div>
                                 <div class="flex-row">
                                     <input type="radio" id="auto-iva-gain-input" name="price-type" value="gain-iva">
-                                    <p>Precio de Venta + Margen de Ganancia + IVA 21%</p>
+                                    <p>Precio de Compra + Margen de Ganancia + IVA 21%</p>
                                 </div>
                             </div>
                         </div>
@@ -104,16 +104,19 @@
             </div>
 
             <div class="form-group">
-                <label for="columnsInput">Nombres de las Columnas (separados por coma):</label>
-                <textarea id="columnsInput" name="columns" rows="3" placeholder="Ej: SKU, Producto, Precio, Cantidad"></textarea>
-                <small style="color: var(--color-gray); display: block; margin-top: 5px;">Podrás importar datos para estas columnas más adelante.</small>
+                <label for="columnsInput">Nombres de tus Columnas:</label>
+                <input id="columnsInput" type="text" placeholder="Nombre" disabled style="cursor: not-allowed; background-color: var(--color-gray);">
+                <input type="text" placeholder="Stock" disabled style="margin-top: 10px; cursor: not-allowed; background-color: var(--color-gray);">
+                <div id="user-column-list"></div>
+                <btn id="add-row-btn" class="btn">Agregar</btn>
+                <small style="color: var(--color-gray); display: block; margin-top: 5px;">Podrás agregar datos para estas columnas más adelante.</small>
             </div>
 
-            <hr> <div class="form-group">
+            <!--<hr> <div class="form-group">
                 <label>Importar Datos (Opcional):</label>
                 <button type="button" id="prepare-import-btn" class="btn btn-secondary">Preparar Importación desde CSV</button>
                 <div id="import-prepared-status" style="margin-top: 10px; color: green); font-weight: 500;"></div>
-            </div>
+            </div>-->
 
             <div id="message" style="margin-top: 1rem; color: red);"></div>
 

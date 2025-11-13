@@ -339,8 +339,26 @@
     background-color: var(--color-white);
     top: 100%;
     right: 0;
+    max-height: 400px;
+    overflow-y: auto;
     border-radius: 5px 0 5px 5px;
     border: var(--border-strong);
+}
+
+#inventory-info-modal{
+    background-color: var(--color-white);
+    min-width: 100px;
+    height: fit-content;
+    max-width: 300px;
+    z-index: 300;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: var(--border-strong);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    box-shadow: 5px 5px 0 var(--color-black);
 }
 
 .inventory-select-container{
@@ -650,6 +668,9 @@
     z-index: 200;
     transition: all 0.7s ease;
     display: block !important;
+    border: var(--border-strong);
+    border-radius: 0 4px 4px;
+    box-shadow: 5px 5px 0 var(--color-black);
 }
 
 .mobile-menu:not(.hidden){

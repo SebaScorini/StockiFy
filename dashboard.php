@@ -25,13 +25,16 @@
     </div>
     <div id="transaction-picker-modal" class="hidden">
         <div class="flex-row" style="justify-content: space-between; align-items: center; padding: 0.5rem;">
+
             <div id="modal-return-btn" class="return-btn" style="top: 0; left: 0">Volver</div>
             <div class="flex-row" style="padding: 0.5rem; align-items: center; justify-content: right;">
                 <div class="flex-column" id="inventory-picker-container">
                     <div id="inventory-picker-name" class="btn"><p>Todos los Inventarios</p></div>
+                    <p style="position: absolute; bottom: 100%; right: 0; font-size: 11px" class="inventory-info-btn">¿Donde están mis inventarios?</p>
                     <div id="item-picker-header" class="flex-row"></div>
                 </div>
             </div>
+
         </div>
         <hr>
         <div id="item-picker-modal" class="picker-modal flex-column">
@@ -53,6 +56,14 @@
         </div>
     </div>
     <div id="transaction-info-modal" class="hidden">
+    </div>
+    <div id="inventory-info-modal" class="hidden">
+        Solo se permite seleccionar los inventarios (y productos) que tienen activadas las columnas recomendadas de "Precio de Compra" y "Precio de Venta".
+        <br>
+        <br>
+        ¡Activalas en la seccion de "Configurar Tabla"!
+        <br>
+        <button class="btn btn-primary" id="close-inventory-info-modal">Cerrar</button>
     </div>
 </div>
 <!--                      FIN DE CODIGO                        -->
@@ -87,8 +98,7 @@
             <h3>Usuario</h3>
             <ul>
                 <li><button class="menu-btn" data-target-view="analysis"><i class="ph ph-chart-line"></i> Estadísticas Diarias 🔴</button></li>
-                <li><button class="menu-btn" data-target-view="notifications"><i class="ph ph-bell"></i> Notificaciones</button></li>
-                <li><a href="registros.php" class="menu-link"><i class="ph ph-list-checks"></i> Registro de Modificaciones</a></li>
+                <!--<li><button class="menu-btn" data-target-view="notifications"><i class="ph ph-bell"></i> Notificaciones</button></li>-->
             </ul>
             <!--                          FIN DE CODIGO                        -->
 
@@ -116,8 +126,7 @@
             <h3>Usuario</h3>
             <ul>
                 <li><button class="menu-btn" data-target-view="analysis"><i class="ph ph-chart-line"></i> Estadísticas Diarias 🔴</button></li>
-                <li><button class="menu-btn" data-target-view="notifications"><i class="ph ph-bell"></i> Notificaciones</button></li>
-                <li><a href="registros.php" class="menu-link"><i class="ph ph-list-checks"></i> Registro de Modificaciones</a></li>
+                <!--<li><button class="menu-btn" data-target-view="notifications"><i class="ph ph-bell"></i> Notificaciones</button></li>-->
             </ul>
         </nav>
     </aside>
@@ -230,11 +239,7 @@
 
         <!-- SECCION DE ESTADISTICAS DIARIAS. CODIGO COMPLETAMENTE NUEVO -->
         <div id="analysis" class="dashboard-view hidden">
-            <div class="not-available-container hidden">
-                <h2>Para calcular tus Estadísticas Diarias, primero debes activar los siguientes Campos Recomendados para la Base de Datos seleccionada:</h2>
-                <div class="missing-preference-text flex-column"></div>
-                <button class="btn btn-primary got-to-config-btn">Ir a Configuración</button>
-            </div>
+            <p style="font-size: 13px; text-align: right;" class="inventory-info-btn">¿Donde están mis inventarios?</p>
             <div class="menu-container">
                 <div class="table-header">
                     <h2>Estadísticas Diarias 🔴</h2>

@@ -21,7 +21,7 @@
 :root {
     --color-white: #FFFFFF;
     --color-black: #1A1A1A;
-    --color-gray: #8A8A8A;
+    --color-gray: rgba(138, 138, 138, 0.6);
     --accent-color: #5E81AC; /* Azul por defecto */
     --accent-color-rgb: 94, 129, 172;
     --accent-color-medium-opacity: rgba(var(--accent-color-rgb), 0.75);
@@ -33,6 +33,10 @@
     --border-strong: 2px solid var(--color-black);
     --border-radius: 4px;
     --transition-speed: 0.2s;
+}
+
+.obligatory-column{
+    background-color: grey;
 }
 
 /* ---- Reseteo y Estilos Generales ---- */
@@ -124,6 +128,12 @@ main {
 }
 .view-container p { color: var(--color-gray); margin-bottom: 1.5rem; }
 
+#user-column-list{
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
 /* ---- Estilos para Botones (Versión "Pop-Up") ---- */
 .btn {
@@ -178,6 +188,18 @@ input[type="text"], input[type="email"], input[type="password"], textarea {
     font-family: var(--font-body);
     font-size: 1rem;
     transition: all var(--transition-speed) ease;
+}
+
+#createDbForm{
+    padding: 5rem;
+}
+@media (max-width: 400px){
+    #createDbForm * input[type="text"]{
+        width: 80%;
+    }
+    #createDbForm{
+        padding: 5rem 1rem;
+    }
 }
 input[type="text"]:focus, textarea:focus { outline: none; box-shadow: 0 0 0 3px var(--accent-color); }
 
@@ -535,7 +557,7 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
 }
 
 #dropdown-container.clicked{
-    width: 200px;
+    width: 140px;
 }
 
 #dropdown-container .btn{
@@ -820,6 +842,17 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
     height: 100%;
     padding: 2rem 3rem 1rem 1rem;
 }
+
+@media (max-width: 400px) {
+    nav * .btn, .btn-primary, .btn-secondary{
+        font-size: 0.7rem !important;
+    }
+    #dropdown-container.clicked{
+        width: 110px;
+    }
+
+}
+
 /* ---- Configuraciones de Flex ---- */
 
 .flex-row{

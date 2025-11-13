@@ -86,8 +86,15 @@ document.addEventListener('DOMContentLoaded', () =>{
 
 })
 
-function setupHeader(){
+async function setupHeader(){
     const nav = document.getElementById('header-nav');
+
+    const response = await api.checkUserAdmin();
+    if (!response.success){
+        alert('Ha ocurrido un error interno. Será deslogeado');
+        window.location.href = '/StockiFy/logout.php';
+    }
+    const isAdmin = response.isAdmin;
 
     nav.innerHTML = `
             <a href="/StockiFy/dashboard.php" class="btn btn-primary">Ir al Panel</a> 
@@ -96,6 +103,7 @@ function setupHeader(){
                 <div class="flex-column hidden" id="mi-cuenta-dropdown">
                     <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Configuración</a>
                     <a href="/StockiFy/logout.php" class="btn btn-secondary">Cerrar Sesión</a>
+                    ${isAdmin ? `<a href="/StockiFy/registros.php" class="btn btn-primary">Admin</a>` : ''}  
                 </div>
             </div>            
         `;

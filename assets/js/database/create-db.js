@@ -4,18 +4,29 @@ import * as api from '../api.js';
 import { openImportModal, initializeImportModal } from '../import.js';
 import * as setup from "../setupMiCuentaDropdown.js";
 
+const protectedNames = ['stock','nombre','min_stock','stockmínimo','preciodeventa','preciodecompra', 'margendeganancia',
+    'stockminimo','name','sale_price','receipt_price','hard_gain','percentage_gain'];
+
 document.addEventListener('DOMContentLoaded', async () => {
     // Inicializa el modal (busca sus elementos)
     initializeImportModal();
 
     await checkUserStatus();
     const nav = document.getElementById('header-nav');
+    const response = await api.checkUserAdmin();
+    if (!response.success){
+        alert('Ha ocurrido un error interno. Será deslogeado');
+        window.location.href = '/StockiFy/logout.php';
+    }
+    const isAdmin = response.isAdmin;
+
     if (nav) nav.innerHTML = `<a href="/StockiFy/estadisticas.php" class="btn btn-secondary">Estadisticas</a>
                                    <div id="dropdown-container">
                 <div class="btn btn-secondary" id="mi-cuenta-btn">Mi Cuenta</div>
                 <div class="flex-column hidden" id="mi-cuenta-dropdown">
                     <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Configuración</a>
                     <a href="/StockiFy/logout.php" class="btn btn-secondary">Cerrar Sesión</a>
+                    ${isAdmin ? `<a href="/StockiFy/registros.php" class="btn btn-primary">Admin</a>` : ''}  
                 </div>
             </div>   
                            `;
@@ -29,6 +40,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const prepareImportBtn = document.getElementById('prepare-import-btn');
     const importStatusDiv = document.getElementById('import-prepared-status'); // Para mostrar si los datos están listos
 
+    const addRowBtn = document.getElementById('add-row-btn');
+    addRowBtn.addEventListener('click', handleAddRow);
+
+    const userList = document.getElementById('user-column-list');
+
+    // --- CÓDIGO PARA BLOQUEAR COMAS ---
+    userList.addEventListener('input', (event) => {
+        if (event.target.classList.contains('user-column')) {
+            event.target.value = event.target.value.replace(/,/g, '');
+        }
+    });
     if (!createDbForm || !prepareImportBtn) return;
 
     // --- Event Listener para ABRIR EL MODAL ---
@@ -46,13 +68,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         const preferences = getUserPreferences();
 
         const dbName = document.getElementById('dbNameInput').value.trim();
-        const columns = document.getElementById('columnsInput').value.trim();
+        const columnInputs = userList.querySelectorAll('.user-column');
+        let columnList = [];
         const submitButton = createDbForm.querySelector('button[type="submit"]');
 
-        console.log(dbName);
+        columnInputs.forEach(input => {
+            if (input.classList.contains('invalid-row')) return;
+
+            const value = input.value.trim().replace(/,/g, '').toLowerCase().replace(/ /g, '');
+            columnList.push(value);
+        })
+
+        const columns = columnList.join(',');
 
         if (!dbName) {
             messageDiv.textContent = 'Por favor, completa el nombre y las columnas.';
+            return;
+        }
+
+        const response = await api.checkDbName(dbName);
+        if (!response.success){
+            messageDiv.textContent = 'Ha ocurrido un error interno';
+            return;
+        }
+
+        if (response.exists){
+            messageDiv.textContent = 'Ya existe una base de datos registrada con ese nombre';
             return;
         }
 
@@ -173,11 +214,15 @@ function prepareRecomendedColumns(){
             defaultInput.classList.remove('visible');
             autoPriceLabel.classList.remove('visible');
             autoPriceCheckbox.checked = false;
+            autoPriceCheckbox.disabled = true;
             autoPriceTypeContainer.classList.remove('visible');
         }
         else{
             defaultInput.classList.add('visible');
-            if (salePriceCheckbox.checked){autoPriceLabel.classList.add('visible');}
+            if (salePriceCheckbox.checked){
+                autoPriceLabel.classList.add('visible');
+                autoPriceCheckbox.disabled = false;
+            }
         }
         updateAutoPrice();
     }
@@ -219,6 +264,9 @@ function prepareRecomendedColumns(){
             autoIvaRadio.checked = false;
             autoGainRadio.checked = false;
             autoIvaGainRadio.checked = false;
+            autoGainRadio.disabled = true;
+            autoIvaGainRadio.disabled = true;
+            autoGainRadio.disabled = true;
             autoPriceTypeContainer.classList.remove('visible');
         }
         else{
@@ -286,6 +334,49 @@ function getUserPreferences(){
     }
 
     return preferences;
+}
+function handleAddRow(){
+    const userList = document.getElementById('user-column-list');
+    const newRow = document.createElement('div');
+    newRow.classList.add('flex-column');
+    newRow.classList.add('user-column-row');
+    newRow.style.gap = '5px';
+    newRow.innerHTML = `<div class="warning-msg" style="font-size: 10px; width: 100%"></div>
+                        <div class="flex-row all-center">
+                        <input type="text" class="user-column" placeholder="SKU, Color, Talle, Fecha de Vencimiento" required>
+                        <div class="btn btn-secondary delete-row-btn" style="width: fit-content; height:fit-content; background-color: rgba(211,116,116,0.71); 
+                        margin: 0; padding: 10px;">Borrar</div>
+                        </div>`;
+
+    const newDeleteBtn = newRow.querySelector('.delete-row-btn');
+    const newColumnInput = newRow.querySelector('.user-column');
+    const warningMsg = newRow.querySelector('.warning-msg');
+
+    newColumnInput.addEventListener('input', () => checkRowValidity(newRow,newColumnInput,warningMsg));
+
+    newDeleteBtn.addEventListener('click', () => handleDeleteRow(newDeleteBtn));
+    userList.appendChild(newRow);
+}
+
+function handleDeleteRow(btn){
+    const row = btn.closest('.user-column-row');
+    row.remove();
+}
+
+function checkRowValidity(row,input,warningMsg){
+    const value = input.value;
+    const cleanValue = value.trim().toLowerCase().replace(/ /g, '').replace(/,/g, '');
+    for (const name of protectedNames){
+        if (cleanValue === name){
+            warningMsg.innerHTML = 'Esta columna será ignorada ya que tiene el nombre de una columna interna/recomendada';
+            input.classList.add('invalid-row');
+            break;
+        }
+        else{
+            warningMsg.innerHTML = '';
+            input.classList.remove('invalid-row');
+        }
+    }
 }
 
 /* ---------------------- FIN DE FUNCIONES DE NANO  ---------------------- */

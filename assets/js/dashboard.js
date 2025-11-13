@@ -97,16 +97,67 @@ async function renderTable(columns, data) {
         return;
     }
 
+    tableHead.innerHTML = `<tr>${columns.map(col => {
+        switch (col.toLowerCase()) {
+            case 'id':
+                return '';
+            case 'created_at':
+                return '';
+            case 'name':
+                return `<th>Nombre</th>`;
+            case 'min_stock':
+                if (inventoryPreferences.min_stock === 1) {
+                    return `<th>Stock Mínimo</th>`;
+                }
+                return '';
+            case 'sale_price':
+                if (inventoryPreferences.sale_price === 1) {
+                    let autoType;
+                    switch (inventoryPreferences.auto_price_type) {
+                        case 'iva':
+                            autoType = 'IVA';
+                            break;
+                        case 'gain':
+                            autoType = 'Margen de Ganancia';
+                            break;
+                        default:
+                            autoType = 'IVA + Margen de Ganancia';
+                            break
+                    }
+                    return `<th>Precio de Venta ${(inventoryPreferences.auto_price === 1) ? '<br>(Calculado con ' + autoType + ')' : ''}</th>`;
+                }
+                return '';
+            case 'receipt_price':
+                if (inventoryPreferences.receipt_price === 1) {
+                    return `<th>Precio de Compra</th>`;
+                }
+                return '';
+            case 'hard_gain':
+                if (inventoryPreferences.hard_gain === 1) {
+                    return `<th>Margen de Ganancia (Valor Fijo)</th>`;
+                }
+                return '';
+            case 'percentage_gain':
+                if (inventoryPreferences.percentage_gain === 1) {
+                    return `<th>Margen de Ganancia (Porcentaje)</th>`;
+                }
+                return '';
+            default:
+                return `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
+        }
+    }).join('')}</tr>`;
+
     if (!data || data.length === 0) {
         // Estado vacío
-        tableHead.innerHTML = ''; // Limpio cabecera
+        // tableHead.innerHTML = ''; // Limpio cabecera
         tableBody.innerHTML = `
             <tr>
                 <td colspan="${columns.length || 1}" class="empty-table-message">
                     Aún no hay datos ingresados.
-                    <button id="import-data-empty-btn" class="btn btn-primary btn-inline">¿Deseas importarlos?</button>
+                    <!--<button id="import-data-empty-btn" class="btn btn-primary btn-inline">¿Deseas importarlos?</button>-->
                 </td>
             </tr>`;
+        /*
         // Busco y conecto el botón DESPUÉS de insertarlo
         const importBtn = document.getElementById('import-data-empty-btn');
         if (importBtn) {
@@ -117,65 +168,12 @@ async function renderTable(columns, data) {
             console.log("Listener añadido al botón 'import-data-empty-btn'.");
         } else {
             console.error("No se encontró el botón #import-data-empty-btn después de renderizar tabla vacía.");
-        }
+        }*/
     } else {
-        // Estado con datos
-        // Renderizo cabeceras (con primera letra mayúscula)
-
-
         /* ---------------------- CODIGO DE NANO  ---------------------- */
 
-
         //Genere switch-cases para las columnas recomendadas de la tabla actual.
-        tableHead.innerHTML = `<tr>${columns.map(col => {
-            switch (col.toLowerCase()) {
-                case 'id':
-                    return '';
-                case 'created_at':
-                    return '';
-                case 'name':
-                    return `<th>Nombre</th>`;
-                case 'min_stock':
-                    if (inventoryPreferences.min_stock === 1) {
-                        return `<th>Stock Mínimo</th>`;
-                    }
-                    return '';
-                case 'sale_price':
-                    if (inventoryPreferences.sale_price === 1) {
-                        let autoType;
-                        switch (inventoryPreferences.auto_price_type) {
-                            case 'iva':
-                                autoType = 'IVA';
-                                break;
-                            case 'gain':
-                                autoType = 'Margen de Ganancia';
-                                break;
-                            default:
-                                autoType = 'IVA + Margen de Ganancia';
-                                break
-                        }
-                        return `<th>Precio de Venta ${(inventoryPreferences.auto_price === 1) ? '<br>(Calculado con ' + autoType + ')' : ''}</th>`;
-                    }
-                    return '';
-                case 'receipt_price':
-                    if (inventoryPreferences.receipt_price === 1) {
-                        return `<th>Precio de Compra</th>`;
-                    }
-                    return '';
-                case 'hard_gain':
-                    if (inventoryPreferences.hard_gain === 1) {
-                        return `<th>Margen de Ganancia (Valor Fijo)</th>`;
-                    }
-                    return '';
-                case 'percentage_gain':
-                    if (inventoryPreferences.percentage_gain === 1) {
-                        return `<th>Margen de Ganancia (Porcentaje)</th>`;
-                    }
-                    return '';
-                default:
-                    return `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
-            }
-        }).join('')}</tr>`;
+
         // Renderizo filas
         tableBody.innerHTML = data.map(row => {
             const rowId = row['id'] ?? row['Id'] ?? row['ID']; // Busco ID case-insensitive
@@ -280,6 +278,12 @@ async function init() {
     /* ---------------------- CODIGO DE NANO  ---------------------- */
 
     //PREPARA EL HEADER CORRECTAMENTE
+    const response = await api.checkUserAdmin();
+    if (!response.success){
+        alert('Ha ocurrido un error interno. Será deslogeado');
+        window.location.href = '/StockiFy/logout.php';
+    }
+    const isAdmin = response.isAdmin;
 
     const nav = document.getElementById('header-nav');
     if (nav) nav.innerHTML = `
@@ -289,6 +293,7 @@ async function init() {
                 <div class="flex-column hidden" id="mi-cuenta-dropdown">
                     <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Configuración</a>
                     <a href="/StockiFy/logout.php" class="btn btn-secondary">Cerrar Sesión</a>
+                    ${isAdmin ? `<a href="/StockiFy/registros.php" class="btn btn-primary">Admin</a>` : ''}  
                 </div>
             </div>   
                            `;
@@ -378,6 +383,7 @@ async function init() {
     //Lo voy a acomodar mejor despues!!
 
     setupOrderBy();
+    setupInventoryInfoBtn();
 
     await setupClients();
     await setupProviders();
@@ -1571,7 +1577,9 @@ function showTransactionView(viewOrder, viewDirection,menuContainer) {
 function setupGreyBg(){
     const greyBg = document.getElementById('grey-background');
     const transactionModal = document.getElementById('transaction-picker-modal');
+    const transactionContainer = document.getElementById('new-transaction-container');
     const mobileMenu = document.getElementById('mobile-menu');
+    const inventoryInfoModal = document.getElementById('inventory-info-modal');
     greyBg.addEventListener('click', (event) =>{
         if (event.target === greyBg) {
             if (!transactionModal.classList.contains('hidden')) {
@@ -1581,10 +1589,16 @@ function setupGreyBg(){
                 greyBg.classList.add('hidden');
                 mobileMenu.classList.add('hidden');
             }
+            else if(!transactionContainer.classList.contains('hidden')) {
+                transactionContainer.classList.add('hidden');
+                greyBg.classList.add('hidden');
+                inventoryInfoModal.classList.add('hidden');
+            }
             else{
                 greyBg.classList.add('hidden');
                 hideTransactionSuccess();
             }
+
         }
     })
 }
@@ -3840,6 +3854,24 @@ function setupMobileMenu(){
         const greyBg = document.getElementById('grey-background');
         greyBg.classList.remove('hidden');
         mobileMenu.classList.remove('hidden');
+    })
+}
+
+function setupInventoryInfoBtn(){
+    const btns = document.querySelectorAll('.inventory-info-btn');
+    const closeBtn = document.getElementById('close-inventory-info-modal');
+
+    btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = document.getElementById('inventory-info-modal');
+            const greyBg = document.getElementById('grey-background');
+            modal.classList.remove('hidden');
+            greyBg.classList.remove('hidden');
+        })
+    })
+    closeBtn.addEventListener('click', () => {
+        const modal = document.getElementById('inventory-info-modal');
+        modal.classList.add('hidden');
     })
 }
 
