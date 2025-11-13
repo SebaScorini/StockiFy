@@ -9,7 +9,7 @@ const protectedNames = ['stock','nombre','min_stock','stockmínimo','preciodeven
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Inicializa el modal (busca sus elementos)
-    initializeImportModal();
+    //initializeImportModal();
 
     await checkUserStatus();
     const nav = document.getElementById('header-nav');
@@ -37,8 +37,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const createDbForm = document.getElementById('createDbForm');
     const messageDiv = document.getElementById('message');
-    const prepareImportBtn = document.getElementById('prepare-import-btn');
-    const importStatusDiv = document.getElementById('import-prepared-status'); // Para mostrar si los datos están listos
+    //const prepareImportBtn = document.getElementById('prepare-import-btn');
+    //const importStatusDiv = document.getElementById('import-prepared-status'); // Para mostrar si los datos están listos
 
     const addRowBtn = document.getElementById('add-row-btn');
     addRowBtn.addEventListener('click', handleAddRow);
@@ -51,13 +51,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             event.target.value = event.target.value.replace(/,/g, '');
         }
     });
-    if (!createDbForm || !prepareImportBtn) return;
-
+    if (!createDbForm) return;
+/*
     // --- Event Listener para ABRIR EL MODAL ---
     prepareImportBtn.addEventListener('click', () => {
         // Antes de abrir, podríamos pasarle las columnas actuales al modal si es necesario
         openImportModal();
-    });
+    });*/
 
     // --- Event Listener para el ENVÍO FINAL ---
     createDbForm.addEventListener('submit', async (event) => {
@@ -118,14 +118,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             submitButton.textContent = 'Crear Base de Datos';
         }
     });
-
+/*
     // Función global para que import.js pueda actualizar el estado
     window.updateImportStatus = (message) => {
         if(importStatusDiv) {
             importStatusDiv.textContent = message;
             prepareImportBtn.textContent = "Modificar Importación CSV";
         }
-    }
+    }*/
 });
 
 async function checkUserStatus(){
