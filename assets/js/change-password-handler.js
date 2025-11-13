@@ -1,16 +1,24 @@
-document.addEventListener('DOMContentLoaded',() =>
+import * as api from './api.js';
+
+document.addEventListener('DOMContentLoaded' ,() =>
 {
     const saveBtn = document.getElementById('save-password-btn');
     const changePassForm = document.getElementById('change-password-form');
     const btnGuardarTodo = document.getElementById('btn-guardar');
 
-    changePassForm.addEventListener('input', () =>{
-        const oldSavedPassword = document.getElementById('contraseña').value;
+    changePassForm.addEventListener('input', async () =>{
+        const passwordHash = document.getElementById('contraseña').value;
         const oldPasswordVerif = document.getElementById('old-password').value;
         const newPass = document.getElementById('new-password').value;
         const newPassConfirm = document.getElementById('confirm-new-password').value;
 
-        saveBtn.disabled = !((oldSavedPassword === oldPasswordVerif) && (newPass === newPassConfirm) && (oldSavedPassword !== newPass) && (newPass.length > 0));
+        const response = await api.verifyPassword(oldPasswordVerif,passwordHash);
+
+        if (!response.success) return;
+
+        const verifiedPass = response.correctPassword;
+
+        saveBtn.disabled = !(verifiedPass && (newPass === newPassConfirm) && (newPass.length > 0));
     })
 
     changePassForm.addEventListener('submit', function(event) {

@@ -30,7 +30,17 @@ function populateTableSelect(){
 
     try{
         const tableData = user['databases'];
-        const selectContainer = document.getElementById('select-tabla-container');
+        const currentTable = user['activeInventoryId'];
+
+        const selectedTable = document.getElementById("selected-table");
+
+        selectedTable.textContent = tableData.find(table => table.id === parseInt(currentTable,10)).name;
+        const selectContainer = document.getElementById('table-list');
+
+        selectedTable.addEventListener('click', () => {
+            selectContainer.classList.toggle('hidden');
+        })
+
         tableData.forEach(table => {
             const tablaItem = document.createElement('p');
             tablaItem.textContent = table.name;
@@ -38,6 +48,8 @@ function populateTableSelect(){
 
             tablaItem.addEventListener('click', () => {
                 tablaID = table.id;
+                selectedTable.textContent = table.name;
+                selectContainer.classList.toggle('hidden');
                 actualizarEstadisticas(desdeDate,hastaDate,chart,tablaID);
             })
 
@@ -281,13 +293,10 @@ function setupHeader(){
 
     nav.innerHTML = `
             <a href="/StockiFy/dashboard.php" class="btn btn-primary">Ir al Panel</a> 
-            <a href="/StockiFy/estadisticas.php" class="btn btn-secondary">Estadisticas</a>
             <div id="dropdown-container">
                 <div class="btn btn-secondary" id="mi-cuenta-btn">Mi Cuenta</div>
                 <div class="flex-column hidden" id="mi-cuenta-dropdown">
                     <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Configuración</a>
-                    <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Modificaciones de Stock</a>
-                    <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Soporte</a>
                     <a href="/StockiFy/logout.php" class="btn btn-secondary">Cerrar Sesión</a>
                 </div>
             </div>            

@@ -51,13 +51,10 @@ function setupHeader(isLoggedIn) {
     if (isLoggedIn) {
         nav.innerHTML = `
             <a href="/StockiFy/dashboard.php" class="btn btn-primary">Ir al Panel</a> 
-            <a href="/StockiFy/estadisticas.php" class="btn btn-secondary">Estadisticas</a>
             <div id="dropdown-container">
                 <div class="btn btn-secondary" id="mi-cuenta-btn">Mi Cuenta</div>
                 <div class="flex-column hidden" id="mi-cuenta-dropdown">
                     <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Configuración</a>
-                    <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Modificaciones de Stock</a>
-                    <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Soporte</a>
                     <a href="/StockiFy/logout.php" class="btn btn-secondary">Cerrar Sesión</a>
                 </div>
             </div>            

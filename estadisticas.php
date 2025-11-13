@@ -70,13 +70,13 @@
             </div>
         </div>
         <div class="estadisticas-container" style="margin-top: 5rem">
-            <div class="flex-row justify-between">
-                <h1>Estadisticas Por Inventario</h1>
-                <div id="select-tabla-container" class="flex-column">
-                </div>
-            </div>
+            <h1 style="width: 80%">Estadisticas Por Inventario</h1>
             <h4>(Todas las ventas realizadas sobre el inventario seleccionado)</h4>
             <div class="stat-grid">
+                <div class="flex-column" id="select-tabla-container">
+                    <div class="btn btn-primary" id="selected-table"></div>
+                    <div id="table-list" class="flex-column hidden"></div>
+                </div>
                 <div class="flex-column estadistica-item-container" id="ganancias-tabla">
                     <h1>Ganancias</h1>
                     <h3></h3>
@@ -98,7 +98,7 @@
                     <h3></h3>
                 </div>
                 <div class="flex-column estadistica-item-container" id="promedio-venta-tabla">
-                    <h1>Precio Promedio por Venta</h1>
+                    <h1>Precio Promedio de Productos Vendidos</h1>
                     <h3></h3>
                 </div>
             </div>

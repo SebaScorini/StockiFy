@@ -68,6 +68,7 @@
     flex-grow: 1;
     padding: 2rem;
     background-color: #f9f9f9;
+    overflow-x: hidden;
 }
 
 /* Vistas dentro del contenido principal */
@@ -263,13 +264,11 @@
 }
 
 /*---------                       ESTILOS DE NANO                       ---------*/
-
-
 /* Estilos Estadisticas */
 
 .daily-stats-wrapper{
     width: fit-content;
-    padding: 3rem;
+    padding: 1rem;
     justify-content: left;
     gap: 3rem;
 }
@@ -367,7 +366,8 @@
 }
 
 .estadisticas-graph-wrapper{
-    width: 100%;
+    width: fit-content;
+    align-content: center;
 }
 
 #new-transaction-container{
@@ -512,8 +512,6 @@
 }
 
 .client-row,.provider-row{
-    display: flex;
-    flex-direction: column;
     justify-content: space-between;
     width: 100%;
     padding: 1rem;
@@ -623,6 +621,75 @@
     position: relative;
 }
 
+.dashboard-sidebar-mobile{
+    position: absolute;
+    display: none;
+}
+
+.stat-graph{
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border: var(--border-strong);
+}
+
+#stats-wrapper{
+    display: flex;
+    height: fit-content;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 170px;
+    row-gap: 1rem;
+    padding: 1rem;
+}
+
+.mobile-menu{
+    padding: 10px 12px;
+    background-color: var(--color-white);
+    position: absolute;
+    z-index: 200;
+    transition: all 0.7s ease;
+    display: block !important;
+}
+
+.mobile-menu:not(.hidden){
+    left: 0;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.mobile-menu.hidden{
+    left: -200px;
+    visibility: hidden;  /* Lo oculta de la vista y de los clics */
+    pointer-events: none;
+}
+
+#open-mobile-menu-btn{
+    position: absolute;
+    margin: 10px 0 0 10px;
+    padding: 5px;
+    background-color: var(--accent-color);
+    border: var(--border-strong);
+    border-radius: 20px;
+}
+
+@media (max-width: 900px) {
+    .dashboard-sidebar-mobile{
+        display: block;
+    }
+   .dashboard-sidebar{
+        display: none;
+    }
+
+   .stat-group-container > h3{
+       font-size: 1.5rem;
+   }
+
+   .daily-stat-item > h4{
+       font-size: 1rem;
+   }
+}
+
 .product-table-picker{
     padding: 0.5rem;
     text-align: center;
@@ -723,6 +790,7 @@
     padding: 5px 0 5px 5px;
     border-radius: var(--border-radius);
     border: var(--border-strong);
+    z-index: 20;
 }
 
 .order-by-container.clicked{

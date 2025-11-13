@@ -15,8 +15,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="btn btn-secondary" id="mi-cuenta-btn">Mi Cuenta</div>
                 <div class="flex-column hidden" id="mi-cuenta-dropdown">
                     <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Configuración</a>
-                    <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Modificaciones de Stock</a>
-                    <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Soporte</a>
                     <a href="/StockiFy/logout.php" class="btn btn-secondary">Cerrar Sesión</a>
                 </div>
             </div>   

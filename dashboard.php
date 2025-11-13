@@ -17,7 +17,7 @@
 
 <!--          FONDO GRIS Y MODALES DE TRANSACCIONES            -->
 
-<div id="grey-background" class="hidden">
+<div id="grey-background" class="hidden" style="z-index: 21">
     <div id="new-transaction-container" class="hidden">
         <div id="return-btn" class="return-btn" style="top: 0; left: 0">Volver</div>
         <div id="transaction-form-container">
@@ -60,10 +60,8 @@
     <a href="index.php" id="header-logo">
         <img src="assets/img/LogoE.png" alt="StockiFy Logo">
     </a>
-    <nav id="header-nav"></nav> </header>
-
-
-
+    <nav id="header-nav"></nav>
+</header>
 <div class="dashboard-container">
     <aside class="dashboard-sidebar">
         <nav class="main-menu">
@@ -96,6 +94,33 @@
 
         </nav>
     </aside>
+    <aside id="dashboard-sidebar-mobile" class="dashboard-sidebar-mobile">
+        <div id="open-mobile-menu-btn" class="ph-fill ph-dots-three-outline-vertical"></div>
+        <nav id="mobile-menu" class="mobile-menu hidden">
+            <h3>Base de Datos</h3>
+            <ul>
+                <li><button class="menu-btn active" data-target-view="view-db"><i class="ph ph-table"></i> Ver Datos</button></li>
+                <li><button class="menu-btn" data-target-view="config-db"><i class="ph ph-gear"></i> Configurar Tabla</button></li>
+                <li><a href="select-db.php" class="menu-link"><i class="ph ph-database"></i> Cambiar Base de Datos</a></li>
+                <li><a href="create-db.php" class="menu-link"><i class="ph ph-plus-circle"></i> Crear Nueva Base de Datos</a></li>
+                <hr>
+            </ul>
+            <h3>Transacciones</h3>
+            <ul>
+                <li><button class="menu-btn" data-target-view="sales"><i class="ph ph-money"></i> Ventas</button></li>
+                <li><button class="menu-btn" data-target-view="receipts"><i class="ph ph-stack"></i> Compras</button></li>
+                <li><button class="menu-btn" data-target-view="customers"><i class="ph ph-user-focus"></i> Clientes</button></li>
+                <li><button class="menu-btn" data-target-view="providers"><i class="ph ph-van"></i> Proveedores</button></li>
+                <hr>
+            </ul>
+            <h3>Usuario</h3>
+            <ul>
+                <li><button class="menu-btn" data-target-view="analysis"><i class="ph ph-chart-line"></i> Estadísticas Diarias 🔴</button></li>
+                <li><button class="menu-btn" data-target-view="notifications"><i class="ph ph-bell"></i> Notificaciones</button></li>
+                <li><a href="registros.php" class="menu-link"><i class="ph ph-list-checks"></i> Registro de Modificaciones</a></li>
+            </ul>
+        </nav>
+    </aside>
 
     <main class="dashboard-main">
         <div id="view-db" class="dashboard-view">
@@ -104,8 +129,6 @@
                     <h2 id="table-title">Cargando...</h2>
                     <div class="table-controls">
                         <input type="text" id="search-input" placeholder="Buscar en la tabla...">
-                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="sale">+ Agregar Venta</button>
-                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="receipt">+ Agregar Compra</button>
                         <button id="add-row-btn" class="btn btn-primary" style="width: auto; margin-top: 0; margin-left: 1rem;">+ Añadir Fila</button>
                     </div>
                 </div>
@@ -140,20 +163,20 @@
                             <input style="width: 180px;" class="default-value-input" type="text" id="min-stock-default-input" name="min-stock-default" placeholder="Valor por Defecto (0)">
                         </div>
                         <div class="form-group flex-column recomended-column-group">
-                            <input type="checkbox" class="hidden-checkbox" id="sale-price-input" name="sale-price" value="0">
-                            <label for="sale-price-input" class="btn btn-secondary btn-checkbox-toggle">
-                                Precio de Venta
+                            <input type="checkbox" class="hidden-checkbox" id="receipt-price-input" name="receipt-price" value="0">
+                            <label for="receipt-price-input" class="btn btn-secondary btn-checkbox-toggle">
+                                Precio de Compra
                             </label>
-                            <input style="width: 180px;" class="default-value-input" type="text" id="sale-price-default-input" name="sale-price-default" placeholder="Valor por Defecto (0)">
+                            <input style="width: 180px;" class="default-value-input" type="text" id="receipt-price-default-input" name="receipt-price-default" placeholder="Valor por Defecto (0)">
                         </div>
                         <div class="form-group flex-column recomended-column-group">
                             <div class="flex-column all-center" style="gap: 10px">
-                                <input type="checkbox" class="hidden-checkbox" id="receipt-price-input" name="receipt-price" value="0">
-                                <label for="receipt-price-input" class="btn btn-secondary btn-checkbox-toggle">
-                                    Precio de Compra
+                                <input type="checkbox" class="hidden-checkbox" id="sale-price-input" name="sale-price" value="0">
+                                <label for="sale-price-input" class="btn btn-secondary btn-checkbox-toggle">
+                                    Precio de Venta
                                 </label>
                             </div>
-                            <input style="width: 180px;" class="default-value-input" type="text" id="receipt-price-default-input" name="receipt-price-default" placeholder="Valor por Defecto (0)">
+                            <input style="width: 180px;" class="default-value-input" type="text" id="sale-price-default-input" name="sale-price-default" placeholder="Valor por Defecto (0)">
                             <div class="flex-column" style="position: relative; z-index: 10;">
                                 <input type="checkbox" class="hidden-checkbox" id="auto-price-input" name="auto-price" value="0">
                                 <label for="auto-price-input" id="auto-price-checkbox" class="btn btn-secondary btn-checkbox-toggle">
@@ -162,15 +185,15 @@
                                 <div class="form-group flex-column" id="auto-price-type-container" style="align-items: start;">
                                     <div class="flex-row">
                                         <input type="radio" id="auto-iva-input" name="price-type" value="iva">
-                                        <p>Precio de Venta + IVA 21%</p>
+                                        <p>Precio de Compra + IVA 21%</p>
                                     </div>
                                     <div class="flex-row">
                                         <input type="radio" id="auto-gain-input" name="price-type" value="gain">
-                                        <p>Precio de Venta + Margen de Ganancia</p>
+                                        <p>Precio de Compra + Margen de Ganancia</p>
                                     </div>
                                     <div class="flex-row">
                                         <input type="radio" id="auto-iva-gain-input" name="price-type" value="gain-iva">
-                                        <p>Precio de Venta + Margen de Ganancia + IVA 21%</p>
+                                        <p>Precio de Compra + Margen de Ganancia + IVA 21%</p>
                                     </div>
                                 </div>
                             </div>
@@ -225,7 +248,7 @@
                             </div>
                         </div>
                 </div>
-                <div class="flex-row">
+                <div class="table-wrapper" id="stats-wrapper">
                     <div class="daily-stats-wrapper flex-row" id="general-stats">
                         <div class="flex-column" style="gap: 2rem;">
                             <div class="stat-group-container">

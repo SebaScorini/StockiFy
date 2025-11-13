@@ -416,4 +416,40 @@ export async function updateProvider(provider){
     })
     return handleResponse(response);
 }
+
+export async function verifyPassword(newPass,passwordHash){
+    const response = await fetch('/StockiFy/api/auth/verify-password.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({newPass,passwordHash}),
+    })
+    return handleResponse(response);
+}
+
+export async function verifyUserName(userName){
+    const response = await fetch('/StockiFy/api/auth/verify-username.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userName),
+    })
+    return handleResponse(response);
+}
+
+export async function updateUser(userData){
+    const response = await fetch('/StockiFy/api/user/update.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+    })
+    return handleResponse(response);
+}
+
+export async function verifyEmail(email){
+    const response = await fetch('/StockiFy/api/auth/verify-email.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(email),
+    })
+    return handleResponse(response);
+}
 /* ---------------------- FIN DE FUNCIONES DE NANO  ---------------------- */

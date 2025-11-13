@@ -66,6 +66,12 @@ header {
 #header-logo img { height: 40px; width: auto; display: block; }
 #header-nav { display: flex; gap: 1rem; }
 
+@media (max-width: 768px) {
+    #header-logo img { height: 30px; }
+    header { padding: 1rem; }
+    #header-nav > .btn {font-size: 2px; !important}
+}
+
 /* ---- Botones específicos del Header ---- */
 #header-nav .btn {
     width: auto;
@@ -194,7 +200,7 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
 /* ---- Contenedores ---- */
 
 #config-container{
-    width: 50rem;
+    width: 100%;
     background-color: var(--color-white);
     border: var(--border-strong);
     border-radius: 0 4px 4px 4px;
@@ -264,6 +270,37 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
     gap: 1.5rem;
 }
 
+#select-tabla-container{
+    position: absolute;
+    right: 20px;
+}
+
+#selected-table{
+    max-width: 170px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#table-list p{
+    text-align: left;
+    white-space: nowrap;
+}
+
+#table-list{
+    min-width: 170px;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: white;
+    border: var(--border-strong);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    z-index: 15;
+}
+
 #estadisticas-menu-container{
     width: 150px;
     background-color: var(--accent-color-medium-opacity);
@@ -326,6 +363,36 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
     grid-template-columns: 1fr 1fr 1fr;
     row-gap: 4rem;
     padding: 0 4rem;
+}
+
+
+@media (max-width: 1200px) {
+    .stat-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .estadisticas-container > h1{
+        font-size: 3rem;
+    }
+
+    .estadisticas-container {
+        padding: 2rem 1rem;
+    }
+
+    .stat-grid{
+        padding: 0;
+    }
+    .estadistica-item-container h1{
+        font-size: 1.5rem;
+    }
 }
 
 #estadisticas-fecha > div{
@@ -748,7 +815,8 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
 }
 
 #form-micuenta{
-    width: 100%;
+    max-width: 400px;
+    overflow: hidden;
     height: 100%;
     padding: 2rem 3rem 1rem 1rem;
 }

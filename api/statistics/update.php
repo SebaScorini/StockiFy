@@ -80,7 +80,7 @@ foreach ($listaFechas as $fechaSQL) {
     $ingresosBrutosT->execute([$inv, $fechaSQL]);
     $ingresosBrutosT = $ingresosBrutosT->fetchAll();
 
-    $promedioVentaT = $pdo->prepare("SELECT COALESCE(AVG(si.quantity * COALESCE(si.unit_price,0)), 0) AS total FROM sale_items si JOIN sales s ON si.sale_id = s.id WHERE si.inventory_id = ? AND DATE(s.sale_date) = ?");
+    $promedioVentaT = $pdo->prepare("SELECT COALESCE(AVG(COALESCE(si.unit_price,0))) AS total FROM sale_items si JOIN sales s ON si.sale_id = s.id WHERE si.inventory_id = ? AND DATE(s.sale_date) = ?");
     $promedioVentaT->execute([$inv, $fechaSQL]);
     $promedioVentaT = $promedioVentaT->fetchAll();
 

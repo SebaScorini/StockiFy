@@ -66,7 +66,7 @@ class UserModel
      */
     public function findById(int $id)
     {
-        $stmt = $this->db->prepare("SELECT id, username, email, full_name, created_at FROM users WHERE id = :id");
+        $stmt = $this->db->prepare("SELECT id, username, email, full_name, created_at, password_hash FROM users WHERE id = :id");
         $stmt->execute([':id' => $id]);
         return $stmt->fetch();
     }

@@ -142,11 +142,6 @@ async function renderTable(columns, data) {
                     return '';
                 case 'sale_price':
                     if (inventoryPreferences.sale_price === 1) {
-                        return `<th>Precio de Venta</th>`;
-                    }
-                    return '';
-                case 'receipt_price':
-                    if (inventoryPreferences.receipt_price === 1) {
                         let autoType;
                         switch (inventoryPreferences.auto_price_type) {
                             case 'iva':
@@ -159,7 +154,12 @@ async function renderTable(columns, data) {
                                 autoType = 'IVA + Margen de Ganancia';
                                 break
                         }
-                        return `<th>Precio de Compra ${(inventoryPreferences.auto_price === 1) ? '<br>(Calculado con ' + autoType  + ')' : ''}</th>`;
+                        return `<th>Precio de Venta ${(inventoryPreferences.auto_price === 1) ? '<br>(Calculado con ' + autoType + ')' : ''}</th>`;
+                    }
+                    return '';
+                case 'receipt_price':
+                    if (inventoryPreferences.receipt_price === 1) {
+                        return `<th>Precio de Compra</th>`;
                     }
                     return '';
                 case 'hard_gain':
@@ -288,8 +288,6 @@ async function init() {
                 <div class="btn btn-secondary" id="mi-cuenta-btn">Mi Cuenta</div>
                 <div class="flex-column hidden" id="mi-cuenta-dropdown">
                     <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Configuración</a>
-                    <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Modificaciones de Stock</a>
-                    <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Soporte</a>
                     <a href="/StockiFy/logout.php" class="btn btn-secondary">Cerrar Sesión</a>
                 </div>
             </div>   
@@ -298,6 +296,7 @@ async function init() {
     //PREPARA LOS FONDOS GRISES DE LOS MODALES
     setupReturnBtn();
     setupGreyBg();
+    setupMobileMenu();
 
     //PREPARA EL DROPDOWN DE "MI CUENTA"
     setup.setupMiCuenta();
@@ -436,29 +435,28 @@ async function createEditableRow(columns) {
         try{
             switch (type) {
                 case 'iva':
-                    autoPrice = parseFloat(salePrice) * 1.21;
+                    autoPrice = parseFloat(receiptPrice) * 1.21;
                     break;
                 case 'gain':
                     if (inventoryPreferences.percentage_gain === 1) {
-                        autoPrice = parseFloat(salePrice) * (1 + (parseFloat(gainValue) / 100));
+                        autoPrice = parseFloat(receiptPrice) * (1 + (parseFloat(gainValue) / 100));
                     }
-                    else {autoPrice = parseFloat(salePrice) + parseFloat(gainValue);}
+                    else {autoPrice = parseFloat(receiptPrice) + parseFloat(gainValue);}
                     break;
                 default:
-                    autoPrice = parseFloat(salePrice) * 1.21;
+                    autoPrice = parseFloat(receiptPrice) * 1.21;
                     if (inventoryPreferences.percentage_gain === 1) {
                         autoPrice = autoPrice * (1 + (parseFloat(gainValue) / 100));
                     }
                     else {autoPrice += parseFloat(gainValue);}
                     break;
             }
-            if (isNaN(autoPrice)){autoPrice = inventoryDefaults.receipt_price;}
+            if (isNaN(autoPrice)){autoPrice = inventoryDefaults.sale_price;}
             return autoPrice;
         }
         catch(error){
-            //Si algo salió mal, devuelvo el valor por defecto.
-            console.log('Entrada Invalida. Valor de Compra no actualizado');
-            return inventoryDefaults.receipt_price;
+            console.log('Entrada Invalida. Valor de Venta no actualizado');
+            return inventoryDefaults.sale_price;
         }
     }
 
@@ -515,7 +513,6 @@ async function createEditableRow(columns) {
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.placeholder = 'Precio de Compra';
-                    console.log(receiptPrice);
                     input.value = receiptPrice;
 
                     //Guardo el input en variables globales para utilizarlos en el calculo del precio de compra
@@ -570,21 +567,21 @@ async function createEditableRow(columns) {
     //Si el usuario tiene activo el calculo automático de precio de compra, lo calculo
 
     if (inventoryPreferences.auto_price === 1) {
-        const updateReceiptPrice = () => {
-            salePrice = salePriceInput.value;
+        const updateSalePrice = () => {
+            receiptPrice = receiptPriceInput.value;
             if (gainValueInput){gainValue = gainValueInput.value;}
             else {gainValue = 0;}
 
             if (gainValue === ''){gainValue = 0;}
-            if (salePrice === ''){salePrice = 0;}
-            receiptPrice = getAutoPrice();
-            receiptPriceInput.value = receiptPrice.toFixed(2);
+            if (receiptPrice === ''){receiptPrice = 0;}
+            salePrice = getAutoPrice();
+            salePriceInput.value = salePrice.toFixed(2);
         };
 
-        salePriceInput.addEventListener('input', updateReceiptPrice);
-        if (gainValueInput){gainValueInput.addEventListener('input', updateReceiptPrice)};
+        receiptPriceInput.addEventListener('input', updateSalePrice);
+        if (gainValueInput){gainValueInput.addEventListener('input', updateSalePrice)};
 
-        updateReceiptPrice();
+        updateSalePrice();
     }
 
     /* ---------------------- FIN CODIGO DE NANO  ---------------------- */
@@ -1574,12 +1571,20 @@ function showTransactionView(viewOrder, viewDirection,menuContainer) {
 function setupGreyBg(){
     const greyBg = document.getElementById('grey-background');
     const transactionModal = document.getElementById('transaction-picker-modal');
+    const mobileMenu = document.getElementById('mobile-menu');
     greyBg.addEventListener('click', (event) =>{
         if (event.target === greyBg) {
             if (!transactionModal.classList.contains('hidden')) {
                 hideTransactionModal();
             }
-            else{greyBg.classList.add('hidden'); hideTransactionSuccess();}
+            else if (!mobileMenu.classList.contains('hidden')) {
+                greyBg.classList.add('hidden');
+                mobileMenu.classList.add('hidden');
+            }
+            else{
+                greyBg.classList.add('hidden');
+                hideTransactionSuccess();
+            }
         }
     })
 }
@@ -2465,23 +2470,11 @@ async function setupProviders(){
     const response = await api.getOrderedProviders();
     if (response.success){
         const providers = response.providerList;
-        console.log(providers);
-        if (providers.date.descending.length === 0){ populateEmptyProviderModal(); return; }
         populateProviderModal(providers);
     }
     else{
         console.log('no salio bien' + response.error);
     }
-}
-
-function populateEmptyProviderModal(){
-    const providerModals = document.querySelectorAll('.provider-view');
-    providerModals.forEach(modal => {
-        modal.innerHTML = `<div class="flex-row"><div class="flex-column">
-            <h2>No has creado ningun Proveedor</h2>
-            <button class="btn btn-primary new-transaction-btn" data-transaction="provider">Crea tu Primer Proveedor</button>
-            </div></div>`;
-    })
 }
 
 function populateProviderModal(providers){
@@ -2647,22 +2640,11 @@ async function setupClients(){
     const response = await api.getOrderedClients();
     if (response.success){
         const clients = response.clientList;
-        if (clients.date.descending.length === 0){ populateEmptyClientModal(); return; }
         populateClientModal(clients);
     }
     else{
         console.log('no salio bien' + response.error);
     }
-}
-
-function populateEmptyClientModal(){
-    const clientModals = document.querySelectorAll('.customer-view');
-    clientModals.forEach(modal => {
-        modal.innerHTML = `<div class="flex-row"><div class="flex-column">
-            <h2>No has creado ningun cliente</h2>
-            <button class="btn btn-primary new-transaction-btn" data-transaction="customer">Crea tu Primer Cliente</button>
-            </div></div>`;
-    })
 }
 
 function populateClientModal(clients){
@@ -2736,13 +2718,14 @@ function createClientRow (client){
     clientDiv.innerHTML = `<div>
                                 <h3>${client.full_name}</h3>
                             </div>
-                            <div><p style="font-size: 15px">${client.created_at}</p></div>`
+                            <div><p style="font-size: 15px">${client.created_at}</p></div>`;
 
     clientDiv.addEventListener('click', () => {
         showClientInfoModal(client);
     })
     return clientDiv;
 }
+
 
 function showClientInfoModal(client){
     const modal = document.getElementById('transaction-info-modal');
@@ -2767,7 +2750,7 @@ function showClientInfoModal(client){
                                 <label for="client-dni" class="flex-row" style="gap: 5px"><h2>D.N.I </h2><p>(Opcional)</p></label>
                                 <input type="text" name="tax-id" id="client-dni" placeholder="No asignado." value="${clientDNI}" 
                                 pattern="\\d{1,2}\\.\\d{3}\\.\\d{3}">           
-                                <button class="btn btn-primary" id="save-customer-btn" disabled>Guardar Cambios</button>
+                                <button class="btn btn-primary" id="save-customer-btn" disabled>Guardar Cambios</button>                            
                                 </form>`;
 
     const saveBtn = document.getElementById('save-customer-btn');
@@ -3481,8 +3464,8 @@ function createCharts(){
         },
         chart: {
             type: 'area',
-            height: 600,
-            width: 500
+            height: 400,
+            width: 300
         },
         series: [],
         xaxis: {
@@ -3570,8 +3553,8 @@ function populateHourlyGraphs(hourlyStatistics){
     var options = {
         chart: {
             type: 'area',
-            height: 600,
-            width: 500
+            height: 400,
+            width: 300
         },
         series: [{
             data: hourlyStatistics.stock.stockIngresado
@@ -3587,8 +3570,8 @@ function populateHourlyGraphs(hourlyStatistics){
     options = {
         chart: {
             type: 'area',
-            height: 600,
-            width: 500
+            height: 400,
+            width: 300
         },
         series: [{
             data: hourlyStatistics.stock.stockVendido
@@ -3603,8 +3586,8 @@ function populateHourlyGraphs(hourlyStatistics){
     options = {
         chart: {
             type: 'area',
-            height: 600,
-            width: 500
+            height: 400,
+            width: 300
         },
         series: [{
             data: hourlyStatistics.monetarias.gastos
@@ -3619,8 +3602,8 @@ function populateHourlyGraphs(hourlyStatistics){
     options = {
         chart: {
             type: 'area',
-            height: 600,
-            width: 500
+            height: 400,
+            width: 300
         },
         series: [{
             data: hourlyStatistics.monetarias.ingresos
@@ -3635,8 +3618,8 @@ function populateHourlyGraphs(hourlyStatistics){
     options = {
         chart: {
             type: 'area',
-            height: 600,
-            width: 500
+            height: 400,
+            width: 300
         },
         series: [{
             data: hourlyStatistics.monetarias.ganancias
@@ -3651,8 +3634,8 @@ function populateHourlyGraphs(hourlyStatistics){
     options = {
         chart: {
             type: 'area',
-            height: 600,
-            width: 500
+            height: 400,
+            width: 300
         },
         series: [{
             data: hourlyStatistics.transacciones.ventasRealizadas
@@ -3667,8 +3650,8 @@ function populateHourlyGraphs(hourlyStatistics){
     options = {
         chart: {
             type: 'area',
-            height: 600,
-            width: 500
+            height: 400,
+            width: 300
         },
         series: [{
             data: hourlyStatistics.transacciones.comprasRealizadas
@@ -3683,8 +3666,8 @@ function populateHourlyGraphs(hourlyStatistics){
     options = {
         chart: {
             type: 'area',
-            height: 600,
-            width: 500
+            height: 400,
+            width: 300
         },
         series: [{
             data: hourlyStatistics.conexiones.nuevosClientes
@@ -3699,8 +3682,8 @@ function populateHourlyGraphs(hourlyStatistics){
     options = {
         chart: {
             type: 'area',
-            height: 600,
-            width: 500
+            height: 400,
+            width: 300
         },
         series: [{
             data: hourlyStatistics.conexiones.nuevosProveedores
@@ -3850,6 +3833,15 @@ async function setupInventoryPicker() {
     }
 }
 
+function setupMobileMenu(){
+    const menuBtn = document.getElementById('open-mobile-menu-btn')
+    menuBtn.addEventListener('click', () => {
+        const mobileMenu = document.getElementById('mobile-menu');
+        const greyBg = document.getElementById('grey-background');
+        greyBg.classList.remove('hidden');
+        mobileMenu.classList.remove('hidden');
+    })
+}
 
 
 
