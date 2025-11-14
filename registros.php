@@ -6,6 +6,7 @@ $currentUser = getCurrentUser();
 if (!isset($_SESSION['user_id'])) {
     header('Location: /StockiFy/index.php');
     exit;
+
 }
 ?>
 <!DOCTYPE html>

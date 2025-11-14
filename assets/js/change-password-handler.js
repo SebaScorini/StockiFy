@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded' ,() =>
 
         const verifiedPass = response.correctPassword;
 
-        saveBtn.disabled = !(verifiedPass && (newPass === newPassConfirm) && (newPass.length > 0));
+        saveBtn.disabled = !(verifiedPass && (newPass === newPassConfirm) && (newPass.length > 0) && (newPass !== oldPasswordVerif));
     })
 
     changePassForm.addEventListener('submit', function(event) {

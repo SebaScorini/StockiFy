@@ -10,8 +10,6 @@ $data = json_decode(file_get_contents('php://input'), true);
 
 try {
     $pdo = Database::getInstance();
-    getCurrentUser();
-    $user_id = $_SESSION['user_id'];
 
     $contactData = $data;
 
