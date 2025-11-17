@@ -10,6 +10,16 @@
 </head>
 <body>
 
+<?php
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/auth_helper.php';
+$currentUser = getCurrentUser();
+
+if (!isset($_SESSION['user_id'])){
+    header("Location: login.php");
+}
+?>
+
 <header>
     <a href="index.php" id="header-logo">
         <img src="assets/img/LogoE.png" alt="StockiFy Logo">

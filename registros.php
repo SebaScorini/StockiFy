@@ -4,9 +4,12 @@ require_once __DIR__ . '/auth_helper.php';
 
 $currentUser = getCurrentUser();
 if (!isset($_SESSION['user_id'])) {
+    header('Location: /StockiFy/login.php');
+    exit;
+}
+else if ($currentUser['is_admin'] == 0){
     header('Location: /StockiFy/index.php');
     exit;
-
 }
 ?>
 <!DOCTYPE html>

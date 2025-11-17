@@ -13,6 +13,17 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
 <body id="page-index" data-user-id="">
+
+<?php
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/auth_helper.php';
+$currentUser = getCurrentUser();
+
+if (!isset($_SESSION['user_id'])){
+    header("Location: login.php");
+}
+?>
+
 <div id="grey-background" class="hidden">
     <p id="msj-bubble" class="view-container"></p>
     <div id="inventory-info-modal" class="hidden">

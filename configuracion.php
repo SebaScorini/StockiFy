@@ -13,13 +13,12 @@
 </head>
 
 <?php
-
     require_once __DIR__ . '/vendor/autoload.php';
     require_once __DIR__ . '/auth_helper.php';
     $currentUser = getCurrentUser();
 
-    if (!isset($_SESSION['user_id'])) {
-        header('Location: /StockiFy/index.php');
+    if (!isset($_SESSION['user_id'])){
+        header("Location: login.php");
     }
 ?>
 

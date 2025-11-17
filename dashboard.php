@@ -17,6 +17,17 @@
 
 <!--          FONDO GRIS Y MODALES DE TRANSACCIONES            -->
 
+
+<?php
+    require_once __DIR__ . '/vendor/autoload.php';
+    require_once __DIR__ . '/auth_helper.php';
+    $currentUser = getCurrentUser();
+
+    if (!isset($_SESSION['user_id'])){
+        header("Location: login.php");
+    }
+?>
+
 <div id="grey-background" class="hidden" style="z-index: 21">
     <div id="new-transaction-container" class="hidden">
         <div id="return-btn" class="return-btn" style="top: 0; left: 0">Volver</div>
