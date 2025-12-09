@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="assets/css/dashboard.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    <link rel="stylesheet" href="/node_modules/shepherd.js/dist/css/shepherd.css">
     <script src="assets/js/theme.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 </head>
@@ -82,33 +83,33 @@
     <a href="index.php" id="header-logo">
         <img src="assets/img/LogoE.png" alt="StockiFy Logo">
     </a>
-    <nav id="header-nav"></nav>
+    <nav id="header-nav"> </nav>
 </header>
 <div class="dashboard-container">
     <aside class="dashboard-sidebar">
-        <nav class="main-menu">
+        <nav class="main-menu"><!-- Agregue id a todos los botones para el tour Franco -->
             <h3>Base de Datos</h3>
             <ul>
                 <!--                     CODIGO DE NANO                        -->
 
                 <!--        MODIFICACION DE ORDEN DE MENUS, MENUS NUEVOS       -->
-                <li><button class="menu-btn active" data-target-view="view-db"><i class="ph ph-table"></i> Ver Datos</button></li>
-                <li><button class="menu-btn" data-target-view="config-db"><i class="ph ph-gear"></i> Configurar Tabla</button></li>
-                <li><a href="select-db.php" class="menu-link"><i class="ph ph-database"></i> Cambiar Base de Datos</a></li>
-                <li><a href="create-db.php" class="menu-link"><i class="ph ph-plus-circle"></i> Crear Nueva Base de Datos</a></li>
+                <li><button class="menu-btn active" data-target-view="view-db" id="view-data"><i class="ph ph-table"></i> Ver Datos</button></li>
+                <li><button class="menu-btn" data-target-view="config-db" id="config-table"><i class="ph ph-gear"></i> Configurar Tabla</button></li>
+                <li><a href="select-db.php" class="menu-link" id="select-db"><i class="ph ph-database"></i> Cambiar Base de Datos</a></li>
+                <li><a href="create-db.php" class="menu-link" id="create-db"><i class="ph ph-plus-circle"></i> Crear Nueva Base de Datos</a></li>
                 <hr>
             </ul>
             <h3>Transacciones</h3>
             <ul>
-                <li><button class="menu-btn" data-target-view="sales"><i class="ph ph-money"></i> Ventas</button></li>
-                <li><button class="menu-btn" data-target-view="receipts"><i class="ph ph-stack"></i> Compras</button></li>
-                <li><button class="menu-btn" data-target-view="customers"><i class="ph ph-user-focus"></i> Clientes</button></li>
-                <li><button class="menu-btn" data-target-view="providers"><i class="ph ph-van"></i> Proveedores</button></li>
+                <li><button class="menu-btn" data-target-view="sales" id="sales-t"><i class="ph ph-money"></i> Ventas</button></li>
+                <li><button class="menu-btn" data-target-view="receipts" id="receipts-t"><i class="ph ph-stack"></i> Compras</button></li>
+                <li><button class="menu-btn" data-target-view="customers" id="customers-t"><i class="ph ph-user-focus"></i> Clientes</button></li>
+                <li><button class="menu-btn" data-target-view="providers" id="providers-t"><i class="ph ph-van"></i> Proveedores</button></li>
                 <hr>
             </ul>
             <h3>Usuario</h3>
             <ul>
-                <li><button class="menu-btn" data-target-view="analysis"><i class="ph ph-chart-line"></i> Estadísticas Diarias 🔴</button></li>
+                <li><button class="menu-btn" data-target-view="analysis" id="daily-t"><i class="ph ph-chart-line"></i> Estadísticas Diarias 🔴</button></li>
                 <!--<li><button class="menu-btn" data-target-view="notifications"><i class="ph ph-bell"></i> Notificaciones</button></li>-->
             </ul>
             <!--                          FIN DE CODIGO                        -->
@@ -117,26 +118,26 @@
     </aside>
     <aside id="dashboard-sidebar-mobile" class="dashboard-sidebar-mobile">
         <div id="open-mobile-menu-btn" class="ph-fill ph-dots-three-outline-vertical"></div>
-        <nav id="mobile-menu" class="mobile-menu hidden">
+        <nav id="mobile-menu" class="mobile-menu hidden"><!--Agregue ids para poder inicializar el tour tambien en movil Franco -->
             <h3>Base de Datos</h3>
             <ul>
-                <li><button class="menu-btn active" data-target-view="view-db"><i class="ph ph-table"></i> Ver Datos</button></li>
-                <li><button class="menu-btn" data-target-view="config-db"><i class="ph ph-gear"></i> Configurar Tabla</button></li>
-                <li><a href="select-db.php" class="menu-link"><i class="ph ph-database"></i> Cambiar Base de Datos</a></li>
-                <li><a href="create-db.php" class="menu-link"><i class="ph ph-plus-circle"></i> Crear Nueva Base de Datos</a></li>
+                <li><button class="menu-btn active" id="view-db-m" data-target-view="view-db"><i class="ph ph-table"></i> Ver Datos</button></li>
+                <li><button class="menu-btn" id="config-db-m" data-target-view="config-db"><i class="ph ph-gear"></i> Configurar Tabla</button></li>
+                <li><a href="select-db.php" class="menu-link" id="select-db-m"><i class="ph ph-database"></i> Cambiar Base de Datos</a></li>
+                <li><a href="create-db.php" class="menu-link" id="create-db-m"><i class="ph ph-plus-circle"></i> Crear Nueva Base de Datos</a></li>
                 <hr>
             </ul>
             <h3>Transacciones</h3>
             <ul>
-                <li><button class="menu-btn" data-target-view="sales"><i class="ph ph-money"></i> Ventas</button></li>
-                <li><button class="menu-btn" data-target-view="receipts"><i class="ph ph-stack"></i> Compras</button></li>
-                <li><button class="menu-btn" data-target-view="customers"><i class="ph ph-user-focus"></i> Clientes</button></li>
-                <li><button class="menu-btn" data-target-view="providers"><i class="ph ph-van"></i> Proveedores</button></li>
+                <li><button class="menu-btn" id="sales-m" data-target-view="sales"><i class="ph ph-money"></i> Ventas</button></li>
+                <li><button class="menu-btn" id="receipts-m" data-target-view="receipts"><i class="ph ph-stack"></i> Compras</button></li>
+                <li><button class="menu-btn" id="customers-m" data-target-view="customers"><i class="ph ph-user-focus"></i> Clientes</button></li>
+                <li><button class="menu-btn" id="providers-m" data-target-view="providers"><i class="ph ph-van"></i> Proveedores</button></li>
                 <hr>
             </ul>
             <h3>Usuario</h3>
             <ul>
-                <li><button class="menu-btn" data-target-view="analysis"><i class="ph ph-chart-line"></i> Estadísticas Diarias 🔴</button></li>
+                <li><button class="menu-btn" id="daily-m" data-target-view="analysis"><i class="ph ph-chart-line"></i> Estadísticas Diarias 🔴</button></li>
                 <!--<li><button class="menu-btn" data-target-view="notifications"><i class="ph ph-bell"></i> Notificaciones</button></li>-->
             </ul>
         </nav>
@@ -170,21 +171,21 @@
                                         Y ELIMINAR TABLA -->
             <div class="menu-container" style="padding: 3rem;">
                 <div style="padding: 1rem; border: var(--border-strong); border-radius: var(--border-radius);">
-                    <div class="flex-row" style="width: 100%; align-items: center; justify-content: space-between; padding: 10px">
+                    <div class="flex-row" id="column-settings" style="width: 100%; align-items: center; justify-content: space-between; padding: 10px">
                         <h2>Columnas Recomendadas</h2>
                         <img src="./assets/img/arrow-pointing-down.png" alt="Flecha para abir o cerrar menú de dropdown." id="open-columnas-recomendadas-btn">
                     </div>
-                    <form id="recomended-columns-form">
+                    <form id="recomended-columns-form"><!-- Agregado clase config button a los labels para mantener el tamaño -->
                         <div class="form-group flex-column recomended-column-group">
                             <input type="checkbox" class="hidden-checkbox" id="min-stock-input" name="min-stock" value="0">
-                            <label for="min-stock-input" class="btn btn-secondary btn-checkbox-toggle">
+                            <label for="min-stock-input" class="btn btn-secondary btn-checkbox-toggle config-button">
                                 Stock Mínimo
                             </label>
                             <input style="width: 180px;" class="default-value-input" type="text" id="min-stock-default-input" name="min-stock-default" placeholder="Valor por Defecto (0)">
                         </div>
                         <div class="form-group flex-column recomended-column-group">
                             <input type="checkbox" class="hidden-checkbox" id="receipt-price-input" name="receipt-price" value="0">
-                            <label for="receipt-price-input" class="btn btn-secondary btn-checkbox-toggle">
+                            <label for="receipt-price-input" class="btn btn-secondary btn-checkbox-toggle config-button">
                                 Precio de Compra
                             </label>
                             <input style="width: 180px;" class="default-value-input" type="text" id="receipt-price-default-input" name="receipt-price-default" placeholder="Valor por Defecto (0)">
@@ -192,14 +193,14 @@
                         <div class="form-group flex-column recomended-column-group">
                             <div class="flex-column all-center" style="gap: 10px">
                                 <input type="checkbox" class="hidden-checkbox" id="sale-price-input" name="sale-price" value="0">
-                                <label for="sale-price-input" class="btn btn-secondary btn-checkbox-toggle">
+                                <label for="sale-price-input" class="btn btn-secondary btn-checkbox-toggle config-button">
                                     Precio de Venta
                                 </label>
                             </div>
                             <input style="width: 180px;" class="default-value-input" type="text" id="sale-price-default-input" name="sale-price-default" placeholder="Valor por Defecto (0)">
                             <div class="flex-column" style="position: relative; z-index: 10;">
                                 <input type="checkbox" class="hidden-checkbox" id="auto-price-input" name="auto-price" value="0">
-                                <label for="auto-price-input" id="auto-price-checkbox" class="btn btn-secondary btn-checkbox-toggle">
+                                <label for="auto-price-input" id="auto-price-checkbox" class="btn btn-secondary btn-checkbox-toggle config-button">
                                     Calcular Automaticamente
                                 </label>
                                 <div class="form-group flex-column" id="auto-price-type-container" style="align-items: start;">
@@ -220,7 +221,7 @@
                         </div>
                         <div class="form-group flex-column recomended-column-group">
                             <input type="checkbox" class="hidden-checkbox" id="gain-input" name="gain" value="0">
-                            <label for="gain-input" class="btn btn-secondary btn-checkbox-toggle">
+                            <label for="gain-input" class="btn btn-secondary btn-checkbox-toggle config-button"><!-- Hasta aca el config Franco -->
                                 Margen de Ganancia
                             </label>
                             <div class="flex-row">
@@ -240,7 +241,7 @@
                         <button class="btn btn-primary" id="save-changes-btn" disabled>Guardar Cambios</button>
                 </form>
                 </div>
-                <div class="danger-zone" style="margin-top: 2rem; padding: 1rem; border: 2px solid var(--accent-red); border-radius: var(--border-radius);">
+                <div class="danger-zone" id="delete-db" style="margin-top: 2rem; padding: 1rem; border: 2px solid var(--accent-red); border-radius: var(--border-radius);">
                     <h3 style="color: var(--accent-red);">Zona de Peligro</h3>
                     <p style="color: var(--color-gray);">Estas acciones son permanentes.</p>
                     <button id="delete-db-btn" class="btn btn-secondary" style="border-color: var(--accent-red); color: var(--accent-red);">Eliminar esta Base de Datos</button>
@@ -394,11 +395,11 @@
                 <div class="table-header">
                     <h2>Ventas</h2>
                     <div class="table-controls">
-                        <div data-direction="descending" data-order= "none" class="direction-btn">
+                        <div data-direction="descending" data-order= "none" class="direction-btn" id="desc-asc-sales">
                             <i class="ph ph-arrow-up hidden" style="margin-right: 5px"></i>
                             <i class="ph ph-arrow-down" style="margin-right: 5px"></i>
                         </div>
-                        <div class="order-by-container">
+                        <div class="order-by-container" id="order-sales">
                             <div class="flex-row" style="margin-right: 20px; align-items: center; justify-content: flex-end;">
                                 <i class="ph ph-list-bullets" style="margin-right: 5px"></i>
                                 <h4 class="order-by-btn">Ordenar Por</h4>
@@ -410,7 +411,7 @@
                                 <p data-order="sales-table-price" class="order-btn">Precio</p>
                             </div>
                         </div>
-                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem;" data-transaction="sale">+ Crear una Venta</button>
+                        <button class="btn btn-primary new-transaction-btn" id="register-sale" style="margin-top: 0; margin-left: 1rem;" data-transaction="sale">+ Crear una Venta</button>
                     </div>
                 </div>
                 <div class="table-wrapper">
@@ -448,11 +449,11 @@
                 <div class="table-header">
                     <h2>Compras</h2>
                     <div class="table-controls">
-                        <div data-direction="descending" data-order= "none" class="direction-btn">
+                        <div data-direction="descending" id="desc-asc-receipts" data-order= "none" class="direction-btn">
                             <i class="ph ph-arrow-up hidden" style="margin-right: 5px"></i>
                             <i class="ph ph-arrow-down" style="margin-right: 5px"></i>
                         </div>
-                        <div class="order-by-container">
+                        <div class="order-by-container" id="order-receipts">
                             <div class="flex-row" style="margin-right: 20px; align-items: center; justify-content: flex-end;">
                                 <i class="ph ph-list-bullets" style="margin-right: 5px"></i>
                                 <h4 class="order-by-btn">Ordenar Por</h4>
@@ -464,7 +465,7 @@
                                 <p data-order="receipts-table-price" class="order-btn">Precio</p>
                             </div>
                         </div>
-                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="receipt">+ Crear una Compra</button>
+                        <button class="btn btn-primary new-transaction-btn" id="register-receipt" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="receipt">+ Crear una Compra</button>
                     </div>
                 </div>
                 <div class="table-wrapper">
@@ -497,11 +498,11 @@
                 <div class="table-header">
                     <h2>Clientes</h2>
                     <div class="table-controls">
-                        <div data-direction="descending" data-order= "none" class="direction-btn">
+                        <div data-direction="descending" id="desc-asc-customers" data-order= "none" class="direction-btn">
                             <i class="ph ph-arrow-up hidden" style="margin-right: 5px"></i>
                             <i class="ph ph-arrow-down" style="margin-right: 5px"></i>
                         </div>
-                        <div class="order-by-container">
+                        <div class="order-by-container" id="order-customers">
                             <div class="flex-row" style="margin-right: 20px; align-items: center; justify-content: flex-end;">
                                 <i class="ph ph-list-bullets" style="margin-right: 5px"></i>
                                 <h4 class="order-by-btn">Ordenar Por</h4>
@@ -515,10 +516,10 @@
                                 <p data-order="customers-table-dni" class="order-btn">DNI</p>
                             </div>
                         </div>
-                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="customer">+ Crear Cliente</button>
+                        <button class="btn btn-primary new-transaction-btn" id="add-customer" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="customer">+ Crear Cliente</button>
                     </div>
                 </div>
-                <div class="table-wrapper">
+                <div class="table-wrapper" id="customers-table-wrapper">
                     <div id="customers-table-container">
                         <div id="customers-table-email-descending" class="transaction-view hidden customer-view">
                         </div>
@@ -556,11 +557,11 @@
                 <div class="table-header">
                     <h2>Proveedores</h2>
                     <div class="table-controls">
-                        <div data-direction="descending" data-order= "none" class="direction-btn">
+                        <div data-direction="descending" id="desc-asc-providers" data-order= "none" class="direction-btn">
                             <i class="ph ph-arrow-up hidden" style="margin-right: 5px"></i>
                             <i class="ph ph-arrow-down" style="margin-right: 5px"></i>
                         </div>
-                        <div class="order-by-container">
+                        <div class="order-by-container" id="order-providers">
                             <div class="flex-row" style="margin-right: 20px; align-items: center; justify-content: flex-end;">
                                 <i class="ph ph-list-bullets" style="margin-right: 5px"></i>
                                 <h4 class="order-by-btn">Ordenar Por</h4>
@@ -573,10 +574,10 @@
                                 <p data-order="providers-table-phone" class="order-btn">Teléfono</p>
                             </div>
                         </div>
-                        <button class="btn btn-primary new-transaction-btn" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="provider">+ Crear Proveedor</button>
+                        <button class="btn btn-primary new-transaction-btn" id="add-provider" style="margin-top: 0; margin-left: 1rem; justify-self: left" data-transaction="provider">+ Crear Proveedor</button>
                     </div>
                 </div>
-                <div class="table-wrapper">
+                <div class="table-wrapper" id="providers-table-wrapper">
                     <div id="customers-table-container">
                         <div id="providers-table-email-descending" class="transaction-view hidden provider-view">
                         </div>
@@ -660,6 +661,8 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/shepherd.js@latest/dist/js/shepherd.min.js"></script>
+<script src="assets/js/tour.js"></script>
 <script type="module" src="assets/js/import.js"></script>
 <script type="module" src="assets/js/dashboard.js"></script>
 </body>

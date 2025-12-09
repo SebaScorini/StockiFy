@@ -1,0 +1,24 @@
+{
+  "name": "stockify",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nanoBiglia2005/StockiFy.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nanoBiglia2005/StockiFy/issues"
+  },
+  "homepage": "https://github.com/nanoBiglia2005/StockiFy#readme",
+  "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "shepherd.js": "^14.5.1"
+  }
+}

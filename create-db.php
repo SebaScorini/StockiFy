@@ -164,7 +164,6 @@
     </div>
 </div>
 
-
 <script type="module" src="assets/js/database/create-db.js"></script>
 <script type="module" src="assets/js/import.js"></script>
 <script type="module" src="assets/js/api.js"></script>

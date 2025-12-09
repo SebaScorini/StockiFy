@@ -33,35 +33,82 @@ async function populateTableSelect(){
 
         if (!response.success){return;}
 
+        //Cambiada la funcion para que ambos apartados de estadisticas puedan seleccionar la tabla Franco
+
         const tableData = response.verifiedInventories;
-        const selectedTable = document.getElementById("selected-table");
 
-        if (tableData.length === 0){
-            selectedTable.textContent = 'Ninguna';
-            return;
+        const selectedTableGeneral = document.getElementById("selected-table-general");
+        const selectContainerGeneral = document.getElementById('table-list-general');
+
+        const selectedTableInventory = document.getElementById("selected-table-inventory");
+        const selectContainerInventory = document.getElementById('table-list-inventory');
+
+        const inventoryStatsSection = document.getElementById('inventory-stats-section');
+        const generalStatsSection = document.getElementById('general-stats-section');
+
+        const handleTableSelection = (id, name) => {
+            tablaID = id;
+            selectedTableGeneral.textContent = name;
+            selectedTableInventory.textContent = name;
+            selectContainerGeneral.classList.add('hidden');
+            selectContainerInventory.classList.add('hidden');
+            actualizarEstadisticas();
+        };
+
+        let initialTableName = "Todas las tablas";
+        if (tablaID) {
+            const activeTable = tableData.find(table => table.id === tablaID);
+            if (activeTable) {
+                initialTableName = activeTable.name;
+            }
         }
+        selectedTableGeneral.textContent = initialTableName;
+        selectedTableInventory.textContent = initialTableName;
 
-        selectedTable.textContent = tableData[0].name;
-        const selectContainer = document.getElementById('table-list');
+        selectedTableGeneral.addEventListener('click', () => {
+            selectContainerGeneral.classList.toggle('hidden');
+            selectContainerInventory.classList.add('hidden');
+            selectedTableGeneral.classList.add('hidden');
+        });
 
-        selectedTable.addEventListener('click', () => {
-            selectContainer.classList.toggle('hidden');
-        })
+        selectedTableInventory.addEventListener('click', () => {
+            selectContainerInventory.classList.toggle('hidden');
+            selectContainerGeneral.classList.add('hidden');
+            selectedTableInventory.classList.add('hidden');
+        });
 
-        tableData.forEach(table => {
+        const createTableListItem = (table, isGeneralOption = false) => {
             const tablaItem = document.createElement('p');
-            tablaItem.textContent = table.name;
+            tablaItem.textContent = isGeneralOption ? "Todas las tablas" : table.name;
             tablaItem.classList.add('tabla-item', 'btn', 'btn-primary');
-
             tablaItem.addEventListener('click', () => {
-                tablaID = table.id;
-                selectedTable.textContent = table.name;
-                selectContainer.classList.toggle('hidden');
-                actualizarEstadisticas(desdeDate,hastaDate,chart,tablaID);
-            })
+                handleTableSelection(isGeneralOption ? null : table.id, isGeneralOption ? "Todas las tablas" : table.name);
+                if(generalStatsSection.classList.contains('hidden') && isGeneralOption){
+                    inventoryStatsSection.classList.add('hidden');
+                    generalStatsSection.classList.remove('hidden');
+                }
+                else if(inventoryStatsSection.classList.contains('hidden') && !isGeneralOption){
+                    generalStatsSection.classList.add('hidden');
+                    inventoryStatsSection.classList.remove('hidden');
+                }
+                selectedTableGeneral.classList.remove('hidden');
+                selectedTableInventory.classList.remove('hidden');
+                const inventoryTitle = inventoryStatsSection.querySelector('h1');
+                inventoryTitle.textContent = `Estadisticas de ${table.name}`;
+            });
+            return tablaItem;
+        };
 
-            selectContainer.appendChild(tablaItem);
-        })
+        [selectContainerGeneral, selectContainerInventory].forEach(selectContainer => {
+            selectContainer.innerHTML = ''; 
+
+            selectContainer.appendChild(createTableListItem(null, true));
+
+            tableData.forEach(table => {
+                selectContainer.appendChild(createTableListItem(table));
+            });
+        });
+
     } catch (error) {
         console.error('Error al obtener los datos de la tabla:', error);
     }
@@ -84,9 +131,8 @@ async function actualizarEstadisticas()
         listaFechas.push(formatYMD(fechaActual));
         fechaActual.setDate(fechaActual.getDate()+1);
     }
-    if (!tablaID){
-        tablaID = user['databases'][0]['id'];
-    }
+
+    //Elimine el que si no tiene id de tabla te ponga por defecto la primera ya no es necesario Franco
 
     const dailyData = await api.updateStatistics(tablaID,listaFechas);
 
