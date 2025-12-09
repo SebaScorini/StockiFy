@@ -369,9 +369,9 @@ async function init() {
         console.error("[INIT] Error CATCH:", error);
         alert(`Error al cargar el panel: ${error.message}. Serás redirigido.`);
         if (error.message.includes('No autorizado')) {
-            window.location.href = '/login.php';
+            window.location.href = '/StockiFy/login.php';
         } else {
-            window.location.href = '/select-db.php';
+            window.location.href = '/StockiFy/select-db.php';
         }
     }
 
@@ -711,7 +711,7 @@ async function handleConfirmDelete() {
         const result = await api.deleteDatabase(); // Llamo a la API
         if (result.success) {
             alert(result.message);
-            window.location.href = '/select-db.php'; // Redirijo a la selección
+            window.location.href = '/StockiFy/select-db.php'; // Redirijo a la selección
         } else {
             throw new Error(result.message);
         }
