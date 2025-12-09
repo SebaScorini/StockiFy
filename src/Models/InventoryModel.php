@@ -32,11 +32,14 @@ class InventoryModel
         }
 
         try {
-            $stmt = $this->db->prepare("INSERT INTO inventories (name, user_id, min_stock, sale_price, receipt_price, hard_gain, percentage_gain) 
-                                            VALUES (:name, :user_id, :min_stock, :sale_price, :receipt_price, :hard_gain, :percentage_gain)");
+            /** CODIGO DE NANO. AGREGO PREFERENCIAS DEL USUARIO PARA ESTA DB A LA TABLA DE "INVENTORIES"
+             */
+            $stmt = $this->db->prepare("INSERT INTO inventories (name, user_id, min_stock, sale_price, receipt_price, hard_gain, percentage_gain,auto_price,auto_price_type) 
+                                            VALUES (:name, :user_id, :min_stock, :sale_price, :receipt_price, :hard_gain, :percentage_gain, :auto_price, :auto_price_type)");
             $stmt->execute([':name' => $inventoryName, ':user_id' => $userId, ':min_stock' => $tablePreferences['min_stock']['active'],
                 ':sale_price' => $tablePreferences['sale_price']['active'], ':receipt_price' => $tablePreferences['receipt_price']['active'],
-                ':hard_gain' => $tablePreferences['hard_gain']['active'], ':percentage_gain' => $tablePreferences['percentage_gain']['active']]);
+                ':hard_gain' => $tablePreferences['hard_gain']['active'], ':percentage_gain' => $tablePreferences['percentage_gain']['active'],
+                ':auto_price' => $tablePreferences['auto_price'], ':auto_price_type' => $tablePreferences['auto_price_type']]);
             $inventoryId = (int)$this->db->lastInsertId();
             if (!$inventoryId) {
                 throw new \PDOException("No se pudo crear el registro del inventorio principal.");
@@ -49,30 +52,60 @@ class InventoryModel
             $tableName = "user_{$userId}_{$safeBaseName}";
 
             $columnDefinitions = [];
+
+            /** CODIGO DE NANO. VARIABLE "userColumns" PARA GUARDAR LAS COLUMNAS DEFINIDAS POR EL USUARIO
+             * (DIFERENTES A LAS COLUMNAS RECOMENDADAS)
+             */
+            $userColumns = [];
             foreach ($columns as $columnName) {
                 $trimmedName = trim($columnName);
                 if (empty($trimmedName)) continue;
-                $safeColumnName = preg_replace('/[^a-zA-Z0-9_]/', '', $trimmedName);
+                $safeColumnName = $this->sanitizeColumnName($trimmedName);
                 if (empty($safeColumnName)) continue;
-                if (strtolower($safeColumnName) === 'id' || strtolower($safeColumnName) === 'created_at' || strtolower($safeColumnName) === 'stock' || strtolower($safeColumnName) === 'name'
-                || strtolower($safeColumnName) === 'nombre'
-                ) continue;
-                if (strtolower($safeColumnName) === 'min_stock' || strtolower($safeColumnName) === 'stockmínimo' || strtolower($safeColumnName) === 'stockminimo'
+                /** CODIGO DE NANO. SALTEO LAS COLUMNAS QUE HAYA INGRESADO EL USUARIO
+                 * QUE TENGAN EL MISMO NOMBRE QUE ALGUNA COLUMNA RECOMENDADA
+                 */
+                if (strtolower($safeColumnName) === 'id' || strtolower($safeColumnName) === 'created_at' || strtolower($safeColumnName) === 'stock' || strtolower($safeColumnName) === ' stock' || strtolower($safeColumnName) === 'name'
+                || strtolower($safeColumnName) === 'nombre' || strtolower($safeColumnName) === 'min_stock' || strtolower($safeColumnName) === 'stockmínimo' || strtolower($safeColumnName) === 'stockminimo'
                 || strtolower($safeColumnName) === 'sale_price' || strtolower($safeColumnName) === 'preciodeventa'
                 || strtolower($safeColumnName) === 'receipt_price' || strtolower($safeColumnName) === 'preciodecompra'
                 || strtolower($safeColumnName) === 'hard_gain' || strtolower($safeColumnName) === 'margendeganancia'
                 || strtolower($safeColumnName) === 'percentage_gain') continue;
+
+                /** CODIGO DE NANO. AGREGO LA COLUMNA QUE HAYA PASADO EL CHECKEO
+                 * (OSEA QUE NO ES UNA COLUMNA RECOMENDADA Y TIENE UN NOMBRE VALIDO)
+                 * A TANTO columnDefinitions (ARRAY PARA LA CREACION DE LA TABLA)
+                 * COMO A userColumns (ARRAY PARA columns_json)
+                 */
                 $columnDefinitions[] = "`{$safeColumnName}` TEXT";
-            }
-            if (empty($columnDefinitions)) {
-                throw new \InvalidArgumentException("No se proporcionaron nombres de columna válidos.");
+                $userColumns[] = $safeColumnName;
             }
 
+            /** CODIGO DE NANO. DEFINO VALORES POR DEFECTO PARA LAS COLUMNAS RECOMENDADAS
+             */
             $minStockDefault = (int) $tablePreferences['min_stock']['default'];
             $salePriceDefault = (float) $tablePreferences['sale_price']['default'];
             $receiptPriceDefault = (float) $tablePreferences['receipt_price']['default'];
             $gainDefault = (float) $tablePreferences['hard_gain']['default'];
 
+            /** CODIGO DE NANO. VERIFICO SI EL USUARIO DEFINIO AL MENOS UNA COLUMNA
+             * VALIDA Y SI ES ASÍ AGREGO AQUELLAS COLUMNAS A LA TABLA, DE LO CONTRARIO
+             * CREO LA TABLA SOLO CON LAS COLUMNAS RECOMENDADAS
+             */
+            if (empty($columnDefinitions)) {
+                $sql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
+                `id` INT AUTO_INCREMENT PRIMARY KEY,
+                `stock` TEXT,
+                `name` TEXT,
+                `min_stock` INT DEFAULT {$minStockDefault},
+                `sale_price` DECIMAL(10,2) DEFAULT {$salePriceDefault},
+                `receipt_price` DECIMAL(10,2) DEFAULT {$receiptPriceDefault},
+                `hard_gain` DECIMAL(10,2) DEFAULT {$gainDefault},
+                `percentage_gain` DECIMAL(10,2) DEFAULT {$gainDefault},
+                `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )";
+            }
+            else{
             $sql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
                 `id` INT AUTO_INCREMENT PRIMARY KEY,
                 `stock` TEXT,
@@ -85,17 +118,30 @@ class InventoryModel
                 " . implode(', ', $columnDefinitions) . ",
                 `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )";
+            }
+
             $createStmt = $this->db->prepare($sql);
             if (!$createStmt->execute()) {
                 $errorInfo = $createStmt->errorInfo();
                 throw new \PDOException("Error al crear la tabla física: " . ($errorInfo[2] ?? 'Error desconocido'));
             }
 
+            /** CODIGO DE NANO. PREPARO EL ARRAY columnJson CON LAS COLUMNAS RECOMENDADAS
+             */
+            $columnJson = ['name','stock','min_stock','sale_price','receipt_price','hard_gain','percentage_gain'];
+
+            /** CODIGO DE NANO. SI EL USUARIO INGRESÓ AL MENOS UNA FILA VÁLIDA, LA AGREGO A columnJson
+             */
+
+            if (!empty($userColumns)) {
+                $columnJson = array_merge($columnJson, $userColumns);
+            }
+
             $checkMeta = $this->db->prepare("SELECT id FROM user_tables WHERE inventory_id = ?");
             $checkMeta->execute([$inventoryId]);
             if ($checkMeta->fetchColumn() === false) {
                 $stmt = $this->db->prepare("INSERT INTO user_tables (inventory_id, table_name, columns_json) VALUES (?, ?, ?)");
-                if (!$stmt->execute([$inventoryId, $tableName, json_encode($columns)])) {
+                if (!$stmt->execute([$inventoryId, $tableName, json_encode($columnJson)])) {
                     $errorInfo = $stmt->errorInfo();
                     throw new \PDOException("Error al guardar metadatos de la tabla: " . ($errorInfo[2] ?? 'Error desconocido'));
                 }
@@ -212,4 +258,13 @@ class InventoryModel
             throw $e;
         }
     }
+    private function sanitizeColumnName(string $columnName): string
+    {
+        $safeName = preg_replace('/[^a-zA-Z0-9]/', '', $columnName);
+        if (empty($safeName) || is_numeric(substr($safeName, 0, 1))) {
+            throw new \InvalidArgumentException("El nombre de la columna es inválido.");
+        }
+        return $safeName;
+    }
 }
+

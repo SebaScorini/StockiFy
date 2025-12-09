@@ -1,9 +1,8 @@
 ﻿// public/assets/js/theme.js
 document.addEventListener('DOMContentLoaded', () => {
     const accentColors = [
-        '#88C0D0',
+        '#88c0d0ff',
         '#A3BE8C',
-        '#EBCB8B',
         '#BF616A',
         '#B48EAD'
     ];

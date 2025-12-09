@@ -17,7 +17,7 @@ try {
     $stmt->execute([$inventoryID]);
     $tableName = $stmt->fetchColumn();
 
-    $columns = ['min_stock', 'sale_price', 'receipt_price', 'hard_gain'];
+    $columns = ['min_stock', 'sale_price', 'receipt_price', 'percentage_gain', 'hard_gain'];
     $response = [];
 
     foreach($columns as $column){

@@ -21,7 +21,7 @@
 :root {
     --color-white: #FFFFFF;
     --color-black: #1A1A1A;
-    --color-gray: #8A8A8A;
+    --color-gray: rgba(138, 138, 138, 0.6);
     --accent-color: #5E81AC; /* Azul por defecto */
     --accent-color-rgb: 94, 129, 172;
     --accent-color-medium-opacity: rgba(var(--accent-color-rgb), 0.75);
@@ -33,6 +33,10 @@
     --border-strong: 2px solid var(--color-black);
     --border-radius: 4px;
     --transition-speed: 0.2s;
+}
+
+.obligatory-column{
+    background-color: grey;
 }
 
 /* ---- Reseteo y Estilos Generales ---- */
@@ -65,6 +69,12 @@ header {
 }
 #header-logo img { height: 40px; width: auto; display: block; }
 #header-nav { display: flex; gap: 1rem; }
+
+@media (max-width: 768px) {
+    #header-logo img { height: 30px; }
+    header { padding: 1rem; }
+    #header-nav > .btn {font-size: 2px; !important}
+}
 
 /* ---- Botones específicos del Header ---- */
 #header-nav .btn {
@@ -118,6 +128,12 @@ main {
 }
 .view-container p { color: var(--color-gray); margin-bottom: 1.5rem; }
 
+#user-column-list{
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
 /* ---- Estilos para Botones (Versión "Pop-Up") ---- */
 .btn {
@@ -173,6 +189,18 @@ input[type="text"], input[type="email"], input[type="password"], textarea {
     font-size: 1rem;
     transition: all var(--transition-speed) ease;
 }
+
+#createDbForm{
+    padding: 5rem;
+}
+@media (max-width: 400px){
+    #createDbForm * input[type="text"]{
+        width: 80%;
+    }
+    #createDbForm{
+        padding: 5rem 1rem;
+    }
+}
 input[type="text"]:focus, textarea:focus { outline: none; box-shadow: 0 0 0 3px var(--accent-color); }
 
 #form-micuenta [type="text"], input[type="email"], input[type="password"]{
@@ -194,12 +222,28 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
 /* ---- Contenedores ---- */
 
 #config-container{
-    width: 50rem;
+    width: 100%;
     background-color: var(--color-white);
     border: var(--border-strong);
     border-radius: 0 4px 4px 4px;
     box-shadow: 10px 10px 0px var(--color-black);
     transition: box-shadow var(--transition-speed) ease;
+}
+
+#inventory-info-modal{
+    background-color: var(--color-white);
+    min-width: 100px;
+    height: fit-content;
+    max-width: 300px;
+    z-index: 300;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: var(--border-strong);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    box-shadow: 5px 5px 0 var(--color-black);
 }
 
 #options-config-container{
@@ -264,6 +308,37 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
     gap: 1.5rem;
 }
 
+#select-tabla-container{
+    position: absolute;
+    right: 20px;
+}
+
+#selected-table{
+    max-width: 170px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#table-list p{
+    text-align: left;
+    white-space: nowrap;
+}
+
+#table-list{
+    min-width: 170px;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: white;
+    border: var(--border-strong);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    z-index: 15;
+}
+
 #estadisticas-menu-container{
     width: 150px;
     background-color: var(--accent-color-medium-opacity);
@@ -326,6 +401,36 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
     grid-template-columns: 1fr 1fr 1fr;
     row-gap: 4rem;
     padding: 0 4rem;
+}
+
+
+@media (max-width: 1200px) {
+    .stat-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .stat-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .estadisticas-container > h1{
+        font-size: 3rem;
+    }
+
+    .estadisticas-container {
+        padding: 2rem 1rem;
+    }
+
+    .stat-grid{
+        padding: 0;
+    }
+    .estadistica-item-container h1{
+        font-size: 1.5rem;
+    }
 }
 
 #estadisticas-fecha > div{
@@ -468,7 +573,7 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
 }
 
 #dropdown-container.clicked{
-    width: 200px;
+    width: 140px;
 }
 
 #dropdown-container .btn{
@@ -502,6 +607,147 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
     background-color: var(--accent-color);
     color: var(--color-white);
     border-radius: var(--border-radius);
+}
+
+
+.default-value-input{
+    width: 180px;
+    justify-self: right;
+    margin: -10px;
+    height: 0;
+    opacity: 0;
+    padding: 0;
+}
+
+.default-value-input.visible{
+    margin: 0 0 10px 10px;
+    height: 30px;
+    opacity: 1;
+    padding: 12px;
+}
+
+.recomended-column-label{
+    height: fit-content;
+}
+
+.recomended-column-group{
+    align-items: start;
+}
+
+#recomended-columns-form{
+    width: fit-content;
+    max-height: 0;
+    overflow: hidden;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    transition: all 0.35s ease-in-out;
+}
+
+#recomended-columns-form.visible{
+    padding: 1rem;
+    max-height: 1000px;
+}
+
+.hidden-checkbox {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.btn-checkbox-toggle {
+    display: block;
+    text-align: left;
+    padding-left: 1.5rem;
+    width: fit-content;
+}
+
+.hidden-checkbox:checked + .btn-checkbox-toggle {
+    background-color: var(--accent-color);
+    color: var(--color-white);
+}
+
+.btn-checkbox-toggle::before {
+    content: '☐';
+    font-size: 1.2em;
+    margin-right: 12px;
+    font-family: sans-serif;
+}
+
+.hidden-checkbox:checked + .btn-checkbox-toggle::before {
+    content: '☑';
+}
+
+#gain-type-container{
+    height: 0;
+    opacity: 0;
+    margin-top: -10px;
+    transition: all 0.5s ease;
+}
+
+#gain-type-container.visible{
+    margin: 0 0 10px 10px;
+    height: fit-content;
+    opacity: 1;
+}
+
+#open-columnas-recomendadas-btn{
+    height: 40px;
+    padding: 10px;
+    border-radius: 10px;
+    transition: all 0.5s ease;
+}
+
+#open-columnas-recomendadas-btn:hover{
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+#open-columnas-recomendadas-btn:active{
+    background-color: rgba(0, 0, 0, 0.20);
+}
+
+#open-columnas-recomendadas-btn.is-rotated {
+    transform: rotate(180deg);
+}
+
+#auto-price-checkbox{
+    max-width: 0;
+    max-height: 0;
+    font-size: 0;
+    opacity: 0;
+    padding: 0;
+    transition: all var(--transition-speed) ease;
+}
+
+#auto-price-checkbox.visible{
+    font-size: 14px;
+    max-width: fit-content;
+    max-height: fit-content;
+    opacity: 1;
+    padding: 5px 10px;
+    margin-bottom: 15px;
+}
+
+#auto-price-type-container{
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    font-size: 13px;
+    transition: all var(--transition-speed) ease;
+}
+
+#auto-price-type-container.visible {
+    max-height: 500px;
+    opacity: 1;
+    margin-top: -10px;
+    margin-bottom: 5px;
+}
+
+#auto-price-checkbox {
+    width: 100%;
+    margin: 0;
 }
 
 /* ---- Estilos de botones ---- */
@@ -607,10 +853,22 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
 }
 
 #form-micuenta{
-    width: 100%;
+    max-width: 400px;
+    overflow: hidden;
     height: 100%;
     padding: 2rem 3rem 1rem 1rem;
 }
+
+@media (max-width: 400px) {
+    nav * .btn, .btn-primary, .btn-secondary{
+        font-size: 0.7rem !important;
+    }
+    #dropdown-container.clicked{
+        width: 110px;
+    }
+
+}
+
 /* ---- Configuraciones de Flex ---- */
 
 .flex-row{

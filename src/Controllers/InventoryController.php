@@ -26,15 +26,22 @@ class InventoryController
 
         $data = json_decode(file_get_contents('php://input'), true);
 
-        if (empty($data['dbName']) || empty($data['columns'])) {
+        /** CODIGO DE NANO. CAMBIÉ PARA QUE NO SEA OBLIGATORIO INCLUIR COLUMNAS EXTRA ADEMAS DE NOMBRE/STOCK
+         * Y LAS RECOMENDADAS QUE HAYA SELECCIONADO
+         */
+        if (empty($data['dbName'])) {
             http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'El nombre y las columnas son obligatorios.']);
+            echo json_encode(['success' => false, 'message' => 'El nombre es obligatorios.']);
             return;
         }
 
         try {
             $inventoryModel = new InventoryModel();
             $columnsArray = explode(',', $data['columns']);
+
+            /** CODIGO DE NANO. OBTENGO PREFERENCIAS DEL USUARIO Y LO MANDO JUNTO A LOS OTROS DATOS
+             */
+
             $tablePreferences = $data['preferences'];
 
             $creationResult = $inventoryModel->createInventoryAndTable(

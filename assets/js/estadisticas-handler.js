@@ -26,11 +26,28 @@ function getEstadisticas(){
     actualizarEstadisticas();
 }
 
-function populateTableSelect(){
+async function populateTableSelect(){
 
     try{
-        const tableData = user['databases'];
-        const selectContainer = document.getElementById('select-tabla-container');
+        const response = await api.getUserVerifiedTables();
+
+        if (!response.success){return;}
+
+        const tableData = response.verifiedInventories;
+        const selectedTable = document.getElementById("selected-table");
+
+        if (tableData.length === 0){
+            selectedTable.textContent = 'Ninguna';
+            return;
+        }
+
+        selectedTable.textContent = tableData[0].name;
+        const selectContainer = document.getElementById('table-list');
+
+        selectedTable.addEventListener('click', () => {
+            selectContainer.classList.toggle('hidden');
+        })
+
         tableData.forEach(table => {
             const tablaItem = document.createElement('p');
             tablaItem.textContent = table.name;
@@ -38,6 +55,8 @@ function populateTableSelect(){
 
             tablaItem.addEventListener('click', () => {
                 tablaID = table.id;
+                selectedTable.textContent = table.name;
+                selectContainer.classList.toggle('hidden');
                 actualizarEstadisticas(desdeDate,hastaDate,chart,tablaID);
             })
 
@@ -276,19 +295,42 @@ function showPicker(fechaInput){
     }, 0)
 }
 
-function setupHeader(){
+function setupInventoryInfoBtn(){
+    const btns = document.querySelectorAll('.inventory-info-btn');
+    const closeBtn = document.getElementById('close-inventory-info-modal');
+
+    btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = document.getElementById('inventory-info-modal');
+            const greyBg = document.getElementById('grey-background');
+            modal.classList.remove('hidden');
+            greyBg.classList.remove('hidden');
+        })
+    })
+    closeBtn.addEventListener('click', () => {
+        const modal = document.getElementById('inventory-info-modal');
+        modal.classList.add('hidden');
+    })
+}
+
+async function setupHeader(){
     const nav = document.getElementById('header-nav');
+
+    const response = await api.checkUserAdmin();
+    if (!response.success){
+        alert('Ha ocurrido un error interno. Será deslogeado');
+        window.location.href = '/StockiFy/logout.php';
+    }
+    const isAdmin = response.isAdmin;
 
     nav.innerHTML = `
             <a href="/StockiFy/dashboard.php" class="btn btn-primary">Ir al Panel</a> 
-            <a href="/StockiFy/estadisticas.php" class="btn btn-secondary">Estadisticas</a>
             <div id="dropdown-container">
                 <div class="btn btn-secondary" id="mi-cuenta-btn">Mi Cuenta</div>
                 <div class="flex-column hidden" id="mi-cuenta-dropdown">
                     <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Configuración</a>
-                    <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Modificaciones de Stock</a>
-                    <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Soporte</a>
                     <a href="/StockiFy/logout.php" class="btn btn-secondary">Cerrar Sesión</a>
+                    ${isAdmin ? `<a href="/StockiFy/registros.php" class="btn btn-primary">Admin</a>` : ''}  
                 </div>
             </div>            
         `;
@@ -307,6 +349,7 @@ async function init(){
             const value = user['user']['created_at'];
             tablaID = user['activeInventoryId'];
 
+            setupInventoryInfoBtn();
             createGraph();
             getInitialDates(value);
             getEstadisticas();

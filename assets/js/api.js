@@ -67,6 +67,9 @@ export async function getUserProfile() {
 }
 
 
+//CODIGO DE NANO. AGREGUÉ EL CAMPO "preferences" CON LAS PREFERENCIAS Y DEFAULTS DEL USUARIO
+//PARA LAS COLUMNAS RECOMENDADAS
+
 export async function createDatabase(dbName, columns, preferences) {
     const requestBody = { dbName, columns, preferences };
     const response = await fetch('/StockiFy/api/database/create.php', {
@@ -314,3 +317,165 @@ export async function getCurrentInventoryDefaults(){
     });
     return handleResponse(response);
 }
+
+export async function setCurrentInventoryPreferences(preferences){
+    const response = await fetch('/StockiFy/api/database/set-preferences-current.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(preferences),
+    });
+    return response;
+}
+
+export async function getUserVerifiedTables(){
+    const response = await fetch('/StockiFy/api/database/get-verified-tables.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    });
+    return handleResponse(response);
+}
+
+export async function getTableProducts(table){
+    const response = await fetch('/StockiFy/api/products/get-all-from-table.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(table),
+    });
+    return handleResponse(response);
+}
+
+export async function getFullSaleInfo(saleID){
+    const response = await fetch('/StockiFy/api/sales/get-info.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(saleID),
+    });
+    return handleResponse(response);
+}
+
+export async function getProductData(productID,tableID){
+    const response = await fetch('/StockiFy/api/products/get-product-data.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({productID,tableID}),
+    });
+    return handleResponse(response);
+}
+
+export async function updateSaleList(productList){
+    const response = await fetch('/StockiFy/api/sales/update-product-list.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(productList),
+    });
+    return handleResponse(response);
+}
+
+export async function updateRececiptList(productList){
+    const response = await fetch('/StockiFy/api/receipts/update-product-list.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(productList),
+    });
+    return handleResponse(response);
+}
+
+export async function getFullReceiptInfo(receiptID){
+    const response = await fetch('/StockiFy/api/receipts/get-info.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(receiptID),
+    });
+    return handleResponse(response);
+}
+
+export async function getProdivderById(id){
+    const response = await fetch('/StockiFy/api/providers/get-by-id.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({id}),
+    });
+    return handleResponse(response);
+}
+
+export async function updateCustomer(customer){
+    const response = await fetch('/StockiFy/api/customers/update.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customer),
+    })
+    return handleResponse(response);
+}
+
+
+export async function updateProvider(provider){
+    const response = await fetch('/StockiFy/api/providers/update.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(provider),
+    })
+    return handleResponse(response);
+}
+
+export async function verifyPassword(newPass,passwordHash){
+    const response = await fetch('/StockiFy/api/auth/verify-password.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({newPass,passwordHash}),
+    })
+    return handleResponse(response);
+}
+
+export async function verifyUserName(userName){
+    const response = await fetch('/StockiFy/api/auth/verify-username.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userName),
+    })
+    return handleResponse(response);
+}
+
+export async function updateUser(userData){
+    const response = await fetch('/StockiFy/api/user/update.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+    })
+    return handleResponse(response);
+}
+
+export async function verifyEmail(email){
+    const response = await fetch('/StockiFy/api/auth/verify-email.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(email),
+    })
+    return handleResponse(response);
+}
+
+export async function checkUserAdmin(){
+    const response = await fetch('/StockiFy/api/auth/check-admin.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+    })
+    return handleResponse(response);
+}
+
+export async function registerContactForm(contactData){
+    const response = await fetch('/StockiFy/api/contact/register-contact-email.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contactData),
+    })
+    return handleResponse(response);
+}
+
+export async function checkDbName(dbName){
+    const response = await fetch('/StockiFy/api/database/check-name.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dbName),
+    })
+    return handleResponse(response);
+}
+/* ---------------------- FIN DE FUNCIONES DE NANO  ---------------------- */

@@ -1,5 +1,6 @@
 import { mostrarMensaje } from './universal-functions.js'
 import * as setup from "./setupMiCuentaDropdown.js";
+import * as api from './api.js';
 
 document.addEventListener('DOMContentLoaded', () =>{
 
@@ -11,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () =>{
     var newEmail;
     var emailCode;
 
-    emailForm.addEventListener('submit', function (event) {
+    emailForm.addEventListener('submit', async function (event) {
         event.preventDefault();
 
         const formData = new FormData(this);
@@ -27,6 +28,9 @@ document.addEventListener('DOMContentLoaded', () =>{
         }
         else
         {
+            const response = await api.verifyEmail(newEmail);
+            if (!response.success) {mostrarMensaje('msj-error',`<h3>${response.message}</h3>`); return;}
+            if (response.exists) {mostrarMensaje('msj-error',`<h3>Ese e-mail ya se encuentra registrado</h3>`); return;}
             fetch('./assets/php/send-email-change.php', {
                 method: 'POST',
                 body: formData
@@ -53,8 +57,6 @@ document.addEventListener('DOMContentLoaded', () =>{
         //No checkeo si el parseo será válido ya que ya se realizo la verificación del
         //ingreso en el form.
         const userCode = parseInt(formData.get('code'));
-        console.log(userCode);
-        console.log(emailCode);
 
         if (userCode !== emailCode){
             mostrarMensaje('msj-error','<h3>El código ingresado es incorrecto. Verifique de nuevo.</h3>')
@@ -84,19 +86,24 @@ document.addEventListener('DOMContentLoaded', () =>{
 
 })
 
-function setupHeader(){
+async function setupHeader(){
     const nav = document.getElementById('header-nav');
+
+    const response = await api.checkUserAdmin();
+    if (!response.success){
+        alert('Ha ocurrido un error interno. Será deslogeado');
+        window.location.href = '/StockiFy/logout.php';
+    }
+    const isAdmin = response.isAdmin;
 
     nav.innerHTML = `
             <a href="/StockiFy/dashboard.php" class="btn btn-primary">Ir al Panel</a> 
-            <a href="/StockiFy/estadisticas.php" class="btn btn-secondary">Estadisticas</a>
             <div id="dropdown-container">
                 <div class="btn btn-secondary" id="mi-cuenta-btn">Mi Cuenta</div>
                 <div class="flex-column hidden" id="mi-cuenta-dropdown">
                     <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Configuración</a>
-                    <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Modificaciones de Stock</a>
-                    <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Soporte</a>
                     <a href="/StockiFy/logout.php" class="btn btn-secondary">Cerrar Sesión</a>
+                    ${isAdmin ? `<a href="/StockiFy/registros.php" class="btn btn-primary">Admin</a>` : ''}  
                 </div>
             </div>            
         `;

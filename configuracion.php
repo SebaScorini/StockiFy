@@ -5,24 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StockiFy</title>
     <script src="assets/js/theme.js"></script>
-    <script src="assets/js/show_password.js"></script>
-    <script src="assets/js/config-changes-monitoring.js"></script>
-    <script src="assets/js/config-option-selection.js"></script>
     <script src="assets/js/modif-buttons-controls.js"></script>
+    <script type="module" src="assets/js/config/configuración.js"></script>
     <script type="module" src="assets/js/email-change-handler.js"></script>
     <script type="module" src="assets/js/change-password-handler.js"></script>
-    <script src="assets/js/modif-reg-handler.js"></script>
     <link rel="stylesheet" href="assets/css/main.css">
 </head>
 
 <?php
-
     require_once __DIR__ . '/vendor/autoload.php';
     require_once __DIR__ . '/auth_helper.php';
     $currentUser = getCurrentUser();
 
-    if (!isset($_SESSION['user_id'])) {
-        header('Location: /StockiFy/index.php');
+    if (!isset($_SESSION['user_id'])){
+        header("Location: login.php");
     }
 ?>
 
@@ -40,38 +36,26 @@
 
     <main class="text-left">
         <div class="flex-row" style="margin: 3rem 0 3rem 0;">
-            <div id="options-config-container">
-                <div class="btn btn-option-selected" id="btn-config-cuenta">
-                    <p>Mi Cuenta</p>
-                </div>
-                <div class="btn" id="btn-config-modifs">
-                    <p>Registro de Modificaciones</p>
-                </div>
-                <div class="btn" id="btn-config-soporte">
-                    <p>Soporte</p>
-                </div>
-            </div>
             <div class="flex-column all-center" id="config-container">
                 <form class="flex-column justify-left align-center" method="post" action="./configuracion.php" id="form-micuenta">
-                    <label for="nombre" style="margin-top: 0">Nombre</label>
-                    <input class="config-input" type="text" id="nombre" name="name" value=<?php echo $currentUser['full_name']?>>
+                    <label for="nombre" style="margin-top: 0">Nombre Completo</label>
+                    <input class="config-input" type="text" id="nombre" name="full_name" value='<?php echo $currentUser['full_name']?>'>
 
-                    <label for="apellido">Apellido</label>
-                    <input class="config-input" type="text" id="apellido" name="surname" value=<?php echo $currentUser['full_name']?>>
+                    <label for="apellido">Nombre de Usuario</label>
+                    <input class="config-input" type="text" id="username" name="username" value='<?php echo $currentUser['username']?>'>
 
                     <label for="email">Email</label>
-                    <input class="input-locked config-input" type="email" id="email" name="email" value=<?php echo $currentUser['email']?> readonly>
+                    <input class="input-locked config-input" type="email" id="email" name="email" value='<?php echo $currentUser['email']?>' readonly>
                     <p class="btn btn-modificar" style="margin-bottom: 0" id="btn-modif-email">Modificar Email</p>
 
                     <label for="contraseña-hidden">Contraseña</label>
                     <div class="flex-row all-center" style="gap: 0.3rem;">
                         <input class="input-locked" type="text" id="contraseña-fake" value="************" disabled>
-                        <input class="input-locked hidden config-input" type="text" id="contraseña" name="password" value=<?php echo $currentUser['password']?> readonly>
-                        <div id='btn-password' class="btn flex-row all-center"><img src="./assets/img/password-hidden.png" id="pass-img"></div>
+                        <input class="input-locked hidden config-input" type="text" id="contraseña" name="password" value='<?php echo $currentUser['password_hash']?>' readonly>
                     </div>
                     <p class="btn btn-modificar" id="btn-modif-pass">Modificar Contraseña</p>
-
-                    <button class="btn" id="btn-guardar" disabled >Guardar Cambios</button>
+                    <p id="form-error" style="color: red"></p>
+                    <button class="btn" id="btn-guardar" style="height: fit-content; width: fit-content" disabled >Guardar Cambios</button>
                 </form>
                 <div id="registro-modifs-container" class="flex-column all-center hidden">
                 </div>
@@ -113,6 +97,6 @@
         <div class="flex-row justify-right" style="width: 100%"><p id="reg-return" class="return-btn">Volver</p></div>
 
     </div>
-</body>
+    <script type="module" src="assets/js/config-changes-monitoring.js"></script>
 </body>
 </html>

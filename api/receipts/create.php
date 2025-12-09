@@ -39,6 +39,16 @@ try {
             ':quantity' => $item['amount'],
             ':unit_price' => $item['receiptPrice'],
             ':total_price' => $totalPrice]);
+
+        //Agrega el stock del item de la compra (Franco)
+        $tableName = $pdo->prepare("SELECT table_name FROM user_tables WHERE inventory_id = :inventory_id");
+        $tableName->execute([':inventory_id' => $item['tID']]);
+        $tableName = $tableName->fetch();
+        $updateStock = $pdo->prepare("UPDATE " . $tableName['table_name'] . " SET stock = stock + :quantity WHERE id = :item_id");
+        $updateStock->execute([
+            ':quantity' => $item['amount'],
+            ':item_id' => $item['pID']
+        ]);
     }
     $response = ['success' => true, 'receiptId' => $receiptId];
 } catch (Exception $e) {
