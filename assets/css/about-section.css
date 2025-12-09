@@ -80,8 +80,8 @@
  .about-container{
      margin-top: 130px;
      width: 100%;
-     box-shadow: 5px 5px 0 var(--color-black);
- }
+     box-shadow: 5px 5px 0 var(--color-gray);
+ }/* Cambiado a gris Franco*/
 
  #acerca-de-container{
      margin-top: 130px;
@@ -223,8 +223,8 @@
      padding: 1rem;
      border: var(--border-strong);
      border-radius: var(--border-radius);
-     box-shadow: 5px 5px 0 var(--color-black);
- }
+     box-shadow: 5px 5px 0 var(--color-gray);
+ }/* Cambiado a gris Franco*/
 
  .contact-wrapper{
      width: 80vw;
@@ -248,5 +248,5 @@
  #contact-map{
      border: var(--border-strong);
      border-radius: var(--border-radius);
-     box-shadow: 5px 5px 0 var(--color-black);
- }
+     box-shadow: 5px 5px 0 var(--color-gray);
+ }/* Cambiado a gris Franco*/

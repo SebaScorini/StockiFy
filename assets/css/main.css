@@ -88,9 +88,9 @@ header {
 }
 
 #header-nav .btn:hover {
-    box-shadow: 3px 3px 0px var(--color-black);
+    box-shadow: 3px 3px 0px var(--color-gray);
     transform: translate(-1px, -1px);
-}
+}/*Cambiado a gris Franco*/
 
 #header-nav .btn:active {
     box-shadow: 1px 1px 0px var(--color-black);
@@ -115,9 +115,9 @@ main {
     width: 100%;
     max-width: 550px;
     text-align: center;
-    box-shadow: 10px 10px 0px var(--color-black);
+    box-shadow: 10px 10px 0px var(--color-gray);
     transition: box-shadow var(--transition-speed) ease;
-}
+}/* Cambiado a gris Franco*/
 .view-container:hover, #config-container:hover {
     box-shadow: 12px 12px 0px var(--accent-color);
 }
@@ -155,13 +155,13 @@ main {
     transform: translate(0, 0);
 }
 .btn:hover {
-    box-shadow: 4px 4px 0px var(--color-black);
+    box-shadow: 4px 4px 0px var(--color-gray);
     transform: translate(-2px, -2px);
-}
+}/* Cambiado a gris Franco*/
 .btn:active {
-    box-shadow: 1px 1px 0px var(--color-black);
+    box-shadow: 1px 1px 0px var(--color-gray);
     transform: translate(3px, 3px);
-}
+}/* Cambiado a gris Franco*/
 
 /* CORRECCIÓN DE COLOR */
 .btn.btn-primary:not(:disabled) {
@@ -175,6 +175,10 @@ main {
     background-color: var(--color-white);
     color: var(--color-black);
 }
+
+#selected-table-general:hover, #selected-table-inventory:hover{
+    box-shadow: 4px 4px 0px color-mix(in srgb, var(--accent-color), #000 20%);
+}/* Adapta a color Franco*/
 
 /* ---- Formularios ---- */
 label { display: block; margin: 1rem 0 0.5rem 0; font-weight: 600; }
@@ -310,7 +314,7 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
 
 #select-tabla-container{
     position: absolute;
-    right: 20px;
+    right: 10px;
 }
 
 #selected-table{
@@ -325,7 +329,7 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
     white-space: nowrap;
 }
 
-#table-list{
+#table-list-general, #table-list-inventory{ /*Lo adapto para las dos tablas Franco*/
     min-width: 170px;
     position: absolute;
     top: 100%;
@@ -389,6 +393,10 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
     transform: scale(1.005);
     background-color: var(--accent-color);
 }
+
+.estadisticas-container:hover .estadistica-item-container{
+    box-shadow: 10px 10px 0px color-mix(in srgb, var(--accent-color), #000 20%);
+}/* Sombra se adapta al color de acento Franco*/
 
 .estadisticas-container:hover h4{
     color: var(--color-white);
@@ -484,15 +492,16 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
     padding: 1rem;
     background-color: var(--color-white);
     border: var(--border-strong);
-    box-shadow: 10px 10px 0px var(--color-black);
+    box-shadow: 10px 10px 0px var(--color-gray);
     border-radius: var(--border-radius);
     width: fit-content;
     transition: all var(--transition-speed) ease;
-}
+}/* Cambiado a gris Franco*/
 
 .estadistica-item-container:hover{
     transform: scale(1.1);
-}
+    box-shadow: 10px 10px 0px color-mix(in srgb, var(--accent-color), #000 20%);
+}/* Sombra se adapta al color de acento Franco*/
 
 .estadistica-item-container:hover h1, h3, h4{
     transition: all var(--transition-speed) ease;
@@ -513,6 +522,14 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
     left: 50%;
     transform: translate(-50%,-50%);
 }
+
+#grafico-estadistica-container{
+    box-shadow: 10px 10px 0px var(--color-black);
+}/*Para evitar color en el gráfico Franco*/
+
+#grafico-estadistica-container:hover{
+    box-shadow: 10px 10px 0px var(--color-black);
+}/*Para evitar color en el gráfico Franco*/
 
 .fecha-container {
     position: fixed;
@@ -875,6 +892,8 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
     display: flex;
 }
 
+
+
 .flex-column{
     display: flex;
     flex-direction: column;
@@ -1066,5 +1085,14 @@ hr { border: none; height: 2px; background-color: var(--color-black); margin: 1.
     .view-container > div > a{
         font-size: 0.75rem;
     }
+}
+
+body.tour-active {
+    pointer-events: none;
+}
+
+.shepherd-element {
+    pointer-events: auto;
+    z-index: 9999;
 }
 
