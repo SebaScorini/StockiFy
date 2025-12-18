@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
       title: 'Panel Principal',
       text: 'En esta área podrás ver un resumen de tus actividades recientes y estadísticas clave.',
       attachTo: {
-        element: '.main-dashboard',
+        element: '.dashboard-main',
         on: 'top'
       },
       buttons: [
@@ -334,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     title: 'Configurar Tabla',
     text: 'Aquí puedes personalizar las columnas y vistas de tu tabla de datos.',
     attachTo: {
-      element: '#main-dashboard',
+      element: '.dashboard-main',
       on: 'top'
     },
     buttons: [
@@ -429,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
       title: 'Ventas',
       text: 'Gestiona todas las ventas realizadas desde esta sección.',
       attachTo: {
-        element: '#main-dashboard',
+        element: '.dashboard-main',
         on: 'top'
       },
       buttons: [
@@ -638,7 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
       title: 'Compras',
       text: 'Aquí puedes registrar y gestionar todas las compras realizadas.',
       attachTo: {
-        element: '#main-dashboard',
+        element: '.dashboard-main',
         on: 'top'
       },
       buttons: [
@@ -848,7 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
       title: 'Clientes',
       text: 'Gestiona la información de tus clientes desde esta sección.',
       attachTo: {
-        element: '#main-dashboard',
+        element: '.dashboard-main',
         on: 'top'
       },
       buttons: [
@@ -1236,7 +1236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         title: 'Panel Principal',
         text: 'En esta área podrás ver un resumen de tus actividades recientes y estadísticas clave.',
         attachTo: {
-            element: '.main-dashboard',
+        element: '.dashboard-main',
             on: 'top'
         },
         buttons: [

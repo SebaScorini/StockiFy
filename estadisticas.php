@@ -11,7 +11,7 @@
     <script src="assets/js/estadisticas-handler.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <link rel="stylesheet" href="/node_modules/shepherd.js/dist/css/shepherd.css">
+    <link rel="stylesheet" href="node_modules/shepherd.js/dist/css/shepherd.css">
 </head>
 <body id="page-index" data-user-id="">
 

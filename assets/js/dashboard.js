@@ -286,7 +286,7 @@ async function init() {
     const isAdmin = response.isAdmin;
 
     const nav = document.getElementById('header-nav');
-    if (nav) nav.innerHTML = `<button class="btn btn-secondary" id="generalTour"> <img src="/assets/img/question.png" alt="tuto"> </button>
+    if (nav) nav.innerHTML = `<button class="btn btn-secondary" id="generalTour"> <img src="/StockiFy/assets/img/question.png" alt="Tutorial"> </button>
                                 <a href="/StockiFy/estadisticas.php" class="btn btn-secondary">Estadisticas</a>
                                    <div id="dropdown-container">
                 <div class="btn btn-secondary" id="mi-cuenta-btn">Mi Cuenta</div>
