@@ -11,6 +11,7 @@
     <script src="assets/js/estadisticas-handler.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link rel="stylesheet" href="node_modules/shepherd.js/dist/css/shepherd.css">
 </head>
 <body id="page-index" data-user-id="">
 
@@ -58,7 +59,12 @@ if (!isset($_SESSION['user_id'])){
             <div class="flex-row justify-between" id="estadisticas-fecha">
             </div>
         </div>
-        <div class="estadisticas-container">
+        <div class="estadisticas-container" id="general-stats-section">
+            <div class="flex-column" id="select-tabla-container">
+                <p style="font-size: 13px; text-align: right;" class="inventory-info-btn">¿Donde están mis inventarios?</p>
+                <div class="btn btn-primary" id="selected-table-general"></div>
+                <div id="table-list-general" class="flex-column hidden"></div>
+            </div>
             <h1>Estadisticas Generales</h1>
             <h4>(Todas tus bases de datos, todos tus productos)</h4>
             <div class="stat-grid">
@@ -88,15 +94,15 @@ if (!isset($_SESSION['user_id'])){
                 </div>
             </div>
         </div>
-        <div class="estadisticas-container" style="margin-top: 5rem">
-            <h1 style="width: 80%">Estadisticas Por Inventario</h1>
+        <div class="estadisticas-container hidden"  id="inventory-stats-section">
+            <div class="flex-column" id="select-tabla-container">
+                <p style="font-size: 13px; text-align: right;" class="inventory-info-btn">¿Donde están mis inventarios?</p>
+                <div class="btn btn-primary" id="selected-table-inventory"></div>
+                <div id="table-list-inventory" class="flex-column hidden"></div>
+            </div>
+            <h1 style="width: 80%">Estadisticas de </h1>
             <h4>(Todas las ventas realizadas sobre el inventario seleccionado)</h4>
             <div class="stat-grid">
-                <div class="flex-column" id="select-tabla-container">
-                    <p style="font-size: 13px; text-align: right;" class="inventory-info-btn">¿Donde están mis inventarios?</p>
-                    <div class="btn btn-primary" id="selected-table"></div>
-                    <div id="table-list" class="flex-column hidden"></div>
-                </div>
                 <div class="flex-column estadistica-item-container" id="ganancias-tabla">
                     <h1>Ganancias</h1>
                     <h3></h3>
@@ -118,7 +124,7 @@ if (!isset($_SESSION['user_id'])){
                     <h3></h3>
                 </div>
                 <div class="flex-column estadistica-item-container" id="promedio-venta-tabla">
-                    <h1>Precio Promedio de Productos Vendidos</h1>
+                    <h1>Precio Promedio por producto</h1>
                     <h3></h3>
                 </div>
             </div>
@@ -126,5 +132,7 @@ if (!isset($_SESSION['user_id'])){
     </div>
 </main>
 <script type="module" src="assets/js/estadisticas-handler.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/shepherd.js@latest/dist/js/shepherd.min.js"></script>
+<script src="assets/js/tourStats.js"></script>
 </body>
 </html>

@@ -286,7 +286,7 @@ async function init() {
     const isAdmin = response.isAdmin;
 
     const nav = document.getElementById('header-nav');
-    if (nav) nav.innerHTML = `
+    if (nav) nav.innerHTML = `<button class="btn btn-secondary" id="generalTour"> <img src="/StockiFy/assets/img/question.png" alt="Tutorial"> </button>
                                 <a href="/StockiFy/estadisticas.php" class="btn btn-secondary">Estadisticas</a>
                                    <div id="dropdown-container">
                 <div class="btn btn-secondary" id="mi-cuenta-btn">Mi Cuenta</div>
@@ -479,9 +479,9 @@ async function createEditableRow(columns) {
                 td.classList.add('stock-cell'); // Aplico estilo flex
                 td.innerHTML = `
                  <button class="stock-btn minus" disabled>-</button>
-                 <input type="number" class="stock-input" value="0" min="0" data-column="${col}"> 
+                 <input type="number" class="stock-input" value="0" min="0" oninput="if(this.value<0)this.value=0" data-column="${col}">
                  <button class="stock-btn plus" disabled>+</button>`;
-                break;
+                break;//Oninput para evitar numeros negativos Franco
             case 'name':
                 const nameInput = document.createElement('input');
                 nameInput.type = 'text';
@@ -847,10 +847,10 @@ function showSaleModal(saleInfo){
     let customerInfo;
     if (!saleInfo.customerInfo){
         customerInfo = `<div class="flex-row justify-between">
-                                    <p>Cliente</p>
+                                    <h3>Cliente</h3>
                                     <p>'No asignado'</p>
                                 </div>`;
-    }
+    }//Faltaba negrita Franco
     else{customerInfo = newCustomerInfo(saleInfo.customerInfo);}
 
     const saleList = itemList.map((item, index) => {
@@ -1192,7 +1192,7 @@ async function createReceiptRow(receipt){
                         </div>
                         <div class="flex-column" style="width: fit-content; text-align: right">
                             <p>${receipt.receipt_date}</p>
-                            <p class="customer-name">Proveedor = ${providerName}</p>   
+                            <p class="customer-name">Proveedor = ${providerName}</p>  
                         </div>`;
     receiptDiv.addEventListener('click', async () => {
         const receiptInfo = await api.getFullReceiptInfo(receipt.id);
@@ -1210,10 +1210,10 @@ function showReceiptModal(receiptInfo){
     let providerInfo;
     if (!receiptInfo.providerInfo){
         providerInfo = `<div class="flex-row justify-between">
-                                    <p>Proveedor</p>
+                                    <h3>Proveedor</h3>
                                     <p>'No asignado'</p>
                                 </div>`;
-    }
+    }//Faltaba negrita Franco
     else{providerInfo = newProviderInfo(receiptInfo.providerInfo);}
 
     const receiptList = itemList.map((item, index) => {
@@ -2991,7 +2991,7 @@ function getSaleForm() {
                                 <hr>
                                 <div class="flex-row" style="gap: 50px; justify-content: space-between; align-items: center">
                                     <h3>Productos</h3>
-                                    <div class="btn picker-btn" data-modal-target="item-picker-modal" data-type="sale">
+                                    <div class="btn picker-btn" id="sale-items" data-modal-target="item-picker-modal" data-type="sale">
                                         Agregar Producto
                                     </div>
                                 </div>       
@@ -3002,7 +3002,7 @@ function getSaleForm() {
                                     <h3>Cliente</h3>
                                     <p id="sale-client-name">Ninguno</p>
                                     </div>
-                                    <div class="btn picker-btn" data-modal-target="client-picker-modal">Cambiar</div>
+                                    <div class="btn picker-btn" id="client-select" data-modal-target="client-picker-modal">Cambiar</div>
                                 </div>
                                 <div class="flex-row" style="justify-content: space-between; align-items: center">
                                 <h2 style="margin-top: 50px">Total = $<span id="price-text">0</h2>
@@ -3021,7 +3021,7 @@ function getReceiptForm() {
                                 <hr>
                                 <div class="flex-row" style="gap: 50px; justify-content: space-between; align-items: center">
                                     <h3>Productos</h3>
-                                    <div class="btn picker-btn" data-modal-target="item-picker-modal" data-type="receipt">
+                                    <div class="btn picker-btn" id="receipt-items" data-modal-target="item-picker-modal" data-type="receipt">
                                         Agregar Producto
                                     </div>
                                 </div>       
@@ -3032,7 +3032,7 @@ function getReceiptForm() {
                                     <h3>Proveedor</h3>
                                     <p id="receipt-provider-name">Ninguno</p>
                                     </div>
-                                    <div class="btn picker-btn" data-modal-target="provider-picker-modal">Cambiar</div>
+                                    <div class="btn picker-btn" id="provider-select" data-modal-target="provider-picker-modal">Cambiar</div>
                                 </div>
                                 <div class="flex-row" style="justify-content: space-between; align-items: center">
                                 <h2 style="margin-top: 50px">Total = $<span id="price-text">0</h2>

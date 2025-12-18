@@ -81,10 +81,10 @@
     background-color: var(--color-white);
     border: var(--border-strong);
     border-radius: var(--border-radius);
-    box-shadow: 10px 10px 0px var(--color-black);
+    box-shadow: 10px 10px 0px var(--color-gray);
     overflow: hidden;
     margin: 0;
-}
+}/* Cambiado a griz Franco*/
 
 .table-header {
     display: flex;
@@ -462,10 +462,10 @@
 .sale-row:hover, .receipt-row:hover{
     color: var(--color-white);
     background-color: var(--accent-color);
-    box-shadow: 4px 4px 0 var(--color-black);
+    box-shadow: 4px 4px 0 var(--color-gray);
     transform: translate(-4px, -4px);
     cursor: pointer;
-}
+}/* Cambiado a gris Franco*/
 
 .customer-name, .provider-name{
     font-weight: 600;
@@ -527,9 +527,9 @@
 .client-row:hover, .provider-row:hover{
     background-color: var(--accent-color);
     color: var(--color-white);
-    box-shadow: 4px 4px 0 var(--color-black);
+    box-shadow: 4px 4px 0 var(--color-gray);
     transform: translate(-4px, -4px);
-}
+}/* Cambiado a gris Franco*/
 
 .client-row:active, .provider-row:active{
     transform: translate(4px, 4px);
@@ -812,4 +812,15 @@
 .order-by-dropdown p:hover{
     cursor: pointer;
     background-color: rgba(0, 0, 0, 0.05);
+}
+
+.config-button { /*Agregado para mayor consistencia en los botnes de configuracion Franco*/
+    width: 250px !important;
+    text-align: left;
+    justify-content: center;
+}
+
+#generalTour img {
+    width: 10px;
+    height: 10px;
 }

@@ -18,7 +18,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (result.success) {
                 messageDiv.style.color = 'green';
                 messageDiv.textContent = '¡Registro exitoso! Redirigiendo...';
-                setTimeout(() => { window.location.href = '/StockiFy/login.php'; }, 2000);
+                setTimeout(() => {
+                    sessionStorage.setItem('isNewUser', 'true');
+                    window.location.href = '/StockiFy/login.php';
+                }, 2000);
             }
         } catch (error) {
             messageDiv.style.color = 'red';

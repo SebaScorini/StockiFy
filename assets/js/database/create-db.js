@@ -20,8 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     const isAdmin = response.isAdmin;
 
-    if (nav) nav.innerHTML = `<a href="/StockiFy/estadisticas.php" class="btn btn-secondary">Estadisticas</a>
-                                   <div id="dropdown-container">
+    if (nav) nav.innerHTML = `<div id="dropdown-container">
                 <div class="btn btn-secondary" id="mi-cuenta-btn">Mi Cuenta</div>
                 <div class="flex-column hidden" id="mi-cuenta-dropdown">
                     <a href="/StockiFy/configuracion.php" class="btn btn-secondary">Configuración</a>
