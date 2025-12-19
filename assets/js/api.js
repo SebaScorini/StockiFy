@@ -478,4 +478,37 @@ export async function checkDbName(dbName){
     })
     return handleResponse(response);
 }
+
+export async function updateTableRow(itemId, dataToUpdate) {
+    const response = await fetch('/api/table/update-row.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId, dataToUpdate }),
+    });
+    return handleResponse(response);
+}
+
+export async function getCsvHeaders(formData) {
+    const response = await fetch('api/import/get-csv-headers.php', {
+        method: 'POST',
+        body: formData
+    });
+    return await response.json();
+}
+
+export async function prepareCsvImport(formData) {
+    const response = await fetch('api/import/prepare-csv.php', {
+        method: 'POST',
+        body: formData
+    });
+    return await response.json();
+}
+
+export async function executeImport() {
+    const response = await fetch('api/import/execute-import.php', {
+        method: 'POST'
+    });
+    return await response.json();
+}
+
 /* ---------------------- FIN DE FUNCIONES DE NANO  ---------------------- */

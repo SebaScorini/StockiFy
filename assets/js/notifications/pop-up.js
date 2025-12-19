@@ -26,7 +26,7 @@ function _showToast(type, title, message, duration = 5000) {
         <div class="toast-timer" style="animation-duration: ${duration}ms"></div>
     `;
 
-    fetch('/api/notifications/create.php', {
+    fetch('/StockiFy/api/notifications/create.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type, title, message })

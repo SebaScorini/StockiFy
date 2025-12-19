@@ -150,6 +150,9 @@
                     <h2 id="table-title">Cargando...</h2>
                     <div class="table-controls">
                         <input type="text" id="search-input" placeholder="Buscar en la tabla...">
+                        <button id="open-import-modal-btn" class="btn btn-secondary" style="display: flex; align-items: center; gap:8px;">
+                        <i class="ph ph-download-simple"></i> Importar Datos
+                        </button>
                         <button id="add-row-btn" class="btn btn-primary" style="width: auto; margin-top: 0; margin-left: 1rem;">+ Añadir Fila</button>
                     </div>
                 </div>
@@ -660,6 +663,72 @@
         </div>
     </div>
 </div>
+
+<div id="import-modal" class="modal-overlay hidden">
+<div class="modal-content view-container"> <button id="close-modal-btn" class="modal-close-btn">&times;
+</button>
+<div class="modal-header">
+<h2>Importar Datos desde CSV</h2>
+<p>Selecciona o arrastra tu archivo CSV.</p>
+</div>
+<div class="modal-body">
+<div id="import-step-1">
+<div id="drop-zone" class="drop-zone">
+<p>Arrastra tu archivo CSV acá o hacé clic para seleccionar</p>
+<input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+</div> <div id="import-status" style="margin-top: 1rem;"></div>
+</div>
+<div id="import-step-2" class="hidden">
+<h3>Mapeá las Columnas</h3>
+<p>Asigná las columnas de tu archivo a las de StockiFy.</p>
+<form id="mapping-form" style="max-height: 40vh; overflow-y: auto; padding-right: 10px;">
+</form>
+</div> </div>
+<div class="modal-footer">
+<button id="import-cancel-btn" class="btn btn-secondary">Cancelar</button>
+<button id="validate-prepare-btn" class="btn btn-primary hidden">Validar y Preparar
+Datos</button>
+</div> </div></div>
+<div id="delete-confirm-modal" class="modal-overlay hidden">
+<div class="modal-content view-container" style="max-width: 450px;">
+<button id="close-delete-modal-btn" class="modal-close-btn">&times;</button>
+<div class="modal-header">
+<h2 style="color: var(--accent-red);">Confirmar Eliminación</h2>
+<p>Esta acción <strong>no se puede deshacer</strong>. Se borrará permanentemente la base de
+datos "<strong id="delete-db-name-confirm"></strong>" y todos sus datos.</p>
+</div>
+<div class="modal-body">
+<p style="text-align: left; color: var(--color-gray);">Para confirmar, escribí el nombre exacto
+de la base de datos:</p>
+<input type="text" id="delete-confirm-input" placeholder="Nombre de la Base de Datos"
+style="margin-bottom: 1rem;">
+<div id="delete-error-message" style="color: var(--accent-red); font-weight: 500;"></div>
+</div>
+<div class="modal-footer">
+<button id="cancel-delete-btn" class="btn btn-secondary">Cancelar</button>
+<button id="confirm-delete-btn" class="btn btn-primary" disabled>Eliminar
+Permanentemente</button>
+</div> </div></div>
+
+<div id="toast-container"></div>
+
+<div id="custom-prompt-modal" class="modal-overlay hidden">  
+<div class="modal-content view-container" style="max-width: 450px;">  
+<div class="modal-header">  
+<h2 id="prompt-title">Título del Prompt</h2>  
+<p id="prompt-message" style="text-align: left;">Mensaje de ayuda.</p>  
+</div>        
+<form id="prompt-form">  
+<div class="modal-body">  
+<input type="text" id="prompt-input" placeholder="Escribí acá..." required>  
+</div>            
+<div class="modal-footer">  
+<button type="button" id="prompt-cancel-btn" class="btn btn-secondary">Cancelar</button>  
+<button type="submit" id="prompt-confirm-btn" class="btn btn-primary">Confirmar</button>  
+</div>        
+</form>    
+</div></div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/shepherd.js@latest/dist/js/shepherd.min.js"></script>
 <script src="assets/js/tour.js"></script>

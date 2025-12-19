@@ -4,9 +4,76 @@ import * as api from './api.js';
 import * as setup from './setupMiCuentaDropdown.js';
 import { openImportModal, initializeImportModal, setStockifyColumns } from './import.js';
 import {getCustomerById, getProductData} from "./api.js";
+import {pop_ups} from "./notifications/pop-up.js";
 
 let allData = [];
 let currentTableColumns = [];
+
+async function loadNotifications() {
+const listContainer = document.getElementById('notifications-list');
+if (!listContainer) return;
+listContainer.innerHTML = '<p>Cargando historial...</p>';
+try {
+const response = await fetch('/api/notifications/get.php');
+const data = await response.json();
+if (!data.success) throw new Error(data.message);
+if (data.notifications.length === 0) {
+listContainer.innerHTML = '<p>No tenés notificaciones guardadas.</p>';
+return;
+}
+let html = '';
+let currentGroup = '';
+data.notifications.forEach(n => {
+const dateGroup = getRelativeDateGroup(n.created_at);
+if (dateGroup !== currentGroup) {
+html += `<h3 class="notification-date-header">${dateGroup}</h3>`;
+currentGroup = dateGroup;
+}
+const config = notificationConfig[n.type] || notificationConfig.info;
+html += `
+<div class="toast-notification show"style="--toast-color: ${config.color}; position: relative;
+opacity: 1; transform: none; transition: none; margin-bottom: 1rem; max-width: 100%;"
+data-notification-id="${n.id}">
+<i class="toast-icon ph ${config.icon}"></i>
+<div class="toast-content">
+<strong class="toast-title">${n.title}</strong>
+<p class="toast-message">${n.message || ''}</p>
+<small style="color: var(--color-gray); font-size: 0.8rem; margin-top: 5px; display:
+block;"> ${new Date(n.created_at).toLocaleString('es-AR', { hour: '2-digit', minute:
+'2-digit' })}
+</small> </div> <button class="toastclose-btn" title="Eliminar notificación">
+<i class="ph ph-x"></i> </button> </div> `;
+});
+listContainer.innerHTML = html;
+} catch (error) {
+listContainer.innerHTML = `<p style="color: var(--accent-red);">Error al cargar notificaciones:
+${error.message}</p>`;
+}
+}
+
+function getRelativeDateGroup(dateString) {
+const date = new Date(dateString);
+const today = new Date();
+const yesterday = new Date(today);
+yesterday.setDate(yesterday.getDate() - 1);
+today.setHours(0, 0, 0, 0);
+yesterday.setHours(0, 0, 0, 0);
+const compDate = new Date(date);
+compDate.setHours(0, 0, 0, 0);
+if (compDate.getTime() === today.getTime()) {
+return 'Hoy';
+}
+if (compDate.getTime() === yesterday.getTime()) {
+return 'Ayer';
+}
+return date.toLocaleDateString('es-AR', {
+day: 'numeric',
+month: 'long',
+year: 'numeric'
+});
+}
+
+
 
 // -- Manejo de Stock --
 async function handleStockUpdate(event) {
@@ -77,157 +144,247 @@ async function handleStockUpdate(event) {
 
 // -- Renderizado de Tabla --
 async function renderTable(columns, data) {
-    const tableHead = document.querySelector('#data-table thead');
-    const tableBody = document.querySelector('#data-table tbody');
-    if (!tableHead || !tableBody) {
-        console.error("Error crítico: No se encontraron los elementos thead o tbody.");
-        return;
-    }
+const tableHead = document.querySelector('#data-table thead');
+const tableBody = document.querySelector('#data-table tbody');
+if (!tableHead || !tableBody) return;
+const inventoryPreferences = await api.getCurrentInventoryPreferences();
+if (!inventoryPreferences.success) return;
+const headersHTML = columns.map(col => {
+switch (col.toLowerCase()) {
+case 'created_at': return '';
+case 'id': return '<th style="width: 50px;">ID</th>';
+case 'name': return `<th>Nombre</th>`;
+case 'min_stock': return (inventoryPreferences.min_stock === 1) ? `<th>Stock Mín.</th>` : '';
+case 'sale_price': return (inventoryPreferences.sale_price === 1) ? `<th>Venta</th>` : '';
+case 'receipt_price': return (inventoryPreferences.receipt_price === 1) ? `<th>Compra</th>` :
+'';
+case 'hard_gain': return (inventoryPreferences.hard_gain === 1) ? `<th>Ganancia ($)</th>` : '';
+case 'percentage_gain': return (inventoryPreferences.percentage_gain === 1) ? `<th>Ganancia (%)
+</th>` : '';
+default: return `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
+}
+}).join('');
+tableHead.innerHTML = `<tr>${headersHTML}<th class="actions-header">Acciones</th></tr>`;
+if (!data || data.length === 0) {
+tableBody.innerHTML = `<tr><td colspan="100%" class="empty-table-message">No hay datos.</td></tr>`;
+} else {
+tableBody.innerHTML = data.map(row => {
+const rowId = row['id'] ?? row['Id'] ?? row['ID'];
+const createdAt = row['created_at'] || 'Fecha desconocida';
+const cellsHTML = columns.map(col => {
+let value = row[col];
+const editAttrs = `class="editable-cell" data-col="${col}"`;
+switch (col.toLowerCase()) {
+case 'created_at':
+return '';
+case 'id':
+return `<td class="id-cell">#${value}</td>`;
+case 'stock':
+return `<td ${editAttrs}>${value ?? 0}</td>`;
+case 'min_stock':
+return (inventoryPreferences.min_stock === 1) ? `<td ${editAttrs}>${value ?? ''}
+</td>` : '';
+case 'sale_price':
+return (inventoryPreferences.sale_price === 1) ? `<td ${editAttrs}>${value ?? ''}
+</td>` : '';
+case 'receipt_price':
+return (inventoryPreferences.receipt_price === 1) ? `<td ${editAttrs}>${value ?? ''}
+</td>` : '';
+case 'hard_gain':
+return (inventoryPreferences.hard_gain === 1) ? `<td ${editAttrs}>${value ?? ''}
+</td>` : '';
+case 'percentage_gain':
+return (inventoryPreferences.percentage_gain === 1) ? `<td ${editAttrs}>${value ??
+''}</td>` : '';
+default:
+return `<td ${editAttrs}>${value ?? ''}</td>`;
+}
+}).join('');
+const actionsHTML = `
+<td class="actions-cell"> <div class="flex-row" style="gap: 8px; justifycontent: center;"> <button class="btn-icon action-edit" title="Editar Fila"
+onclick="window.enableEditRow(this, ${rowId})">
+<i class="ph ph-pencil-simple"></i> </button>
+<button class="btn-icon action-history" title="Ver Fecha Creación"
+onclick="window.showRowHistory('${createdAt}', ${rowId})">
+<i class="ph ph-clock"></i> </button>
+<button class="btn-icon action-delete" title="Eliminar Fila" onclick="window.confirmDeleteRow(${rowId})">
+<i class="ph ph-trash" style="color: var(--accent-red);"></i>
+</button> </div> </td> `;
+return `<tr id="row-${rowId}">${cellsHTML}${actionsHTML}</tr>`;
+}).join('');
+}
+}
 
-    tableBody.removeEventListener('click', handleStockUpdate);
-    tableBody.removeEventListener('change', handleStockUpdate);
-    tableBody.addEventListener('click', handleStockUpdate);
-    tableBody.addEventListener('change', handleStockUpdate);
-    console.log("Listeners de stock (click y change) añadidos/actualizados en tbody.");
+// --- FUNCIONES DE ACCIONES DE LA TABLA ---
+window.showRowHistory = (dateString, id) => {
+// Usamos tu sistema de pop_ups
+pop_ups.info(`Este registro (ID: ${id}) fue creado el: <br><b>${dateString}</b>`, "Historial de Creación");
+};
+window.confirmDeleteRow = async(id) => {
+const confirmado = await pop_ups.confirm(
+'Eliminar Registro',
+'¿Estás seguro de que deseas eliminar esta fila permanentemente?'
+);
+if (!confirmado) {
+return;
+}
+try {
+const response = await fetch('/StockiFy/api/table/delete-row.php', {
+method: 'POST',
+headers: {'Content-Type': 'application/json'},
+body: JSON.stringify({ id: id })
+}).then(res => res.json());
+if (response.success) {
+pop_ups.info("Registro eliminado.");
+const row = document.querySelector(`tr[data-id="${id}"]`);
+if (row) row.remove();
+const allDataIndex = allData.findIndex(r => r.id == id);
+if (allDataIndex > -1) allData.splice(allDataIndex, 1);
+window.location.reload();
+} else {
+throw new Error(response.message || "No se pudo eliminar.");
+}
+} catch (error) {
+pop_ups.error("Error al eliminar: " + error.message);
+}
+}
+window.enableEditRow = (btn, id) => {
+const row = document.getElementById(`row-${id}`);
+if (!row) return;
+const originalRow = allData.find(r => (r.id ?? r.Id ?? r.ID) == id);
+const cells = row.querySelectorAll('.editable-cell');
+cells.forEach(cell => {
+const colName = cell.dataset.col;
+const val = cell.textContent.trim();
+let isNumeric = false;
+// ESTRATEGIA DE DETECCIÓN AUTOMÁTICA
+if (originalRow && originalRow.hasOwnProperty(colName)) {
+isNumeric = typeof originalRow[colName] === 'number';
+if (originalRow[colName] === null && val !== '' && !isNaN(val)) {
+isNumeric = true;
+}
+} else {
+isNumeric = val !== '' && !isNaN(val);
+}
+if (isNumeric) {
+// Es numérico
+cell.innerHTML = `<input type="number" step="any" class="inline-edit-input form-control" datacol="${colName}" value="${val}" style="width: 100%">`;
+} else {
+// Es texto
+cell.innerHTML = `<input type="text" class="inline-edit-input form-control" datacol="${colName}" value="${val}" style="width: 100%">`;
+}
+});
+const actionsCell = row.querySelector('.actions-cell div') || row.querySelector('.action-buttons');
+if (actionsCell) {
+const originalHTML = actionsCell.innerHTML;
+row.dataset.originalActions = originalHTML;
+actionsCell.innerHTML = `
+<div style="display: flex; gap: 5px; justify-content: center;"> <button
+class="btn-icon action-save" onclick="window.saveRowChanges(${id})" title="Guardar">
+<i class="ph ph-check" style="color: var(--accent-green); font-weight: bold; font-size:
+1.2rem;"></i> </button> <button class="btn-icon action-cancel"
+onclick="window.cancelEditRow(${id})" title="Cancelar">
+<i class="ph ph-x" style="color: var(--accent-red); font-weight: bold; font-size:
+1.2rem;"></i> </button> </div> `;
+}
+};
+window.saveRowChanges = async (id) => {
+const row = document.getElementById(`row-${id}`);
+const inputs = row.querySelectorAll('.inline-edit-input');
+const dataToUpdate = {};
+inputs.forEach(input => {
+dataToUpdate[input.dataset.col] = input.value;
+});
+try {
+const result = await api.updateTableRow(id, dataToUpdate);
+if (result.success) {
+pop_ups.success("Fila actualizada correctamente.");
+await loadTableData();
+} else {
+throw new Error(result.message);
+}
+} catch (error) {
+pop_ups.error("Error al guardar: " + error.message);
+}
+};
+window.cancelEditRow = (id) => {
+const filterableColumns = currentTableColumns.filter(col => col.toLowerCase() !== 'created_at');
+renderTable(filterableColumns,allData);
+};
 
-    const inventoryPreferences = await api.getCurrentInventoryPreferences();
+export async function loadTableData() {
+    try {
+        console.log("[loadTableData] Llamando a api.getTableData...");
+        const result = await api.getTableData();
 
-    if (!inventoryPreferences.success) {
-        console.error("Error crítico: No se encontraron las preferencias del inventario.");
-        return;
-    }
+        if (result && result.success === true) {
+            allData = result.data || [];
+            currentTableColumns = result.columns || [];
 
-    tableHead.innerHTML = `<tr>${columns.map(col => {
-        switch (col.toLowerCase()) {
-            case 'id':
-                return '';
-            case 'created_at':
-                return '';
-            case 'name':
-                return `<th>Nombre</th>`;
-            case 'min_stock':
-                if (inventoryPreferences.min_stock === 1) {
-                    return `<th>Stock Mínimo</th>`;
-                }
-                return '';
-            case 'sale_price':
-                if (inventoryPreferences.sale_price === 1) {
-                    let autoType;
-                    switch (inventoryPreferences.auto_price_type) {
-                        case 'iva':
-                            autoType = 'IVA';
-                            break;
-                        case 'gain':
-                            autoType = 'Margen de Ganancia';
-                            break;
-                        default:
-                            autoType = 'IVA + Margen de Ganancia';
-                            break
+            const filterTableColumns = currentTableColumns.filter(
+                col => col.toLowerCase() !== 'created_at'
+            );
+
+            document.getElementById('table-title').textContent = result.inventoryName || 'Inventario';
+
+            if (searchColumnDropdown) {
+                searchColumnDropdown.innerHTML = `
+            <button class="search-dropdown-item ${selectedSearchColumn === 'all' ? 'active' : ''}" data-column="all">
+                <i class="ph ph-check"></i> Todas las Columnas
+            </button>`;
+
+                const filterableColumns = currentTableColumns.filter(col => col.toLowerCase() !== 'created_at');
+
+                filterableColumns.forEach(col => {
+                    const item = document.createElement('button');
+                    item.className = 'search-dropdown-item';
+                    if (selectedSearchColumn === col) item.classList.add('active');
+
+                    item.dataset.column = col;
+                    item.innerHTML = `<i class="ph ph-check"></i> ${col}`;
+                    searchColumnDropdown.appendChild(item);
+                });
+            }
+
+            console.log("[loadTableData] Llamando a renderTable y renderColumnList...");
+            await renderTable(filterTableColumns, allData);
+            renderColumnList(); 
+
+            if (searchColumnDropdown) {
+                searchColumnDropdown.innerHTML = `
+          <button class="search-dropdown-item ${selectedSearchColumn === 'all' ? 'active' : ''}" data-column="all">
+            <i class="ph ph-check"></i> Todas las Columnas
+          </button>`;
+
+                const filterableColumns = currentTableColumns.filter(
+                    col => col.toLowerCase() !== 'created_at'
+                );
+
+                filterableColumns.forEach(col => {
+                    const item = document.createElement('button');
+                    item.className = 'search-dropdown-item';
+                    if (selectedSearchColumn === col) {
+                        item.classList.add('active');
                     }
-                    return `<th>Precio de Venta ${(inventoryPreferences.auto_price === 1) ? '<br>(Calculado con ' + autoType + ')' : ''}</th>`;
-                }
-                return '';
-            case 'receipt_price':
-                if (inventoryPreferences.receipt_price === 1) {
-                    return `<th>Precio de Compra</th>`;
-                }
-                return '';
-            case 'hard_gain':
-                if (inventoryPreferences.hard_gain === 1) {
-                    return `<th>Margen de Ganancia (Valor Fijo)</th>`;
-                }
-                return '';
-            case 'percentage_gain':
-                if (inventoryPreferences.percentage_gain === 1) {
-                    return `<th>Margen de Ganancia (Porcentaje)</th>`;
-                }
-                return '';
-            default:
-                return `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
-        }
-    }).join('')}</tr>`;
+                    item.dataset.column = col;
+                    item.innerHTML = `<i class="ph ph-check"></i> ${col}`;
+                    searchColumnDropdown.appendChild(item);
+                });
+            }
 
-    if (!data || data.length === 0) {
-        // Estado vacío
-        // tableHead.innerHTML = ''; // Limpio cabecera
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="${columns.length || 1}" class="empty-table-message">
-                    Aún no hay datos ingresados.
-                    <!--<button id="import-data-empty-btn" class="btn btn-primary btn-inline">¿Deseas importarlos?</button>-->
-                </td>
-            </tr>`;
-        /*
-        // Busco y conecto el botón DESPUÉS de insertarlo
-        const importBtn = document.getElementById('import-data-empty-btn');
-        if (importBtn) {
-            importBtn.addEventListener('click', () => {
-                setStockifyColumns(currentTableColumns); // Le paso las columnas actuales
-                openImportModal();
-            });
-            console.log("Listener añadido al botón 'import-data-empty-btn'.");
         } else {
-            console.error("No se encontró el botón #import-data-empty-btn después de renderizar tabla vacía.");
-        }*/
-    } else {
-        /* ---------------------- CODIGO DE NANO  ---------------------- */
-
-        //Genere switch-cases para las columnas recomendadas de la tabla actual.
-
-        // Renderizo filas
-        tableBody.innerHTML = data.map(row => {
-            const rowId = row['id'] ?? row['Id'] ?? row['ID']; // Busco ID case-insensitive
-            if (rowId === undefined) console.warn("Fila sin ID encontrada:", row); // Aviso si falta ID
-
-            return `<tr>
-                ${columns.map(col => {
-                let value = row[col];
-                // Fallback ID minúscula (por si acaso)
-                if (value === undefined && col.toLowerCase() === 'id') { value = row['id']; }
-
-                // Genero controles de stock si la columna es 'stock' (case-insensitive)
-                
-                switch (col.toLowerCase()) {
-                    case 'id':
-                        return '';
-                    case 'created_at':
-                        return '';
-                    case 'stock':
-                        return `<td class="stock-cell" data-item-id="${rowId}"><button class="stock-btn minus">-</button><input type="number" class="stock-input" value="${value ?? 0}" min="0"><button class="stock-btn plus">+</button></td>`;
-                    case 'min_stock':
-                        if (inventoryPreferences.min_stock === 1) {
-                            return `<td>${value ?? ''}</td>`;
-                        }
-                        return '';
-                    case 'sale_price':
-                        if (inventoryPreferences.sale_price === 1) {
-                            return `<td>${value ?? ''}</td>`;
-                        }
-                        return '';
-                    case 'receipt_price':
-                        if (inventoryPreferences.receipt_price === 1) {
-                            return `<td>${value ?? ''}</td>`;
-                        }
-                        return '';
-                    case 'hard_gain':
-                        if (inventoryPreferences.hard_gain === 1) {
-                            return `<td>${value ?? ''}</td>`;
-                        }
-                        return '';
-                    case 'percentage_gain':
-                        if (inventoryPreferences.percentage_gain === 1) {
-                            return `<td>${value ?? ''}</td>`;
-                        }
-                        return '';
-                    default:
-                        return `<td>${value ?? ''}</td>`;
-                }
-            }).join('')}
-            </tr>`;
-        }).join('');
-
-        /* ---------------------- FIN CODIGO DE NANO  ---------------------- */
-    }
+            pop_ups.error("[loadTableData] getTableData devolvió success: false.");
+            throw new Error(result?.message || 'Error al obtener datos de tabla.');
+        }
+    } catch (error) {
+        pop_ups.error("[loadTableData] Error CATCH:", error);
+        pop_ups.warning("Error al cargar datos: ${error.message} Serás redirigido.");
+        if (error.message.includes('No autorizado')) {
+            window.location.href = '/login.php';
+        } else {
+            window.location.href = '/select-db.php';
+        }
+    }
 }
 
 // -- Filtrado --
@@ -264,6 +421,9 @@ function setupMenuNavigation() {
     menuButtons.forEach(button => {
         button.addEventListener('click', () => {
             const targetView = button.dataset.targetView;
+            if (targetView === 'notifications') {
+                loadNotifications();
+            }
             if (targetView) { showDashboardView(targetView); }
             else { alert("Funcionalidad aún no implementada."); }
         });
@@ -322,6 +482,33 @@ async function init() {
     const closeDeleteBtn = document.getElementById('close-delete-modal-btn');
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
     const deleteDbBtn = document.getElementById('delete-db-btn'); // El botón que abre el modal
+
+    const openImportBtn = document.getElementById('open-import-modal-btn');
+if (openImportBtn) {
+openImportBtn.addEventListener('click', async () => {
+let activePrefs = {};
+try {
+const response = await api.getCurrentInventoryPreferences();
+if (response.success) activePrefs = response;
+} catch (e) {
+console.warn("No se pudieron cargar preferencias para el filtro de importación.");
+}
+const systemCols = ['id', 'created_at', 'updated_at', 'user_id', 'inventory_id'];
+const recommendedCols = ['min_stock', 'sale_price', 'receipt_price', 'hard_gain',
+'percentage_gain'];
+const colsToMap = currentTableColumns.filter(col => {
+const c = col.toLowerCase();
+if (systemCols.includes(c)) return false;
+if (recommendedCols.includes(c)) {
+return (activePrefs[c] === 1);
+}
+return true;
+});
+setStockifyColumns(colsToMap);
+openImportModal();
+});
+}
+
 
     // --- Conecto Eventos del Modal de Eliminación ---
     deleteDbBtn?.addEventListener('click', openDeleteModal);
