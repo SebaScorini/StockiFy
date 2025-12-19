@@ -478,4 +478,22 @@ export async function checkDbName(dbName){
     })
     return handleResponse(response);
 }
+
+export async function updateTableRow(itemId, dataToUpdate) {
+    const response = await fetch('/StockiFy/api/table/update-row.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId, dataToUpdate }),
+    });
+    return handleResponse(response);
+}
+
+
+export async function executeImport() {
+    const response = await fetch('/StockiFy/api/import/execute-import.php', {
+        method: 'POST'
+    });
+    return await response.json();
+}
+
 /* ---------------------- FIN DE FUNCIONES DE NANO  ---------------------- */
