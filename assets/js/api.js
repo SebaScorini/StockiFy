@@ -488,21 +488,6 @@ export async function updateTableRow(itemId, dataToUpdate) {
     return handleResponse(response);
 }
 
-export async function getCsvHeaders(formData) {
-    const response = await fetch('api/import/get-csv-headers.php', {
-        method: 'POST',
-        body: formData
-    });
-    return await response.json();
-}
-
-export async function prepareCsvImport(formData) {
-    const response = await fetch('api/import/prepare-csv.php', {
-        method: 'POST',
-        body: formData
-    });
-    return await response.json();
-}
 
 export async function executeImport() {
     const response = await fetch('api/import/execute-import.php', {
