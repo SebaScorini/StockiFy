@@ -2,6 +2,7 @@
 namespace App\Controllers;
 
 use App\Models\ImportModel;
+use App\Models\TableModel;
 use Exception;
 
 
@@ -13,7 +14,7 @@ class ImportController
     public function getCsvHeaders(): void
     {
         header('Content-Type: application/json');
-        $user = getCurrentUser(); // Security check
+        $user = getCurrentUser();
 
         if (!$user) {
             http_response_code(401);
@@ -40,7 +41,9 @@ class ImportController
 
         try {
             $importModel = new ImportModel();
+            $headers = $importModel->parseCsvHeaders($_FILES['csvFile']['tmp_name']);
             $csvHeaders = $importModel->parseCsvHeaders($fileTmpPath);
+
 
             echo json_encode([
                 'success' => true,
@@ -90,9 +93,13 @@ class ImportController
         header('Content-Type: application/json');
         $user = getCurrentUser();
 
-        if (!$user) { /* ... error 401 ... */ return; }
+        if (!$user) { http_response_code(401); return; }
 
-        if (empty($_FILES['csvFile']) || $_FILES['csvFile']['error'] !== UPLOAD_ERR_OK) { /* ... error 400 archivo ... */ return; }
+        if (empty($_FILES['csvFile']) || $_FILES['csvFile']['error'] !== UPLOAD_ERR_OK) {
+            http_response_code(400);
+            echo json_encode(['success'=>false, 'message'=>'Error de archivo']);
+            return;
+        }
         if (empty($_POST['mapping'])) {
             http_response_code(400);
             echo json_encode(['success' => false, 'message' => 'No se proporcionó el mapeo de columnas.']);
@@ -101,7 +108,10 @@ class ImportController
 
         $fileTmpPath = $_FILES['csvFile']['tmp_name'];
         $mappingJson = $_POST['mapping'];
-        $overwrite = isset($_POST['overwrite']) && $_POST['overwrite'] === 'true';
+        //$overwrite = isset($_POST['overwrite']) && $_POST['overwrite'] === 'true';
+
+        $rawOverwrite = $_POST['overwrite'] ?? 'false';
+        $overwrite = filter_var($rawOverwrite, FILTER_VALIDATE_BOOLEAN);
 
         $mapping = json_decode($mappingJson, true);
         if (json_last_error() !== JSON_ERROR_NONE || !is_array($mapping)) {
@@ -118,6 +128,8 @@ class ImportController
             $_SESSION['pending_import_data'] = $parsedData;
             $_SESSION['pending_import_overwrite'] = $overwrite;
 
+            session_write_close();
+
             echo json_encode([
                 'success' => true,
                 'message' => 'Archivo validado y datos preparados para importar.',
@@ -127,6 +139,82 @@ class ImportController
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Error al procesar el archivo CSV: ' . $e->getMessage()]);
+            unset($_SESSION['pending_import_data']);
+            unset($_SESSION['pending_import_overwrite']);
+        }
+    }
+
+    /**
+     * Inserta los datos pendientes y gestiona la fusión de datos si es reemplazo.
+     */
+    public function executeImport(): void
+    {
+        // Configuración de errores para JSON limpio
+        ini_set('display_errors', 0);
+        error_reporting(E_ALL);
+
+        header('Content-Type: application/json');
+
+        try {
+            $user = getCurrentUser();
+            $activeInventoryId = $_SESSION['active_inventory_id'] ?? null;
+            $preparedData = $_SESSION['pending_import_data'] ?? null;
+            $overwrite = $_SESSION['pending_import_overwrite'] ?? false;
+
+            if (!$user || !$activeInventoryId) {
+                throw new Exception('Acceso denegado o sin inventario.');
+            }
+            if (empty($preparedData) || !is_array($preparedData)) {
+                throw new Exception('No hay datos preparados para importar.');
+            }
+
+            $tableModel = new TableModel();
+            $metadata = $tableModel->getTableMetadata($activeInventoryId);
+            if (!$metadata) throw new Exception("Metadatos no encontrados.");
+            $tableName = $metadata['table_name'];
+
+            $db = \App\core\Database::getInstance();
+            $safeTable = "`" . str_replace("`", "``", $tableName) . "`";
+            $stmt = $db->query("SHOW COLUMNS FROM $safeTable");
+            $allColumns = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+            $targetColumns = array_filter($allColumns, function($c) {
+                return !in_array(strtolower($c), ['id', 'created_at', 'updated_at']);
+            });
+
+            $existingData = [];
+            if ($overwrite) {
+                $existingData = array_values($tableModel->getData($tableName));
+            }
+
+            // 2. Fusionamos fila por fila
+            foreach ($preparedData as $index => &$newRow) {
+                $oldRow = $existingData[$index] ?? [];
+
+                foreach ($targetColumns as $colName) {
+                    if (array_key_exists($colName, $newRow)) {
+                        continue;
+                    }
+
+                    if (array_key_exists($colName, $oldRow)) {
+                        $newRow[$colName] = $oldRow[$colName];
+                    } else {
+                        $newRow[$colName] = null;
+                    }
+                }
+            }
+            unset($newRow);
+            $insertedRows = $tableModel->bulkInsertData($tableName, $preparedData, $overwrite);
+
+            echo json_encode([
+                'success' => true,
+                'message' => "Importación completada. {$insertedRows} registros procesados.",
+                'insertedRows' => $insertedRows
+            ]);
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        } finally {
             unset($_SESSION['pending_import_data']);
             unset($_SESSION['pending_import_overwrite']);
         }
