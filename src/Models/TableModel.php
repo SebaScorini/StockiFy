@@ -14,11 +14,6 @@ class TableModel
         $this->db = Database::getInstance();
     }
 
-    /**
-     * Obtiene los metadatos de una tabla de usuario (nombre real y columnas).
-     * @param int $inventoryId El ID del inventario activo.
-     * @return array|false Un array con 'table_name' y 'columns_json' o false si no se encuentra.
-     */
     public function getTableMetadata(int $inventoryId): array|false
     {
         $stmt = $this->db->prepare("SELECT table_name, columns_json FROM user_tables WHERE inventory_id = :id");
@@ -26,11 +21,6 @@ class TableModel
         return $stmt->fetch();
     }
 
-    /**
-     * Obtiene todos los datos de una tabla específica.
-     * @param string $tableName El nombre real y seguro de la tabla (ej: user_1_mi_tienda).
-     * @return array Una lista de todas las filas de la tabla.
-     */
     public function getData(string $tableName): array
     {
         $safeTableName = "`" . str_replace("`", "``", $tableName) . "`";
@@ -38,14 +28,6 @@ class TableModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Inserta múltiples filas de datos en una tabla dinámica.
-     * @param string $tableName Nombre real de la tabla (user_X_...).
-     * @param array $data Array de arrays asociativos ['columna' => 'valor'].
-     * @param bool $overwrite Si es true, trunca la tabla antes de insertar.
-     * @return int Número de filas insertadas.
-     * @throws \PDOException Si ocurre un error SQL.
-     */
     public function bulkInsertData(string $tableName, array $data, bool $overwrite = false): int
     {
         if (empty($data)) {
@@ -54,13 +36,21 @@ class TableModel
 
         $safeTableName = "`" . str_replace("`", "``", $tableName) . "`";
 
-        $this->db->beginTransaction();
+        if ($overwrite) {
+            try {
+                $this->db->exec("TRUNCATE TABLE {$safeTableName}");
+            } catch (\PDOException $e) {
+                $this->db->exec("DELETE FROM {$safeTableName}");
+            }
+        }
+
+        $transactionStarted = false;
+        if (!$this->db->inTransaction()) {
+            $this->db->beginTransaction();
+            $transactionStarted = true;
+        }
 
         try {
-            if ($overwrite) {
-                $this->db->exec("TRUNCATE TABLE {$safeTableName}");
-            }
-
             $columns = array_keys($data[0]);
             $safeColumns = array_map(fn($col) => "`" . str_replace("`", "``", $col) . "`", $columns);
             $placeholders = implode(',', array_fill(0, count($columns), '?'));
@@ -74,6 +64,7 @@ class TableModel
                 foreach($columns as $col) {
                     $values[] = $row[$col] ?? null;
                 }
+
                 if ($stmt->execute($values)) {
                     $insertedCount++;
                 } else {
@@ -81,20 +72,23 @@ class TableModel
                 }
             }
 
-            $this->db->commit();
+            if ($transactionStarted) {
+                $this->db->commit();
+            }
+
             return $insertedCount;
 
         } catch (\PDOException $e) {
-            $this->db->rollBack();
+            if ($transactionStarted && $this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
             throw $e;
         }
     }
 
     public function updateItemValue(string $tableName, int $itemId, string $columnName, mixed $newValue): bool
     {
-        // Seguridad: Sanitizar nombres
         $safeTableName = "`" . str_replace("`", "``", $tableName) . "`";
-        // Asumimos que $columnName ya viene sanitizado o lo sanitizamos acá si es necesario
         $safeColumnName = "`" . str_replace("`", "``", $columnName) . "`";
 
         $sql = "UPDATE {$safeTableName} SET {$safeColumnName} = :newValue WHERE id = :id";
@@ -106,15 +100,6 @@ class TableModel
         ]);
     }
 
-    /**
-     * Ajusta (suma o resta) el valor numérico de una columna (ej: Stock).
-     *
-     * @param string $tableName Nombre real de la tabla.
-     * @param int $itemId ID de la fila.
-     * @param string $stockColumnName Nombre de la columna de stock.
-     * @param int $amountToAddOrSubtract Cantidad a sumar (positivo) o restar (negativo).
-     * @return int|false El nuevo valor del stock o false si falló.
-     */
     public function adjustStock(string $tableName, int $itemId, string $stockColumnName, int $amountToAddOrSubtract): int|false
     {
         // Seguridad
@@ -156,6 +141,68 @@ class TableModel
         } catch (Exception $e) {
             $this->db->rollBack();
             error_log("Error en adjustStock: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Actualiza una fila completa en una tabla dinámica.
+     * @param string $tableName El nombre real de la tabla (user_X_...).
+     * @param int $itemId El ID de la fila a actualizar.
+     * @param array $dataToUpdate Un array asociativo ['columna' => 'valor', ...].
+     * @return array|false La fila actualizada o false si falla.
+     * @throws Exception
+     */
+    public function updateItemRow(string $tableName, int $itemId, array $dataToUpdate): array|false
+    {
+        $safeTableName = "`" . str_replace("`", "``", $tableName) . "`";
+        $setClauses = [];
+        $bindings = [':id' => $itemId];
+
+        foreach ($dataToUpdate as $column => $value) {
+            if (strcasecmp($column, 'id') === 0 || strcasecmp($column, 'created_at') === 0) continue;
+
+            $safeColumn = "`" . str_replace("`", "``", trim($column)) . "`";
+            $placeholder = ":" . preg_replace('/[^a-zA-Z0-9_]/', '', trim($column));
+            $setClauses[] = "{$safeColumn} = {$placeholder}";
+            $bindings[$placeholder] = $value;
+        }
+
+        if (empty($setClauses)) throw new \InvalidArgumentException("No hay datos válidos para actualizar.");
+
+        $sql = "UPDATE {$safeTableName} SET " . implode(', ', $setClauses) . " WHERE id = :id";
+
+        $this->db->beginTransaction();
+        try {
+            $stmt = $this->db->prepare($sql);
+            if (!$stmt->execute($bindings)) throw new \PDOException("Error al ejecutar UPDATE");
+
+            $selectStmt = $this->db->prepare("SELECT * FROM {$safeTableName} WHERE id = ?");
+            $selectStmt->execute([$itemId]);
+            $updatedRow = $selectStmt->fetch(PDO::FETCH_ASSOC);
+
+            $this->db->commit();
+            return $updatedRow;
+        } catch (\Exception $e) {
+            if ($this->db->inTransaction()) $this->db->rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Elimina una fila específica de una tabla dinámica.
+     * * @param string $tableName El nombre real de la tabla (ej: user_1_inventario).
+     * @param int $itemId El ID de la fila a eliminar.
+     * @return bool True si se eliminó correctamente, False si falló.
+     */
+    public function deleteRow(string $tableName, int $itemId): bool
+    {
+        $safeTableName = "`" . str_replace("`", "``", $tableName) . "`";
+        $sql = "DELETE FROM {$safeTableName} WHERE id = :id";
+        try {
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([':id' => $itemId]);
+        } catch (\PDOException $e) {
             return false;
         }
     }
@@ -211,6 +258,4 @@ class TableModel
             return false;
         }
     }
-
-    
 }

@@ -137,6 +137,29 @@ function populateMappingUI(csvHeaders, stockifyColumns) {
         arrowDiv.style.textAlign = 'center';
         arrowDiv.style.color = 'var(--accent-color)';
 
+        switch (stockifyCol){
+            case 'name':
+                stockifyCol = 'Nombre';
+                break;
+            case 'min_stock':
+                stockifyCol = 'Stock Mínimo';
+                break;
+            case 'sale_price':
+                stockifyCol = 'Venta';
+                break;
+            case 'receipt_price':
+                stockifyCol = 'Compra';
+                break;
+            case 'hard_gain':
+                stockifyCol = 'Ganancia';
+                break;
+            case 'percentage_gain':
+                stockifyCol = 'Ganancia (%)';
+                break;
+            default:
+                break;
+        }
+
         const stockifyColDiv = document.createElement('div');
         stockifyColDiv.textContent = stockifyCol.charAt(0).toUpperCase() + stockifyCol.slice(1).replace(/_/g, ' ');
         stockifyColDiv.style.fontWeight = '600';
@@ -219,10 +242,11 @@ async function handleValidateAndPrepare(event) {
             if (resultExecute.success) {
                 pop_ups.success(resultExecute.message, "Importación Exitosa");
                 closeImportModal();
-
+    
                 // Recargar tabla
                 if (typeof loadTableData === 'function') {
                     await loadTableData();
+                    window.location.href = "/StockiFy/dashboard.php";
                 } else {
                     window.location.reload();
                 }

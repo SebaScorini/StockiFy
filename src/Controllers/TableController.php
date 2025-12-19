@@ -110,4 +110,87 @@ class TableController
             error_log("Error en TableController::addItem: " . $e->getMessage());
         }
     }
+    public function updateItem(): void
+    {
+        header('Content-Type: application/json');
+        $user = getCurrentUser();
+        $activeInventoryId = $_SESSION['active_inventory_id'] ?? null;
+
+        if (!$user || !$activeInventoryId) {
+            http_response_code(403); // Forbidden
+            echo json_encode(['success' => false, 'message' => 'Acceso denegado o no se ha seleccionado un inventario.']);
+            return;
+        }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        $itemId = $data['itemId'] ?? null;
+        $dataToUpdate = $data['dataToUpdate'] ?? null;
+
+        if (!$itemId || !is_array($dataToUpdate) || empty($dataToUpdate)) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Datos inválidos. Se requiere "itemId" y "dataToUpdate".']);
+            return;
+        }
+
+        try {
+            $tableModel = new TableModel();
+
+            $metadata = $tableModel->getTableMetadata($activeInventoryId);
+            if (!$metadata) { throw new Exception("Metadatos de tabla no encontrados."); }
+            $tableName = $metadata['table_name'];
+
+            $updatedItem = $tableModel->updateItemRow($tableName, $itemId, $dataToUpdate);
+
+            if ($updatedItem) {
+                echo json_encode(['success' => true, 'updatedItem' => $updatedItem]);
+            } else {
+                throw new Exception("No se pudo actualizar la fila.");
+            }
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Error al actualizar: ' . $e->getMessage()]);
+        }
+    }
+
+    public function deleteItem(): void
+    {
+        header('Content-Type: application/json');
+        $user = getCurrentUser();
+        $activeInventoryId = $_SESSION['active_inventory_id'] ?? null;
+
+        if (!$user || !$activeInventoryId) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Permiso denegado.']);
+            return;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $itemId = $input['itemId'] ?? null;
+
+        if (!$itemId) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'ID de fila no proporcionado.']);
+            return;
+        }
+
+        try {
+            $tableModel = new \App\Models\TableModel();
+            $metadata = $tableModel->getTableMetadata($activeInventoryId);
+
+            if (!$metadata) { throw new Exception("Tabla no encontrada."); }
+
+            $tableName = $metadata['table_name'];
+
+            if ($tableModel->deleteRow($tableName, $itemId)) {
+                echo json_encode(['success' => true, 'message' => 'Fila eliminada correctamente.']);
+            } else {
+                throw new Exception("No se pudo eliminar la fila.");
+            }
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+        }
+    }
 }

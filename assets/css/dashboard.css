@@ -823,6 +823,10 @@
     font-size: 1.2rem;
 }
 
+#inventory-info-modal{
+    z-index: 2000;
+}
+
 .select-inventory-btn{
     width: fit-content;
     height: fit-content;
@@ -1062,7 +1066,9 @@
 }
 
 @media (max-width: 768px) {
-    font-size: 14px;
+    .sale-row, .receipt-row{
+        font-size: 14px;
+    }
 }
 
 .sale-row:active, .receipt-row:active{
@@ -1735,175 +1741,6 @@
     background-color: rgba(var(--accent-color-rgb), 0.05); /* Opcional: fondo suave */
 }
 
-/* --- SOLUCIÓN DEFINITIVA DE POSICIONAMIENTO Y GRID --- */
-
-/* 1. EL CONTENEDOR (La ventana grande) */
-#new-transaction-container {
-    /* Lo sacamos del flujo para centrarlo perfectamente en pantalla */
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-
-    /* Tamaño masivo asegurado */
-    width: 90vw !important; /* 90% del ancho de la pantalla */
-    height: 85vh !important; /* 85% del alto */
-    max-width: 1600px;
-
-    /* Estética */
-    background: #ffffff;
-    border: 3px solid #000000;
-    box-shadow: 15px 15px 0px #000000; /* Sombra dura notable */
-    border-radius: 0; /* Bordes rectos para mas limpieza o 8px si preferis */
-
-    /* Comportamiento interno */
-    padding: 40px !important;
-    z-index: 9999; /* Por encima de todo */
-    overflow-y: auto; /* Scroll si la lista es larga */
-    box-sizing: border-box;
-}
-
-/* 2. LA FILA DE PRODUCTOS (El Grid) */
-/* Apuntamos especificamente a las filas dentro de la lista para matar el flexbox */
-#product-list-container .flex-row {
-    display: grid !important;
-
-    /* DEFINICIÓN DE COLUMNAS:
-       1. Nombre: Se lleva el espacio sobrante (minimo 200px)
-       2. Stock: Fijo 100px
-       3. Cantidad: Fijo 150px (espacio para los botones)
-       4. Precio Venta: Fijo 120px
-       5. Precio Total: Fijo 120px
-       6. Boton X: Fijo 50px
-    */
-    grid-template-columns: minmax(250px, 1fr) 100px 150px 120px 120px 50px !important;
-
-    gap: 20px !important; /* Espacio real entre columnas */
-    align-items: center !important;
-
-    /* Aseguramos que ocupe todo el ancho disponible */
-    width: 100% !important;
-    padding: 15px 10px !important;
-    border-bottom: 2px solid #e0e0e0 !important;
-    margin: 0 !important;
-}
-
-/* 3. AJUSTES DE CONTENIDO INTERNO */
-/* Para que los textos dentro de las celdas no se rompan */
-#product-list-container .flex-row > div {
-    width: auto !important; /* Reseteamos anchos forzados */
-    text-align: left; /* Alineación limpia */
-}
-
-/* Ajuste específico para columnas de precio y total (alinear a la derecha visualmente si queres) */
-#product-list-container .flex-row > div:nth-child(4),
-#product-list-container .flex-row > div:nth-child(5) {
-    text-align: right; /* Precios a la derecha */
-}
-
-/* El botón de eliminar centrado */
-#product-list-container .flex-row .delete-product-btn {
-    margin: 0 auto !important;
-}
-
-/* Títulos de las columnas (Nombre, Stock, etc) en negrita */
-#product-list-container .flex-row p:first-child {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: #888;
-    margin-bottom: 5px;
-    letter-spacing: 1px;
-}
-
-#product-list-container .flex-row p:nth-child(2) {
-    font-size: 1rem;
-    color: #000;
-    font-weight: 700;
-}
-
-/* --- FORZAR EXPANSIÓN DEL CONTENIDO INTERNO --- */
-
-/* 1. Que el contenedor del formulario ocupe todo el ancho disponible */
-#transaction-form-container {
-    width: 100%;
-    height: 100%; /* Para que también ocupe el alto si hace falta */
-}
-
-/* 2. Que el formulario mismo se estire al 100% */
-#transaction-form-container form {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-/* 3. IMPORTANTE: Que todas las filas (flex-row) dentro de la ventana ocupen el 100% */
-/* Esto arregla los títulos "Productos" y "Cliente" que se veían chicos */
-#new-transaction-container .flex-row {
-    width: 100%;
-    box-sizing: border-box; /* Para que el padding no rompa el ancho */
-}
-
-/* 4. Separación visual para que no esté todo pegado arriba */
-#new-transaction-container h3 {
-    margin-top: 0;
-    font-size: 1.5rem; /* Texto más grande acorde a la ventana */
-}
-
-/* 5. Ajuste del botón 'Volver' para que no tape nada */
-#return-btn {
-    position: absolute; /* Ya lo tenías, pero aseguramos */
-    top: 20px !important;
-    left: 20px !important;
-    z-index: 10;
-}
-
-/* Ajuste extra para que el título no se pegue al botón volver */
-#transaction-form-container hr:first-of-type {
-    margin-top: 3rem;
-}
-
-/* --- CLASE MAESTRA DE GRILLA (Para Encabezado y Filas) --- */
-.transaction-grid-layout {
-    display: grid !important;
-    /* DEFINICIÓN DE COLUMNAS FLEXIBLES:
-       1. Nombre: 3 partes (Se lleva el mayor espacio)
-       2. Stock: 1 parte
-       3. Cantidad: 1.5 partes (Espacio para botones)
-       4. P. Unitario: 1 parte
-       5. Total: 1 parte
-       6. Acción: 0.5 partes (Botón X pequeño)
-    */
-    grid-template-columns: 3fr 1fr 1.5fr 1fr 1fr 0.5fr !important;
-    gap: 15px !important;
-    width: 100% !important;
-    align-items: center !important;
-    padding: 10px 0 !important;
-    box-sizing: border-box !important; /* Vital para evitar scroll */
-}
-
-/* Estilo para el Encabezado (PHP) */
-.transaction-header {
-    border-bottom: 2px solid #0b0b0b;
-    margin-bottom: 10px;
-}
-.transaction-header span {
-    font-size: 0.85rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    color: #666;
-    letter-spacing: 0.5px;
-}
-
-/* Estilo para las Filas de Datos (JS) */
-.transaction-row {
-    border-bottom: 1px solid #e0e0e0;
-    background: #fff;
-    transition: background 0.2s;
-}
-.transaction-row:hover {
-    background: #f9f9f9;
-}
-
 /* Alineación de textos dentro de la grilla */
 .grid-cell-right { text-align: right; }
 .grid-cell-center { text-align: center; }
@@ -1967,29 +1804,6 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-/* --- ESTILO PARA EL MODAL DE SELECCIÓN (FLOTANTE) --- */
-#transaction-picker-modal {
-    position: fixed !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-
-    /* Z-INDEX SUPERIOR AL DE LA VENTANA PRINCIPAL (que tiene 9999) */
-    z-index: 10000 !important;
-
-    background-color: #ffffff;
-    border: 2px solid #0b0b0b;
-    box-shadow: 10px 10px 0px rgba(0,0,0,0.5); /* Sombra para profundidad */
-
-    /* Dimensiones controladas */
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-    padding: 20px;
-    border-radius: 6px;
 }
 
 /* Oscurecer un poco la ventana de atrás para dar foco a la de adelante (Opcional) */

@@ -480,7 +480,7 @@ export async function checkDbName(dbName){
 }
 
 export async function updateTableRow(itemId, dataToUpdate) {
-    const response = await fetch('/api/table/update-row.php', {
+    const response = await fetch('/StockiFy/api/table/update-row.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ itemId, dataToUpdate }),
@@ -490,7 +490,7 @@ export async function updateTableRow(itemId, dataToUpdate) {
 
 
 export async function executeImport() {
-    const response = await fetch('api/import/execute-import.php', {
+    const response = await fetch('/StockiFy/api/import/execute-import.php', {
         method: 'POST'
     });
     return await response.json();

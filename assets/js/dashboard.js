@@ -259,19 +259,15 @@ const val = cell.textContent.trim();
 let isNumeric = false;
 // ESTRATEGIA DE DETECCIÓN AUTOMÁTICA
 if (originalRow && originalRow.hasOwnProperty(colName)) {
-isNumeric = typeof originalRow[colName] === 'number';
-if (originalRow[colName] === null && val !== '' && !isNaN(val)) {
-isNumeric = true;
-}
-} else {
-isNumeric = val !== '' && !isNaN(val);
+const temp = parseFloat(originalRow[colName]);
+isNumeric = !(isNaN(temp));
 }
 if (isNumeric) {
 // Es numérico
-cell.innerHTML = `<input type="number" step="any" class="inline-edit-input form-control" datacol="${colName}" value="${val}" style="width: 100%">`;
+cell.innerHTML = `<input type="number" step="any" class="inline-edit-input form-control" data-col="${colName}" value="${val}" style="width: 100%">`;
 } else {
 // Es texto
-cell.innerHTML = `<input type="text" class="inline-edit-input form-control" datacol="${colName}" value="${val}" style="width: 100%">`;
+cell.innerHTML = `<input type="text" class="inline-edit-input form-control" data-col="${colName}" value="${val}" style="width: 100%">`;
 }
 });
 const actionsCell = row.querySelector('.actions-cell div') || row.querySelector('.action-buttons');
@@ -293,6 +289,7 @@ const row = document.getElementById(`row-${id}`);
 const inputs = row.querySelectorAll('.inline-edit-input');
 const dataToUpdate = {};
 inputs.forEach(input => {
+    console.log(input);
 dataToUpdate[input.dataset.col] = input.value;
 });
 try {
@@ -300,6 +297,7 @@ const result = await api.updateTableRow(id, dataToUpdate);
 if (result.success) {
 pop_ups.success("Fila actualizada correctamente.");
 await loadTableData();
+window.location.reload();
 } else {
 throw new Error(result.message);
 }
@@ -380,9 +378,9 @@ export async function loadTableData() {
         pop_ups.error("[loadTableData] Error CATCH:", error);
         pop_ups.warning("Error al cargar datos: ${error.message} Serás redirigido.");
         if (error.message.includes('No autorizado')) {
-            window.location.href = '/login.php';
+            window.location.href = '/StockiFy/login.php';
         } else {
-            window.location.href = '/select-db.php';
+            window.location.href = '/StockiFy/select-db.php';
         }
     }
 }
@@ -556,9 +554,9 @@ openImportModal();
         console.error("[INIT] Error CATCH:", error);
         alert(`Error al cargar el panel: ${error.message}. Serás redirigido.`);
         if (error.message.includes('No autorizado')) {
-            window.location.href = '/StockiFy/login.php';
+            window.location.href = '/login.php';
         } else {
-            window.location.href = '/StockiFy/select-db.php';
+            window.location.href = '/select-db.php';
         }
     }
 
