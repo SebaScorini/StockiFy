@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StockiFy</title>
     <script src="assets/js/theme.js"></script>
+    <link rel="icon" href="assets/img/favicon.png" type="image/png">
     <script src="assets/js/modif-buttons-controls.js"></script>
     <script type="module" src="assets/js/config/configuración.js"></script>
     <script type="module" src="assets/js/email-change-handler.js"></script>

@@ -20,6 +20,7 @@ else if ($currentUser['is_admin'] == 0){
   <title>Registros - StockiFy</title>
   <script src="assets/js/theme.js"></script>
   <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="icon" href="assets/img/favicon.png" type="image/png">
   <link rel="stylesheet" href="assets/css/registros.css">
 </head>
 <body>

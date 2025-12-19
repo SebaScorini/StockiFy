@@ -29,6 +29,7 @@ endif
     <script src="assets/js/theme.js"></script>
     <script src="assets/js/cycling-text.js"></script>
     <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="icon" href="assets/img/favicon.png" type="image/png">
     <link rel="stylesheet" href="assets/css/about-section.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />

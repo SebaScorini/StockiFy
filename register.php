@@ -8,6 +8,7 @@
     <script src="assets/js/theme.js"></script>
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/auth.css">
+    <link rel="icon" href="assets/img/favicon.png" type="image/png">
 </head>
 <body>
 <header>

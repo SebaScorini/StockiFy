@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="assets/css/main.css">
     <script src="assets/js/theme.js"></script>
+    <link rel="icon" href="assets/img/favicon.png" type="image/png">
     <script src="assets/js/estadisticas-handler.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
